@@ -1,0 +1,75 @@
+constraint_pack:
+  id: "industry_energy"
+  version: "0.1.0"
+  status: "draft"
+metadata:
+  industry: "energy"
+  description: "能源电力行业约束，涵盖电力零售、虚拟电厂（VPP）、充电桩营运、合同能源管理（EMC）、台区智能化改造"
+  effective_date: "2026-01-01"
+  authority_level: "reference"
+rules:
+  # ── 电力零售 ──
+  - id: "retail_pricing_regulation"
+    severity: "high"
+    rule: "售电定价方案必须考虑当地电力市场化改革政策、目录电价调整机制和输配电价政策。不得做出未经监管部门批准的固定电价承诺。"
+  - id: "customer_classification"
+    severity: "medium"
+    rule: "电力零售客户分类（大工业/一般工商业/居民/农业）直接影响输配电价和市场化交易资格，必须正确分类并匹配对应规则。"
+  - id: "retail_contract_disclosure"
+    severity: "high"
+    rule: "售电合同关键条款（套餐价格、偏差考核、违约金、续约条件）应以清晰易懂方式向用户披露，避免误导性表述。"
+
+  # ── 虚拟电厂（VPP）──
+  - id: "vpp_resource_type"
+    severity: "high"
+    rule: "VPP 聚合的资源类型（分布式光伏、储能、充电桩、可调负荷等）直接影响调度权限、补贴政策和市场准入，必须明确标识资源类型和容量。"
+  - id: "vpp_market_access"
+    severity: "high"
+    rule: "VPP 参与电力辅助服务市场（调频/调峰/备用/需求响应）需符合当地调度中心注册要求和性能考核标准。收益预测应区分容量市场和电量市场。"
+  - id: "vpp_revenue_model"
+    severity: "medium"
+    rule: "VPP 收益分析应区分确定性收益（容量补贴）和不确定性收益（现货市场价差、辅助服务出清价），并给出不同场景下的敏感性分析。"
+  - id: "vpp_technical_requirements"
+    severity: "medium"
+    rule: "VPP 聚合商应满足数据采集频率、通信协议（如 IEC 61850）、调度响应时间和气象预测精度等技术和安全要求。"
+
+  # ── 充电桩营运 ──
+  - id: "charging_pricing_mechanism"
+    severity: "high"
+    rule: "充电桩服务费、电费和服务费分账方式应符合当地电价政策和充电设施运营管理规定。不得将未经审批的附加费用计入电费。"
+  - id: "charging_utilization_model"
+    severity: "medium"
+    rule: "充电桩利用率模型应区分时段（峰/平/谷）、季节、车辆类型（私家车/营运车/物流车）和充电策略（慢充/快充/超充），避免单一平均值误导。"
+  - id: "charging_station_siting"
+    severity: "medium"
+    rule: "充电站选址分析应考虑配电网容量、变压器负载率、停车场权属、消防要求和当地建桩补贴政策。台区改造方案应评估对供电可靠性的影响。"
+
+  # ── 合同能源管理（EMC）──
+  - id: "emc_contract_structure"
+    severity: "high"
+    rule: "EMC 合同必须明确节能计量方法（IPMVP 或其他标准）、基准年能耗、节能量计算方式、分成比例和合同期限。节能效果保证条款应定义考核标准和违约处理机制。"
+  - id: "emc_financial_modeling"
+    severity: "medium"
+    rule: "EMC 项目财务分析应区分投资方/用户/设备供应商的收益与风险，综合考虑初始投资、节能收益、运维成本、碳交易收益和政策补贴。"
+  - id: "emc_measurement_verification"
+    severity: "medium"
+    rule: "节能效果测量与验证（M&V）方案应包含边界划定、基线调整方法、不确定度评估和争议解决机制。"
+
+  # ── 台区智能化改造 ──
+  - id: "grid_transformation_compliance"
+    severity: "high"
+    rule: "台区智能化改造方案需符合新型电力系统建设要求，考虑分布式电源接入、配电自动化、用采系统升级和台区储能配置等关键技术路线。"
+  - id: "transformation_economics"
+    severity: "medium"
+    rule: "改造方案的经济性分析应包含投资回收期、全生命周期成本（LCC）、供电可靠性提升带来的减少停电损失、以及可能的政府补贴或电价优惠。"
+  - id: "data_security_grid"
+    severity: "high"
+    rule: "台区智能化系统涉及用户用电数据、电网运行数据，应符合数据安全法和电力行业数据分类分级要求。采集、传输、存储环节应有明确的安全措施。"
+
+  # ── 通用能源 ──
+  - id: "carbon_policy_awareness"
+    severity: "medium"
+    rule: "涉及碳资产（CCER、碳配额、绿色电力证书）的分析应区分强制性碳市场与自愿减排市场，了解最新碳价走势和交易规则。"
+  - id: "separate_fact_assumption_energy"
+    severity: "high"
+    rule: "能源业务分析必须明确区分政策事实（已发布文件）、假设（待验证的判断）、推算（基于模型的计算）和待验证事项。电力市场改革政策处于动态变化中，应标注有效日期。"

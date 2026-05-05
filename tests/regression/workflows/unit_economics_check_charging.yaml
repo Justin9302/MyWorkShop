@@ -1,0 +1,46 @@
+# 回归测试案例：充电桩单位经济模型校验
+# 对应工作流: workflows/business/unit_economics_check.yaml
+# 领域: 能源电力 / 充电桩运营
+# 类型: 合成测试（非真实客户数据）
+---
+test_case:
+  id: "reg_uec_charging_001"
+  workflow_id: "unit_economics_check"
+  description: "验证直流快充桩的单位经济模型假设和关键指标"
+  industry: "energy"
+  jurisdiction: "CN"
+  risk_level: "medium"
+  created_at: "2026-05-05"
+  input:
+    business_model_description: >
+      某运营商计划在一线城市核心商圈地下停车场部署 20 台 120kW 直流快充桩。
+      单桩设备成本 8 万元（含安装），停车场改造费均摊 2 万元/桩。
+      充电服务费定价 0.6 元/kWh，电费按一般工商业峰谷电价（峰 1.2 元、平 0.8 元、谷 0.4 元）。
+      预计日均单桩充电量：工作日 180kWh，周末 250kWh。
+      年均利用率目标 15%（含峰平谷加权）。
+      运维成本 0.08 元/kWh，场地租赁费 3000 元/月/桩。
+      投资方要求 3 年内回本，IRR ≥ 12%。
+    intent:
+      user_goal: "校验充电桩单位经济模型的关键假设是否合理，识别盈利的关键驱动因素和风险"
+      target_output: "单位经济分析报告（含 CAC、LTV、回本周期、敏感性分析）"
+      success_criteria:
+        - "计算单桩 CAC 和 LTV"
+        - "区分峰平谷时段收益差异"
+        - "给出利用率 vs IRR 敏感性曲线"
+        - "识别利用率低于多少阈值时项目不可行"
+  expected_findings:
+    - "充电桩收益高度依赖峰时段充电量占比"
+    - "15%利用率假设应验证：一线城市核心商圈实际利用率水平"
+    - "场地租赁费是固定成本大头，对回本周期影响显著"
+    - "设备折旧周期与电池技术迭代周期的匹配性"
+  expected_risk_flags:
+    - "充电利用率不达 15% 的风险（实际商圈竞争、排队率、充电习惯）"
+    - "峰谷电价政策调整风险（如分时时段重新划分）"
+    - "设备故障率和维护成本超预期"
+    - "超级快充技术迭代导致设备提前贬值"
+  expected_constraints_triggered:
+    - "constraints/industries/energy.yaml"
+    - "constraints/jurisdictions/cn.yaml"
+  validation_thresholds:
+    min_risk_coverage: 0.6
+    min_citation_accuracy: 0.7

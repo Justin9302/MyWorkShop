@@ -1,0 +1,48 @@
+# 回归测试案例：VPP 商业模式验证
+# 对应工作流: workflows/business/business_model_validation.yaml
+# 领域: 能源电力 / VPP
+# 类型: 合成测试（非真实客户数据）
+---
+test_case:
+  id: "reg_bmv_vpp_001"
+  workflow_id: "business_model_validation"
+  description: "验证虚拟电厂（VPP）聚合分布式储能+光伏+充电桩的商业模式假设是否合理"
+  industry: "energy"
+  jurisdiction: "CN"
+  risk_level: "medium"
+  created_at: "2026-05-05"
+  input:
+    business_model_description: >
+      某公司在华东某工业园区拟建设 VPP 项目，聚合园区内 5MW 分布式光伏、
+      2MW/4MWh 储能系统、50 台直流快充桩（单桩 120kW）和部分可调工业负荷（约 3MW）。
+      项目总投资约 3500 万元。
+      主要收益来源：（1）参与江苏省电力辅助服务市场（调频+调峰）；
+      （2）光伏余量上网；（3）充电服务费；（4）需量管理降低园区基本电费；
+      （5）碳资产（CCER）交易。
+      预计投资回收期 4-5 年。
+      目标客户为工业园区管委会，合作模式为 EMC 合同能源管理（15 年）。
+  intent:
+    user_goal: "验证 VPP 商业模式的收益假设是否合理，识别关键风险和待验证假设"
+    target_output: "商业模式评估报告（含假设清单、验证计划、风险摘要）"
+    success_criteria:
+      - "区分确定性收益与不确定性收益"
+      - "给出分场景敏感性分析"
+      - "标出政策和市场变化风险"
+      - "提出验证实验建议"
+  expected_findings:
+    - "辅助服务市场收益具有政策依赖性（省内规则可能变化）"
+    - "充电桩利用率假设是关键敏感性因素"
+    - "CCER 收益受碳市场价格波动影响"
+    - "储能收益应区分峰谷套利、辅助服务和容量补贴"
+    - "需量管理节约的基本电费具有确定性"
+  expected_risk_flags:
+    - "江苏省辅助服务市场规则变动风险"
+    - "分布式光伏上网电价政策变化"
+    - "充电桩利用率不达预期"
+    - "储能电池循环寿命与衰减对收益的影响"
+  expected_constraints_triggered:
+    - "constraints/industries/energy.yaml"
+    - "constraints/jurisdictions/cn.yaml"
+  validation_thresholds:
+    min_risk_coverage: 0.6
+    min_citation_accuracy: 0.7

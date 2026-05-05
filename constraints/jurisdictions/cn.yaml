@@ -1,13 +1,14 @@
 constraint_pack:
   id: "jurisdiction_cn"
-  version: "0.1.0"
+  version: "0.2.0"
   status: "draft"
 metadata:
   jurisdiction: "CN"
-  description: "China (PRC) regulatory context including cybersecurity, data security, and cross-border data transfer rules"
+  description: "China (PRC) regulatory context including cybersecurity, data security, cross-border data transfer rules, and energy sector regulations"
   effective_date: "2026-01-01"
   authority_level: "reference"
 rules:
+  # ── 通用数据与网络安全 ──
   - id: "prc_data_law_awareness"
     severity: "high"
     rule: "Consider PRC Cybersecurity Law, Data Security Law, and Personal Information Protection Law (PIPL) requirements when processing China-related data."
@@ -17,6 +18,43 @@ rules:
   - id: "content_regulation"
     severity: "medium"
     rule: "Be aware of China's content regulation framework; flag outputs that may require compliance review."
-  - id: "industry_specific_regulation"
+
+  # ── 电力市场化改革 ──
+  - id: "cn_electricity_market_reform"
+    severity: "high"
+    rule: "中国电力市场化改革处于持续深化阶段。涉及电力交易、售电侧改革、现货市场、辅助服务市场的分析应参考最新国家发改委、国家能源局政策文件（如《电力体制改革方案》（中发〔2015〕9号）及配套文件、各省电力市场规则）。政策变化频繁，应标注政策引用日期。"
+  - id: "cn_capacity_and_spot_market"
     severity: "medium"
-    rule: "Financial, legal, and healthcare AI applications in China may have additional sector-specific regulatory requirements."
+    rule: "分析电力市场收益时需区分中长期合同市场、现货市场（日前/实时）、辅助服务市场和容量市场（试点阶段）的不同交易规则和出清机制。各省市场建设进度不同。"
+  - id: "cn_retail_electricity_pricing"
+    severity: "high"
+    rule: "售电价格受政府目录电价（基准价+浮动区间）管控和市场化交易双重影响。分析售电收益时应考虑输配电价、政府性基金及附加、交叉补贴和分时电价（尖峰/峰/平/谷）等复杂因素。"
+
+  # ── 分布式能源与 VPP ──
+  - id: "cn_distributed_grid_connection"
+    severity: "high"
+    rule: "分布式光伏、储能、VPP 并网需符合《分布式电源并网标准》和当地电网公司并网技术要求。余量上网、全额上网和自发自用模式的电价政策各有不同。"
+  - id: "cn_demand_response_policy"
+    severity: "medium"
+    rule: "需求响应和虚拟电厂参与市场需关注国家及省级电力需求侧管理办法、需求响应补贴标准和辅助服务市场注册要求。省级政策差异较大。"
+
+  # ── 充电基础设施 ──
+  - id: "cn_charging_infrastructure_policy"
+    severity: "medium"
+    rule: "充电桩建设与运营需符合《电动汽车充电基础设施发展指南》及各省市建桩规划要求。关注充电服务费上限、运营补贴标准、大工业/一般工商业用电电价政策及峰谷时段优化。"
+  - id: "cn_charging_safety_standards"
+    severity: "high"
+    rule: "充电设施需满足国标 GB/T 18487、GB/T 20234、GB/T 27930 等安全与通信协议标准。运营数据采集需符合个人信息保护法要求。"
+
+  # ── 合同能源管理 ──
+  - id: "cn_emc_policy"
+    severity: "medium"
+    rule: "合同能源管理项目可享受节能节水税收优惠政策。涉及财政补贴的应参考国家及地方节能专项资金管理办法。EMC 合同纠纷适用的法律依据为《合同法》及节能服务相关司法解释。"
+
+  # ── 碳市场 ──
+  - id: "cn_carbon_market"
+    severity: "medium"
+    rule: "中国碳排放权交易市场（全国碳市场）已覆盖发电行业并将逐步扩展。涉及碳交易、CCER 的分析应考虑最新《碳排放权交易管理办法（试行）》及交易规则。碳价受配额分配方案和市场供需影响波动较大。"
+  - id: "cn_green_certificate"
+    severity: "medium"
+    rule: "绿色电力证书（GEC）交易与可再生能源电力消纳保障机制挂钩。涉及绿证的分析需区分补贴绿证和平价绿证，了解最新绿证交易政策和消纳责任权重要求。"

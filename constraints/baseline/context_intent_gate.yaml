@@ -1,0 +1,40 @@
+constraint_pack:
+  id: "baseline_context_intent_gate"
+  version: "0.1.0"
+  status: "draft"
+description: "强制前置门禁：任何工作流在接收用户输入后，必须先完成上下文读取与意图确认，不得直接生成最终答案或执行工具调用。"
+applies_to:
+  - "all_workflows"
+gate_rules:
+  - id: "mandatory_startup_read"
+    severity: "critical"
+    rule: "Before any workflow execution, read config/active-release.yaml, config/context-loading.yaml, and constraints/baseline/human_review.yaml."
+    on_failure: "block_and_report"
+  - id: "intent_confirmation_required"
+    severity: "critical"
+    rule: "Workflow must identify user goal, industry, jurisdiction, risk level, target output, active release version, required assets, missing information, and approval needs before proceeding."
+    required_fields:
+      - "user_goal"
+      - "industry"
+      - "risk_level"
+      - "target_output"
+      - "active_release"
+    on_failure: "pause_and_request_input"
+  - id: "high_risk_pause"
+    severity: "high"
+    rule: "If task is high risk, under-specified, permission-sensitive, or changes platform behavior, pause and ask user to confirm before proceeding."
+    on_failure: "pause_and_request_approval"
+  - id: "load_only_relevant_context"
+    severity: "high"
+    rule: "Load only workflow, constraint, prompt, schema, and tool permissions relevant to the confirmed intent. Do not load unrelated industry or jurisdiction packages."
+    on_failure: "warn_and_record"
+  - id: "record_gate_in_snapshot"
+    severity: "high"
+    rule: "Context intent gate results (passed/blocked/paused), intent summary, and loaded assets must be recorded in run_snapshot.context_intent_gate."
+    on_failure: "record_omission_reason"
+audit:
+  record_gate_status: true
+  record_intent_summary: true
+  record_loaded_assets: true
+  record_blocked_assets: true
+  target_schema: "schemas/run_snapshot.schema.json"

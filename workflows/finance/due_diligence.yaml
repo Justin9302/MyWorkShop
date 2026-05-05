@@ -1,0 +1,53 @@
+workflow:
+  id: "due_diligence"
+  name: "尽调清单"
+  industry: "finance"
+  description: "生成分主题尽调清单、资料请求和风险追踪项。"
+  role: "due_diligence_planner"
+  risk_default: "high"
+  model_routing: "high_risk_review"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "constraints/industries/finance.yaml"]
+  confirmation_outputs: ["交易类型、对象、尽调范围、地区、时间限制"]
+  block_conditions: ["交易对象或尽调范围缺失"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L7", "L8"]
+inputs:
+  - name: "transaction_context"
+    required: true
+  - name: "target_profile"
+    required: true
+  - name: "scope"
+    required: false
+retrieval:
+  scope: ["approved_due_diligence_templates", "industry_risk_notes"]
+  source_filters: ["match_industry", "match_jurisdiction"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/finance.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认尽调范围"
+    action: "identify transaction, target, diligence tracks, deadlines"
+  - id: "checklist_build"
+    name: "生成清单"
+    action: "produce requests by commercial, financial, legal, operational, technical tracks"
+  - id: "risk_mapping"
+    name: "风险映射"
+    action: "map questions to risk hypotheses and escalation triggers"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies transaction context or target profile"
+    cancel_condition: "user cancels diligence planning"
+    audit_fields: ["missing_fields", "transaction_context", "checkpoint_id"]
+outputs:
+  template: "prompts/finance/due_diligence.system.md"
+  required_sections: ["scope", "request_list", "risk_hypotheses", "owner_matrix", "escalation_triggers"]
+human_review:
+  required_when: ["regulated transaction", "external request list", "critical risk"]
+  reviewer_role: "deal_lead_or_compliance_reviewer"
+version: "0.1.0"

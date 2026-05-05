@@ -1,0 +1,22 @@
+constraint_pack:
+  id: "jurisdiction_cn"
+  version: "0.1.0"
+  status: "draft"
+metadata:
+  jurisdiction: "CN"
+  description: "China (PRC) regulatory context including cybersecurity, data security, and cross-border data transfer rules"
+  effective_date: "2026-01-01"
+  authority_level: "reference"
+rules:
+  - id: "prc_data_law_awareness"
+    severity: "high"
+    rule: "Consider PRC Cybersecurity Law, Data Security Law, and Personal Information Protection Law (PIPL) requirements when processing China-related data."
+  - id: "cross_border_data_restriction"
+    severity: "high"
+    rule: "Cross-border transfer of data originating in China may be subject to security assessment, certification, or standard contract requirements."
+  - id: "content_regulation"
+    severity: "medium"
+    rule: "Be aware of China's content regulation framework; flag outputs that may require compliance review."
+  - id: "industry_specific_regulation"
+    severity: "medium"
+    rule: "Financial, legal, and healthcare AI applications in China may have additional sector-specific regulatory requirements."

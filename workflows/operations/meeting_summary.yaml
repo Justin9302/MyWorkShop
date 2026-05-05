@@ -1,0 +1,51 @@
+workflow:
+  id: "meeting_summary"
+  name: "会议纪要"
+  industry: "operations"
+  description: "从会议内容生成决策、行动项、责任人和后续跟进。"
+  role: "meeting_summary_editor"
+  risk_default: "low"
+  model_routing: "summarization"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "config/permissions.yaml"]
+  confirmation_outputs: ["会议类型、参会角色、纪要用途、敏感信息等级"]
+  block_conditions: ["会议内容缺失", "要求记录未经授权的敏感原文"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L4", "L7", "L8"]
+inputs:
+  - name: "meeting_notes_or_transcript"
+    required: true
+    data_class: "confidential"
+  - name: "meeting_goal"
+    required: false
+retrieval:
+  scope: ["current_meeting_input", "approved_project_context"]
+  source_filters: ["confidentiality_allowed"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/industries/operations.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认纪要用途"
+    action: "identify audience, confidentiality, desired format"
+  - id: "extract_decisions"
+    name: "提取决策和行动项"
+    action: "extract decisions, owners, deadlines, dependencies"
+  - id: "summarize"
+    name: "生成纪要"
+    action: "produce concise summary with open questions"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies meeting content or audience"
+    cancel_condition: "user cancels summary"
+    audit_fields: ["missing_fields", "confidentiality", "checkpoint_id"]
+outputs:
+  template: "prompts/operations/meeting_summary.system.md"
+  required_sections: ["summary", "decisions", "action_items", "open_questions", "risks"]
+human_review:
+  required_when: ["sensitive personnel topic", "external distribution", "confidential strategy"]
+  reviewer_role: "meeting_owner"
+version: "0.1.0"

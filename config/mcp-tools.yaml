@@ -1,0 +1,78 @@
+mcp_tools:
+  version: "0.2.0"
+  status: "draft"
+  environment: "vscode_copilot"
+  environments:
+    codex:
+      description: "Original Codex runtime (deprecated for this workspace)"
+      status: "migrated_to_vscode"
+    vscode_copilot:
+      description: "VS Code + GitHub Copilot Agent + MCP extensions"
+      status: "active"
+      mcp_config: ".vscode/mcp.json"
+      native_capabilities:
+        - "file_read_write"
+        - "git_status_diff"
+        - "web_fetch"
+        - "terminal_execution"
+        - "code_search"
+        - "semantic_search"
+  registry_policy:
+    allow_unregistered_tools: false
+    writable_tools_require_confirmation: true
+    external_network_tools_require_confirmation: true
+    record_tool_results_as_summaries: true
+  tools:
+    - id: "filesystem_read"
+      purpose: "Read approved local platform assets and user-provided runtime files."
+      codex_impl: "filesystem_read"
+      vscode_impl: "Copilot native file operations + MCP filesystem server"
+      vscode_tools: ["read_file", "file_search", "list_dir"]
+      permissions:
+        read: true
+        write: false
+        external_network: false
+      allowed_data_classes:
+        - "public"
+        - "internal"
+        - "confidential"
+      approval_required: "for_confidential_or_restricted_inputs"
+    - id: "filesystem_write"
+      purpose: "Create or update versioned platform assets inside the workspace."
+      codex_impl: "filesystem_write"
+      vscode_impl: "Copilot native write operations + MCP filesystem server"
+      vscode_tools: ["create_file", "replace_string_in_file", "insert_edit_into_file", "create_directory"]
+      permissions:
+        read: true
+        write: true
+        external_network: false
+      allowed_data_classes:
+        - "public"
+        - "internal"
+      approval_required: true
+    - id: "git_status"
+      purpose: "Inspect version-control state before and after platform changes."
+      codex_impl: "git_status"
+      vscode_impl: "VS Code Git extension + Copilot get_changed_files"
+      vscode_tools: ["get_changed_files", "run_in_terminal (git commands)"]
+      permissions:
+        read: true
+        write: false
+        external_network: false
+      approval_required: false
+    - id: "fetch_official_sources"
+      purpose: "Retrieve approved official references when a workflow requires current external evidence."
+      codex_impl: "fetch_official_sources"
+      vscode_impl: "Copilot fetch_webpage + MCP fetch server"
+      vscode_tools: ["fetch_webpage"]
+      permissions:
+        read: true
+        write: false
+        external_network: true
+      allowed_data_classes:
+        - "public"
+      approval_required: true
+  audit:
+    record_requested_tool: true
+    record_approval_status: true
+    record_input_output_summaries: true

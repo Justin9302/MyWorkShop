@@ -1,0 +1,80 @@
+workflow:
+  id: "contract_review"
+  name: "合同审查"
+  industry: "legal"
+  description: "识别合同条款风险、缺失信息、谈判点和人审事项。"
+  role: "legal_compliance_reviewer"
+  risk_default: "high"
+  model_routing: "high_risk_review"
+context_intent_gate:
+  required: true
+  required_reads:
+    - "config/active-release.yaml"
+    - "config/context-loading.yaml"
+    - "constraints/baseline/human_review.yaml"
+  confirmation_outputs:
+    - "合同类型、当事方、适用地区、审查目标和风险等级"
+    - "缺失信息、允许检索范围和预期输出格式"
+  block_conditions:
+    - "合同文本或审查目标缺失"
+    - "用户要求给出最终法律意见且无人审"
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L7", "L8"]
+inputs:
+  - name: "contract_text_or_summary"
+    required: true
+    data_class: "confidential"
+  - name: "review_goal"
+    required: true
+  - name: "jurisdiction"
+    required: false
+retrieval:
+  scope:
+    - "approved_contract_playbooks"
+    - "legal_constraints"
+  source_filters:
+    - "match_jurisdiction"
+    - "citation_allowed_or_internal_summary"
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/legal.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认审查目标"
+    action: "summarize intent, scope, parties, jurisdiction, missing fields"
+  - id: "clause_risk_scan"
+    name: "条款风险扫描"
+    action: "identify risky, missing, ambiguous, or unusual clauses"
+  - id: "recommendations"
+    name: "形成修改建议"
+    action: "produce issue list, rationale, suggested negotiation positions"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies contract type, review goal, or jurisdiction"
+    cancel_condition: "user abandons review"
+    audit_fields: ["missing_fields", "risk_level", "checkpoint_id"]
+  - node_id: "recommendations"
+    pause_reason: "requires_human_approval"
+    resume_condition: "qualified reviewer approves or modifies final position"
+    cancel_condition: "reviewer rejects output"
+    audit_fields: ["reviewer_role", "approval_status", "legal_disclaimer"]
+outputs:
+  template: "prompts/legal/contract_review.system.md"
+  schema_ref: "schemas/run_snapshot.schema.json"
+  required_sections:
+    - "executive_summary"
+    - "risk_table"
+    - "missing_information"
+    - "suggested_revisions"
+    - "human_review_required"
+human_review:
+  required_when:
+    - "final legal advice"
+    - "high or critical risk clause"
+    - "external publication"
+  reviewer_role: "licensed_legal_or_compliance_reviewer"
+version: "0.1.0"

@@ -1,0 +1,14 @@
+constraint_pack:
+  id: "baseline_tool_permissions"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "registered_tools_only"
+    severity: "high"
+    rule: "Workflows may only call tools registered in config/mcp-tools.yaml."
+  - id: "write_requires_confirmation"
+    severity: "high"
+    rule: "Any tool call that writes files, modifies platform assets, or sends data externally requires confirmation or human approval."
+  - id: "summarize_tool_results"
+    severity: "medium"
+    rule: "Tool outputs must be recorded as summaries in run snapshots; sensitive raw outputs must not be written into Git."

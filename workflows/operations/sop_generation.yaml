@@ -1,0 +1,53 @@
+workflow:
+  id: "sop_generation"
+  name: "SOP 生成"
+  industry: "operations"
+  description: "把流程目标和约束转化为可执行 SOP、角色分工和检查点。"
+  role: "operations_process_designer"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "constraints/industries/operations.yaml"]
+  confirmation_outputs: ["流程目标、使用者、触发条件、风险等级、审批要求"]
+  block_conditions: ["流程目标或适用团队缺失", "涉及高风险操作且无人审"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L7", "L8"]
+inputs:
+  - name: "process_goal"
+    required: true
+  - name: "team_or_role"
+    required: true
+  - name: "constraints"
+    required: false
+retrieval:
+  scope: ["approved_sop_templates", "internal_process_notes"]
+  source_filters: ["confidentiality_allowed", "version_current"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/operations.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认流程目标"
+    action: "identify audience, trigger, outcome, owner, risk"
+  - id: "process_design"
+    name: "设计流程步骤"
+    action: "define ordered steps, roles, inputs, outputs, exceptions"
+  - id: "control_points"
+    name: "设置控制点"
+    action: "define approvals, logs, quality checks, rollback points"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies process owner, target user, or trigger condition"
+    cancel_condition: "user cancels SOP generation"
+    audit_fields: ["missing_fields", "process_goal", "checkpoint_id"]
+outputs:
+  template: "prompts/operations/sop_generation.system.md"
+  required_sections: ["purpose", "scope", "roles", "steps", "exceptions", "controls", "review_required"]
+human_review:
+  required_when: ["safety critical process", "financial control", "external publication"]
+  reviewer_role: "process_owner_or_operations_lead"
+version: "0.1.0"

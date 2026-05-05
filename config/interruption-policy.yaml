@@ -1,0 +1,40 @@
+interruption_policy:
+  version: "0.1.0"
+  status: "draft"
+  interruption_types:
+    workflow_pause:
+      description: "A planned pause triggered by workflow logic, constraints, missing information, or approval needs."
+      resume_requires_validation: true
+      checkpoint_required: true
+    interrupted_by_user:
+      description: "The user paused or stopped the current run before completion."
+      resume_requires_validation: true
+      checkpoint_required: true
+    cancelled_by_user:
+      description: "The user explicitly abandoned the current run."
+      resume_requires_validation: false
+      checkpoint_required: true
+  mandatory_pause_reasons:
+    - "missing_required_input"
+    - "high_risk_output"
+    - "requires_human_approval"
+    - "tool_permission_required"
+    - "schema_validation_failed"
+    - "context_budget_exceeded"
+    - "evidence_gap"
+  resume_validation:
+    required_checks:
+      - "supplement_answers_pause_reason"
+      - "intent_still_matches_workflow"
+      - "risk_level_recomputed"
+      - "context_load_plan_updated_if_needed"
+      - "approval_status_recorded"
+  audit_fields:
+    - "interruption_id"
+    - "type"
+    - "pause_reason"
+    - "checkpoint_id"
+    - "resume_condition"
+    - "cancel_condition"
+    - "user_supplement_summary"
+    - "validation_result"

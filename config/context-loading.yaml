@@ -26,8 +26,11 @@ context_loading:
       - "Load only relevant workflow, constraint, prompt, schema, evaluator, and metadata files."
       - "Do not load unrelated industry packages, jurisdictions, prompts, or tools."
       - "Summarize or run a second retrieval pass when context exceeds the task budget."
+      - "Before executing regulated tasks (legal, finance, compliance), check the active knowledge_base_version and knowledge_bases list. If empty or marked draft, flag data freshness risk and offer online update."
   audit_expectations:
     record_loaded_files: true
     record_skipped_relevant_files: true
     record_context_reasoning_summary: true
+    record_freshness_check: true
+    record_fetched_sources: true
     target_schema: "schemas/run_snapshot.schema.json"

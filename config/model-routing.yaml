@@ -1,0 +1,62 @@
+model_routing:
+  version: "0.2.0"
+  status: "draft"
+  default_route:
+    model_family: "general_reasoning"
+    reasoning_effort: "medium"
+    allowed_for:
+      - "context_intent_confirmation"
+      - "workflow_execution"
+      - "structured_output_generation"
+  routes:
+    - id: "high_risk_review"
+      description: "高风险法律/金融分析，需要最强推理和严格结构化输出"
+      applies_when:
+        risk_level:
+          - "high"
+          - "critical"
+        workflow_ids:
+          - "contract_review"
+          - "investment_research"
+          - "risk_summary"
+          - "due_diligence"
+      model_family: "advanced_reasoning"
+      reasoning_effort: "high"
+      output_mode: "schema_strict"
+
+    - id: "business_validation"
+      description: "商业模型校验与单位经济分析，需要高推理强度"
+      applies_when:
+        workflow_ids:
+          - "business_model_validation"
+          - "unit_economics_check"
+      model_family: "advanced_reasoning"
+      reasoning_effort: "high"
+      output_mode: "schema_strict"
+
+    - id: "standard_analysis"
+      description: "一般性行业分析与策略审查，中等推理强度"
+      applies_when:
+        workflow_ids:
+          - "policy_qa"
+          - "business_model_design"
+          - "go_to_market_review"
+          - "sop_generation"
+      model_family: "general_reasoning"
+      reasoning_effort: "medium"
+      output_mode: "schema_guided"
+
+    - id: "summarization"
+      description: "会议纪要与项目复盘，输出导向的内容整理"
+      applies_when:
+        workflow_ids:
+          - "meeting_summary"
+          - "project_retrospective"
+      model_family: "general_reasoning"
+      reasoning_effort: "medium"
+      output_mode: "schema_guided"
+
+  fallback:
+    on_missing_route: "use_default_route"
+    on_schema_failure: "retry_once_then_interrupt"
+    on_policy_conflict: "block_and_request_review"

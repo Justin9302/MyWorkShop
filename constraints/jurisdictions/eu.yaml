@@ -1,0 +1,22 @@
+constraint_pack:
+  id: "jurisdiction_eu"
+  version: "0.1.0"
+  status: "draft"
+metadata:
+  jurisdiction: "EU"
+  description: "European Union regulatory context including GDPR, AI Act, and cross-border considerations"
+  effective_date: "2026-01-01"
+  authority_level: "reference"
+rules:
+  - id: "gdpr_compliance"
+    severity: "critical"
+    rule: "Any processing of personal data of EU residents must be assessed against GDPR requirements (lawful basis, data minimization, retention, and deletion)."
+  - id: "eu_ai_act_awareness"
+    severity: "high"
+    rule: "Flag outputs that may fall under EU AI Act high-risk or prohibited categories; recommend human compliance review."
+  - id: "member_state_variation"
+    severity: "medium"
+    rule: "Note when EU directives leave member-state discretion; do not assume uniform implementation across all member states."
+  - id: "cross_border_data_transfer"
+    severity: "high"
+    rule: "Flag data transfer implications (adequacy decision, SCCs, BCRs) when processing involves non-EU jurisdictions."

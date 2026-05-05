@@ -1,0 +1,116 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "验证: 工作流 Schema 校验",
+      "type": "shell",
+      "command": "echo '✅ 请使用 VS Code YAML 扩展进行 Schema 校验'; echo '所有 workflows/**/*.yaml 已关联 schemas/workflow.schema.json'",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "验证: 检查 Git 边界",
+      "type": "shell",
+      "command": "echo '=== Git 纳入检查 ===' && git ls-files | head -40 && echo '' && echo '=== .gitignore 排除检查 ===' && cat .gitignore",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "验证: 检查活动版本配置",
+      "type": "shell",
+      "command": "cat config/active-release.yaml",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "验证: 运行全部检查",
+      "type": "shell",
+      "command": "echo '=== 活动版本 ===' && cat config/active-release.yaml && echo '' && echo '=== Git 状态 ===' && git status --short",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "dependsOn": []
+    },
+    {
+      "label": "运行: 合同审查工作流 (contract_review)",
+      "type": "shell",
+      "command": "echo '请在 Copilot Chat 中输入: @workspace 执行合同审查工作流 workflows/legal/contract_review.yaml'",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "运行: 尽调工作流 (due_diligence)",
+      "type": "shell",
+      "command": "echo '请在 Copilot Chat 中输入: @workspace 执行尽调工作流 workflows/finance/due_diligence.yaml'",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "运行: 商业模式验证 (business_model_validation)",
+      "type": "shell",
+      "command": "echo '请在 Copilot Chat 中输入: @workspace 执行商业模式验证工作流 workflows/business/business_model_validation.yaml'",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "创建: 新工作流模板",
+      "type": "shell",
+      "command": "read -p '输入行业 (legal/business/finance/operations): ' industry && read -p '输入工作流ID (snake_case): ' wfid && mkdir -p \"workflows/${industry}\" && cp schemas/workflow.schema.json \"workflows/${industry}/${wfid}.schema.ref.json\" && echo \"请在 workflows/${industry}/${wfid}.yaml 创建新工作流\"",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "评估: 运行单次评估 (示例快照)",
+      "type": "shell",
+      "command": "python3 scripts/eval_runner.py --snapshot tests/eval_cases/synthetic/run_snapshot_sample_001.json --rubric evaluators/rubrics/business_model_validation.yaml --output outputs/eval_reports/sample_001_eval.json",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "评估: 批量运行所有快照",
+      "type": "shell",
+      "command": "python3 scripts/eval_runner.py --batch tests/eval_cases/synthetic/ --rubric evaluators/rubrics/business_model_validation.yaml --output-dir outputs/eval_reports/",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "评估: 查看最新评估报告",
+      "type": "shell",
+      "command": "ls -lt outputs/eval_reports/ | head -10",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    }
+  ]
+}

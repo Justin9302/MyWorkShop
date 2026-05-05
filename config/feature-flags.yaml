@@ -1,0 +1,39 @@
+feature_flags:
+  version: "0.1.0"
+  status: "draft"
+  flags:
+    context_intent_gate:
+      enabled: true
+      rollout: "all_workflows"
+    layered_context_loading:
+      enabled: true
+      rollout: "all_workflows"
+    workflow_interruptions:
+      enabled: true
+      rollout: "all_workflows"
+    strict_schema_outputs:
+      enabled: true
+      rollout: "all_workflows"
+    human_review_gate:
+      enabled: true
+      rollout: "high_risk_actions"
+    mcp_tool_registry:
+      enabled: true
+      rollout: "registered_tools_only"
+    external_fetch:
+      enabled: false
+      rollout: "manual_approval_only"
+      freshness_check:
+        description: "When the active knowledge base is empty or outdated, the workflow may request user approval to fetch current official sources online."
+        allowed_domains:
+          - "pkulaw.com"
+          - "gov.cn"
+          - "pkulaw.com/law"
+          - "law.cas.cn"
+        citation_required: true
+    evaluation_sidecar:
+      enabled: false
+      rollout: "contract_only"
+    auto_update_prompts:
+      enabled: false
+      rollout: "disabled"

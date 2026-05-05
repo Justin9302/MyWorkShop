@@ -1,0 +1,22 @@
+constraint_pack:
+  id: "jurisdiction_us"
+  version: "0.1.0"
+  status: "draft"
+metadata:
+  jurisdiction: "US"
+  description: "United States federal and general state-level legal context"
+  effective_date: "2026-01-01"
+  authority_level: "reference"
+rules:
+  - id: "us_federal_vs_state"
+    severity: "medium"
+    rule: "Distinguish between federal law and state-specific variations when citing US legal references."
+  - id: "no_practice_of_law"
+    severity: "critical"
+    rule: "Do not engage in the unauthorized practice of law. Provide legal analysis only as draft suggestions requiring qualified attorney review."
+  - id: "securities_law_caution"
+    severity: "high"
+    rule: "Securities law implications (SEC regulations, private placement rules) require explicit disclaimer and human review."
+  - id: "export_control_awareness"
+    severity: "medium"
+    rule: "Flag when outputs may involve ITAR, EAR, or OFAC-regulated content or transactions."

@@ -1,0 +1,53 @@
+workflow:
+  id: "go_to_market_review"
+  name: "市场进入策略审查"
+  industry: "business"
+  description: "审查目标市场、渠道、定位、销售动作和上市风险。"
+  role: "go_to_market_reviewer"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "constraints/industries/business.yaml"]
+  confirmation_outputs: ["目标市场、客户分层、渠道、上线目标、约束条件"]
+  block_conditions: ["目标市场或客户分层缺失", "要求确定性预测但无证据"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L7", "L8"]
+inputs:
+  - name: "gtm_plan"
+    required: true
+  - name: "target_segment"
+    required: false
+  - name: "launch_goal"
+    required: false
+retrieval:
+  scope: ["approved_market_notes", "customer_research_summaries", "competitive_notes"]
+  source_filters: ["confidentiality_allowed", "evidence_level_recorded"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/industries/business.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认上市目标"
+    action: "identify segment, offer, channel, success criteria"
+  - id: "channel_review"
+    name: "渠道与漏斗审查"
+    action: "review acquisition, activation, conversion, retention assumptions"
+  - id: "risk_review"
+    name: "上市风险审查"
+    action: "identify positioning, compliance, pricing, operational risks"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies target segment or launch goal"
+    cancel_condition: "user abandons review"
+    audit_fields: ["missing_fields", "launch_goal", "checkpoint_id"]
+outputs:
+  template: "prompts/business/go_to_market_review.system.md"
+  required_sections: ["gtm_summary", "funnel_assumptions", "risks", "experiments", "decision_points"]
+human_review:
+  required_when: ["external launch recommendation", "regulated market entry"]
+  reviewer_role: "business_owner_or_gtm_lead"
+version: "0.1.0"

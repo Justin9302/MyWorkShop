@@ -1,0 +1,69 @@
+workflow:
+  id: "business_model_design"
+  name: "商业模式建模"
+  industry: "business"
+  description: "将业务想法转化为可检验的商业模式、关键假设和实验路线。"
+  role: "business_model_architect"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "config/context-loading.yaml", "constraints/industries/business.yaml"]
+  confirmation_outputs: ["目标客户、场景、价值主张、商业目标、证据缺口"]
+  block_conditions: ["目标用户或价值主张缺失", "用户要求输出未经验证的确定性商业结论"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L7", "L8"]
+inputs:
+  - name: "business_idea"
+    required: true
+  - name: "target_customer"
+    required: false
+  - name: "market_context"
+    required: false
+  - name: "success_goal"
+    required: false
+retrieval:
+  scope: ["approved_market_notes", "internal_strategy_notes", "public_citable_sources"]
+  source_filters: ["evidence_level_recorded", "confidentiality_allowed"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/business.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认商业目标"
+    action: "identify target customer, job-to-be-done, business objective, risk"
+  - id: "model_canvas"
+    name: "构建商业模式画布"
+    action: "map customer, problem, value proposition, channels, revenue, cost, partners"
+  - id: "assumption_map"
+    name: "提炼关键假设"
+    action: "separate facts, assumptions, inferences, and unknowns"
+  - id: "validation_plan"
+    name: "设计验证路线"
+    action: "define experiments, success metrics, failure thresholds, next decisions"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies target customer, use case, or desired business outcome"
+    cancel_condition: "user abandons modeling"
+    audit_fields: ["missing_fields", "target_customer", "checkpoint_id"]
+  - node_id: "validation_plan"
+    pause_reason: "evidence_gap"
+    resume_condition: "user provides evidence or accepts assumptions as unvalidated"
+    cancel_condition: "user declines to proceed with assumptions"
+    audit_fields: ["assumptions", "evidence_level", "failure_thresholds"]
+outputs:
+  template: "prompts/business/business_model_design.system.md"
+  required_sections:
+    - "business_model_canvas"
+    - "facts_assumptions_inferences"
+    - "unit_economics_hypotheses"
+    - "validation_experiments"
+    - "risks_and_next_steps"
+human_review:
+  required_when: ["investment recommendation", "external publication", "financial forecast represented as fact"]
+  reviewer_role: "business_owner_or_strategy_reviewer"
+version: "0.1.0"

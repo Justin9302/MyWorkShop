@@ -1,0 +1,14 @@
+constraint_pack:
+  id: "industry_operations"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "owner_and_control_required"
+    severity: "medium"
+    rule: "Operational outputs must identify owners, checkpoints, escalation paths, and review requirements."
+  - id: "sensitive_people_topics_review"
+    severity: "high"
+    rule: "Personnel-sensitive conclusions require review by the relevant owner."
+  - id: "do_not_invent_commitments"
+    severity: "medium"
+    rule: "Meeting and project summaries must not invent decisions, owners, or deadlines absent from the input."

@@ -1,0 +1,54 @@
+workflow:
+  id: "investment_research"
+  name: "行业研究"
+  industry: "finance"
+  description: "形成行业研究摘要、关键驱动因素、风险和证据清单。"
+  role: "investment_research_analyst"
+  risk_default: "high"
+  model_routing: "high_risk_review"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "constraints/industries/finance.yaml"]
+  confirmation_outputs: ["研究对象、时间范围、地区、用途、引用范围"]
+  block_conditions: ["研究标的或用途缺失", "要求个性化投资建议"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L8"]
+inputs:
+  - name: "research_topic"
+    required: true
+  - name: "region"
+    required: false
+  - name: "time_horizon"
+    required: false
+retrieval:
+  scope: ["approved_market_sources", "company_public_filings", "internal_research_notes"]
+  source_filters: ["effective_date_valid", "authority_level_recorded"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/finance.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认研究范围"
+    action: "identify topic, region, horizon, intended use"
+  - id: "evidence_synthesis"
+    name: "证据综合"
+    action: "summarize market structure, drivers, risks, uncertainty"
+  - id: "research_output"
+    name: "输出研究摘要"
+    action: "produce neutral research summary without personalized advice"
+interruptions:
+  - node_id: "evidence_synthesis"
+    pause_reason: "evidence_gap"
+    resume_condition: "user supplies source or narrows research scope"
+    cancel_condition: "user cancels research"
+    audit_fields: ["evidence_gap", "research_scope", "checkpoint_id"]
+outputs:
+  template: "prompts/finance/research_summary.system.md"
+  required_sections: ["summary", "key_drivers", "risks", "evidence_table", "unknowns"]
+human_review:
+  required_when: ["investment recommendation", "external publication", "high risk financial conclusion"]
+  reviewer_role: "licensed_or_authorized_finance_reviewer"
+version: "0.1.0"

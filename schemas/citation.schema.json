@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/citation.schema.json",
+  "title": "Citation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_id",
+    "title",
+    "version",
+    "authority_level",
+    "citation_allowed"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "authority_level": {
+      "type": "string",
+      "enum": [
+        "official",
+        "primary",
+        "secondary",
+        "internal",
+        "unknown"
+      ]
+    },
+    "jurisdiction": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "effective_date": {
+      "type": "string"
+    },
+    "excerpt_summary": {
+      "type": "string"
+    },
+    "citation_allowed": {
+      "type": "boolean"
+    },
+    "confidentiality": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ]
+    }
+  }
+}

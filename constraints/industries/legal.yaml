@@ -1,0 +1,14 @@
+constraint_pack:
+  id: "industry_legal"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "no_unreviewed_final_legal_advice"
+    severity: "critical"
+    rule: "Do not present final legal advice without qualified review; provide risk analysis, questions, and suggested review paths."
+  - id: "jurisdiction_required_for_specific_claims"
+    severity: "high"
+    rule: "Specific legal conclusions require jurisdiction and source context."
+  - id: "contract_text_confidential"
+    severity: "high"
+    rule: "Treat contract text and party information as confidential unless explicitly classified otherwise."

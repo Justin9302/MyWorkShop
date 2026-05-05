@@ -1,0 +1,51 @@
+workflow:
+  id: "risk_summary"
+  name: "风险摘要"
+  industry: "finance"
+  description: "总结财务、市场、经营、合规和信息缺口风险。"
+  role: "financial_risk_analyst"
+  risk_default: "high"
+  model_routing: "high_risk_review"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "constraints/industries/finance.yaml"]
+  confirmation_outputs: ["对象、风险类别、用途、时间范围"]
+  block_conditions: ["对象缺失", "要求替代专业尽调或投资建议"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L8"]
+inputs:
+  - name: "subject"
+    required: true
+  - name: "risk_scope"
+    required: false
+retrieval:
+  scope: ["approved_risk_notes", "financial_sources", "public_filings"]
+  source_filters: ["authority_level_recorded", "confidentiality_allowed"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/finance.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认风险范围"
+    action: "identify subject, risk categories, decision context"
+  - id: "risk_inventory"
+    name: "风险盘点"
+    action: "classify risks by severity, evidence, mitigation, owner"
+  - id: "review_gate"
+    name: "人审门禁"
+    action: "flag outputs requiring finance or compliance review"
+interruptions:
+  - node_id: "review_gate"
+    pause_reason: "requires_human_approval"
+    resume_condition: "authorized reviewer approves or modifies risk summary"
+    cancel_condition: "reviewer rejects output"
+    audit_fields: ["risk_level", "approval_status", "checkpoint_id"]
+outputs:
+  template: "prompts/finance/risk_summary.system.md"
+  required_sections: ["risk_summary", "risk_table", "evidence_gaps", "mitigations", "review_required"]
+human_review:
+  required_when: ["external publication", "investment decision", "critical risk"]
+  reviewer_role: "finance_or_compliance_reviewer"
+version: "0.1.0"

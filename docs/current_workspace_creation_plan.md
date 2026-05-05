@@ -141,6 +141,11 @@ ai-work-platform/
     legal/
       contract_review.yaml
       policy_qa.yaml
+    business/
+      business_model_design.yaml
+      business_model_validation.yaml
+      go_to_market_review.yaml
+      unit_economics_check.yaml
     finance/
       investment_research.yaml
       due_diligence.yaml
@@ -156,6 +161,7 @@ ai-work-platform/
       human_review.yaml
     industries/
       legal.yaml
+      business.yaml
       finance.yaml
       operations.yaml
     jurisdictions/
@@ -170,6 +176,9 @@ ai-work-platform/
       contract_review.review.md
     finance/
       research_summary.system.md
+    business/
+      business_model_design.system.md
+      business_model_validation.system.md
     operations/
       sop_generation.system.md
 
@@ -188,6 +197,7 @@ ai-work-platform/
       schema_check.yaml
     rubrics/
       contract_review.yaml
+      business_model_validation.yaml
       research_summary.yaml
       sop_generation.yaml
 
@@ -275,9 +285,10 @@ ai-work-platform/
 - `schemas/citation.schema.json`
 - 第一批行业工作流 YAML
 
-建议先落地 3 个行业包：
+建议先落地 4 个行业包：
 
 - 法律/合规：合同审查、政策问答
+- 商业/战略：商业模式建模、商业模式校验、市场进入策略审查、单位经济模型校验
 - 金融/投研：行业研究、风险摘要、尽调清单
 - 企业运营：SOP 生成、会议纪要、项目复盘
 
@@ -295,6 +306,18 @@ ai-work-platform/
 - 人工审批节点
 - 版本号
 
+商业模式建模与校验工作流应额外定义：
+
+- 目标客户、使用场景、痛点和替代方案
+- 价值主张、产品边界、差异化假设和不可做范围
+- 收入模式、定价假设、成本结构和单位经济模型
+- 获客渠道、转化漏斗、销售周期和留存假设
+- 市场规模、竞争格局、进入壁垒和监管约束
+- 关键假设、验证实验、成功指标和失败阈值
+- 证据等级、引用来源、缺口问题和待验证风险
+- 输出形态，例如商业模式画布、假设清单、验证计划、风险摘要和下一步实验路线
+- 需要人工审批的动作，例如对外发布商业判断、投资建议、财务预测或未经验证的市场结论
+
 审核点：
 
 - 工作流是否像专业流程，而不是普通聊天。
@@ -302,6 +325,7 @@ ai-work-platform/
 - 是否所有高风险动作都有人审节点。
 - 是否避免加载无关行业、地区、prompt、资料和工具权限。
 - 是否所有中断点都有恢复条件、取消条件和审计字段。
+- 商业模式结论是否明确区分事实、假设、推断和待验证事项。
 
 ## 6. 第三阶段：约束与参考资料元数据
 
@@ -805,17 +829,23 @@ P0，立即创建：
 P1，第一轮平台骨架：
 
 - `workflows/legal/contract_review.yaml`
+- `workflows/business/business_model_design.yaml`
+- `workflows/business/business_model_validation.yaml`
 - `constraints/baseline/privacy.yaml`
 - `constraints/baseline/citation.yaml`
 - `constraints/baseline/human_review.yaml`
 - `constraints/baseline/tool_permissions.yaml`
+- `constraints/industries/business.yaml`
 - `prompts/legal/contract_review.system.md`
+- `prompts/business/business_model_design.system.md`
+- `prompts/business/business_model_validation.system.md`
 - `tests/eval_cases/synthetic/`
 - `scripts/validate_context_loading.sh`
 - `scripts/validate_interruption_flow.sh`
 
 P2，第二轮扩展：
 
+- 商业/战略扩展工作流
 - 金融/投研工作流
 - 企业运营工作流
 - 批量评估入口
@@ -831,7 +861,7 @@ P2，第二轮扩展：
 
 1. 当前仓库名称是否采用 `ai-work-platform`。
 2. 现有三份文档是否迁入 `docs/`，还是继续保留在根目录。
-3. 第一批行业包是否确认为法律/合规、金融/投研、企业运营。
+3. 第一批行业包是否确认为法律/合规、商业/战略、金融/投研、企业运营。
 4. 是否需要从第一版就引入真实数据库或对象存储，还是先用本地模拟目录。
 5. 评估 Sidecar 第一版是否只做 Schema 和接口契约，不做完整服务实现。
 6. 版本号是否从 `0.1.0` 开始。
@@ -849,6 +879,7 @@ P2，第二轮扩展：
 - Git 仓库中没有真实业务数据、密钥、日志、模型输出。
 - 所有平台规则、工作流、prompt、schema、评估器都有明确目录。
 - 每个工作流都能说明输入、检索范围、约束、步骤、输出和人工审批点。
+- 商业/战略工作流能说明商业模式中的事实、假设、推断、证据等级、验证实验和失败阈值。
 - 每个工作流都把用户输入后的上下文读取与意图确认作为强制前置门禁。
 - 每个工作流都能生成 `context_load_plan`，说明实际加载了哪些 prompt、规则、资料和工具权限。
 - 每个工作流都能定义正式业务中断点、用户主动停止状态、恢复条件和取消条件。
@@ -862,4 +893,4 @@ P2，第二轮扩展：
 
 ## 18. 建议下一步
 
-如果本计划审核通过，下一步应优先补齐 `workflow.schema.json`、`context_load_plan.schema.json`、`interruption_event.schema.json`、`context-loading.yaml`、`mcp-tools.yaml`、`interruption-policy.yaml` 和 `context_intent_gate.yaml`，再创建第一个最小法律/合规工作流 `contract_review.yaml`，形成可验证的“输入、读上下文、确认意图、按需加载、中断补充、恢复执行、人审、快照、评估”闭环。
+如果本计划审核通过，下一步应优先补齐 `workflow.schema.json`、`context_load_plan.schema.json`、`interruption_event.schema.json`、`context-loading.yaml`、`mcp-tools.yaml`、`interruption-policy.yaml` 和 `context_intent_gate.yaml`，再创建第一个最小法律/合规工作流 `contract_review.yaml`，并同步创建 `business_model_design.yaml` 与 `business_model_validation.yaml` 的最小版本，形成可验证的“输入、读上下文、确认意图、按需加载、中断补充、恢复执行、人审、快照、评估”闭环。

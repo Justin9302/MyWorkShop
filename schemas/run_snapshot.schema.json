@@ -8,13 +8,18 @@
     "run_id",
     "workflow_id",
     "workflow_version",
+    "workflow_state",
     "versions",
+    "context_intent_gate",
+    "context_load_plan",
     "input_summary",
     "retrieved_sources",
     "output_summary",
     "constraints_triggered",
     "tool_calls",
     "human_review",
+    "interruptions",
+    "resume_events",
     "created_at"
   ],
   "properties": {
@@ -29,6 +34,39 @@
     "workflow_version": {
       "type": "string",
       "minLength": 1
+    },
+    "workflow_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "current_node"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "created",
+            "context_intent_pending",
+            "context_intent_confirmed",
+            "running",
+            "workflow_pause",
+            "interrupted_by_user",
+            "cancelled_by_user",
+            "completed",
+            "failed"
+          ]
+        },
+        "current_node": {
+          "type": "string"
+        },
+        "checkpoint_id": {
+          "type": "string"
+        },
+        "resume_node": {
+          "type": "string"
+        }
+      }
     },
     "versions": {
       "type": "object",
@@ -60,6 +98,63 @@
         }
       }
     },
+    "context_intent_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completed",
+        "intent_summary",
+        "workflow_selected",
+        "risk_level",
+        "missing_information",
+        "allowed_scope",
+        "approval_required"
+      ],
+      "properties": {
+        "completed": {
+          "type": "boolean"
+        },
+        "intent_summary": {
+          "type": "string"
+        },
+        "workflow_selected": {
+          "type": "string"
+        },
+        "industry": {
+          "type": "string"
+        },
+        "jurisdiction": {
+          "type": "string"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "missing_information": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approval_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "context_load_plan": {
+      "$ref": "context_load_plan.schema.json"
+    },
     "input_summary": {
       "type": "object",
       "description": "A minimized or redacted summary of user input.",
@@ -68,38 +163,7 @@
     "retrieved_sources": {
       "type": "array",
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "source_id",
-          "title",
-          "version",
-          "authority_level",
-          "citation_allowed"
-        ],
-        "properties": {
-          "source_id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          },
-          "authority_level": {
-            "type": "string"
-          },
-          "jurisdiction": {
-            "type": "string"
-          },
-          "excerpt_summary": {
-            "type": "string"
-          },
-          "citation_allowed": {
-            "type": "boolean"
-          }
-        }
+        "$ref": "citation.schema.json"
       }
     },
     "output_summary": {
@@ -199,6 +263,52 @@
         },
         "notes_summary": {
           "type": "string"
+        }
+      }
+    },
+    "interruptions": {
+      "type": "array",
+      "items": {
+        "$ref": "interruption_event.schema.json"
+      }
+    },
+    "resume_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "resume_event_id",
+          "interruption_id",
+          "validation_result",
+          "created_at"
+        ],
+        "properties": {
+          "resume_event_id": {
+            "type": "string"
+          },
+          "interruption_id": {
+            "type": "string"
+          },
+          "user_supplement_summary": {
+            "type": "string"
+          },
+          "structured_patch": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "validation_result": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected",
+              "requires_more_information"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       }
     },

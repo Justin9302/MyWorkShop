@@ -1,0 +1,49 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "runtime/": true,
+    "outputs/": true,
+    "logs/": true
+  },
+  "files.associations": {
+    "*.system.md": "markdown",
+    "*.schema.json": "json"
+  },
+  "yaml.schemas": {
+    "schemas/workflow.schema.json": ["workflows/**/*.yaml"],
+    "schemas/run_snapshot.schema.json": ["runtime/**/*.json"]
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cSpell.words": ["codex", "deepseek", "gitman", "pgvector", "qdrant"],
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/copilot-instructions.md"
+    }
+  ],
+  "github.copilot.chat.testGeneration.instructions": [
+    {
+      "file": ".github/copilot-instructions.md"
+    }
+  ],
+  "files.readonlyInclude": {
+    "runtime/": true,
+    "outputs/": true,
+    "logs/": true
+  },
+  "chat.tools.terminal.autoApprove": {
+    "git remote": true,
+    "git add": true,
+    "git commit": true
+  }
+}

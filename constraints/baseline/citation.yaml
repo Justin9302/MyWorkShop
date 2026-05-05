@@ -1,0 +1,14 @@
+constraint_pack:
+  id: "baseline_citation"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "cite_when_claim_depends_on_source"
+    severity: "medium"
+    rule: "Claims derived from external or approved reference material must carry citation metadata when citation is allowed."
+  - id: "separate_source_from_inference"
+    severity: "high"
+    rule: "Outputs must distinguish cited facts from model inference, assumptions, and recommendations."
+  - id: "respect_citation_permission"
+    severity: "high"
+    rule: "Do not quote or cite material marked internal-only or non-citable; summarize it as internal context instead."

@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-filesystem", "."],
+      "description": "Read and write files in the workspace with permission controls"
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-fetch"],
+      "description": "Fetch external URLs for approved reference retrieval"
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-git", "."],
+      "description": "Git status and version control operations"
+    }
+  }
+}

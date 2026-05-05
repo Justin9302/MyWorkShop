@@ -1,0 +1,20 @@
+rubric:
+  id: "business_model_validation"
+  version: "0.1.0"
+  status: "draft"
+criteria:
+  - id: "fact_assumption_separation"
+    weight: 0.25
+    description: "Facts, assumptions, inferences, and unknowns are clearly separated."
+  - id: "evidence_quality"
+    weight: 0.25
+    description: "Key claims include evidence level, source metadata, or explicit unvalidated labels."
+  - id: "unit_economics_consistency"
+    weight: 0.2
+    description: "Revenue, cost, CAC, retention, payback, and sensitivity assumptions are internally consistent."
+  - id: "validation_plan_quality"
+    weight: 0.2
+    description: "Experiments include success metrics, failure thresholds, and next decision gates."
+  - id: "human_review_flagging"
+    weight: 0.1
+    description: "Investment, fundraising, forecast, or external-use outputs are flagged for review."

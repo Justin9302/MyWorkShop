@@ -1,0 +1,71 @@
+workflow:
+  id: "business_model_validation"
+  name: "商业模式校验"
+  industry: "business"
+  description: "检查商业模式假设、证据、单位经济和验证计划是否自洽。"
+  role: "business_model_validator"
+  risk_default: "high"
+  model_routing: "business_validation"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "config/model-routing.yaml", "constraints/industries/business.yaml"]
+  confirmation_outputs: ["待校验模式、关键假设、证据来源、决策用途"]
+  block_conditions: ["缺少商业模式描述", "输出将用于投资或融资且无人审"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"]
+inputs:
+  - name: "business_model"
+    required: true
+  - name: "assumptions"
+    required: false
+  - name: "evidence"
+    required: false
+  - name: "decision_context"
+    required: false
+retrieval:
+  scope: ["approved_market_notes", "financial_assumptions", "customer_research_summaries"]
+  source_filters: ["authority_level_recorded", "effective_date_valid", "citation_allowed_or_internal_summary"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/business.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认校验用途"
+    action: "determine whether output supports strategy, funding, launch, or internal planning"
+  - id: "evidence_check"
+    name: "证据等级检查"
+    action: "classify facts, assumptions, inferences, evidence gaps"
+  - id: "unit_economics_check"
+    name: "单位经济校验"
+    action: "review revenue, gross margin, CAC, payback, retention, sensitivity"
+  - id: "decision_gate"
+    name: "形成决策门禁"
+    action: "state pass, revise, test, or stop recommendation with human review needs"
+interruptions:
+  - node_id: "evidence_check"
+    pause_reason: "evidence_gap"
+    resume_condition: "user supplies evidence or downgrades conclusion confidence"
+    cancel_condition: "user cancels validation"
+    audit_fields: ["evidence_gaps", "confidence_level", "checkpoint_id"]
+  - node_id: "decision_gate"
+    pause_reason: "requires_human_approval"
+    resume_condition: "business owner approves use of validation output"
+    cancel_condition: "reviewer rejects output"
+    audit_fields: ["decision_context", "approval_status", "risk_level"]
+outputs:
+  template: "prompts/business/business_model_validation.system.md"
+  schema_ref: "schemas/run_snapshot.schema.json"
+  required_sections:
+    - "validation_summary"
+    - "assumption_evidence_matrix"
+    - "unit_economics_review"
+    - "risk_register"
+    - "recommended_experiments"
+    - "decision_gate"
+human_review:
+  required_when: ["investment recommendation", "fundraising material", "external publication", "high risk strategic decision"]
+  reviewer_role: "business_owner_or_finance_reviewer"
+version: "0.1.0"

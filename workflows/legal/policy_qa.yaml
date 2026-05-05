@@ -1,0 +1,53 @@
+workflow:
+  id: "policy_qa"
+  name: "政策问答"
+  industry: "legal"
+  description: "基于批准资料回答政策、合规或内部制度问题。"
+  role: "policy_qa_analyst"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "config/context-loading.yaml"]
+  confirmation_outputs: ["问题、适用地区、资料范围、引用要求"]
+  block_conditions: ["问题范围不清", "用户要求绕过政策或合规要求"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L8"]
+inputs:
+  - name: "question"
+    required: true
+  - name: "policy_scope"
+    required: false
+  - name: "jurisdiction"
+    required: false
+retrieval:
+  scope: ["approved_policy_metadata", "approved_policy_excerpts"]
+  source_filters: ["effective_date_valid", "authority_level_primary_or_official"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/industries/legal.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认政策问题"
+    action: "identify policy scope, jurisdiction, risk, missing context"
+  - id: "retrieve_policy"
+    name: "检索政策依据"
+    action: "load metadata first, then relevant excerpts"
+  - id: "answer_with_limits"
+    name: "生成带边界的回答"
+    action: "answer, cite allowed sources, list uncertainty"
+interruptions:
+  - node_id: "retrieve_policy"
+    pause_reason: "evidence_gap"
+    resume_condition: "user provides approved policy source or narrows scope"
+    cancel_condition: "user no longer needs answer"
+    audit_fields: ["missing_source", "policy_scope", "checkpoint_id"]
+outputs:
+  template: "prompts/legal/policy_qa.system.md"
+  required_sections: ["short_answer", "policy_basis", "limitations", "next_steps"]
+human_review:
+  required_when: ["critical compliance issue", "external publication"]
+  reviewer_role: "policy_owner_or_compliance_reviewer"
+version: "0.1.0"

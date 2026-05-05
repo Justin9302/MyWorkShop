@@ -1,0 +1,22 @@
+constraint_pack:
+  id: "jurisdiction_au"
+  version: "0.1.0"
+  status: "draft"
+metadata:
+  jurisdiction: "AU"
+  description: "Australia regulatory context including privacy, consumer law, and financial services regulation"
+  effective_date: "2026-01-01"
+  authority_level: "reference"
+rules:
+  - id: "au_privacy_act_awareness"
+    severity: "high"
+    rule: "Consider Australian Privacy Act (including Privacy Amendment Act 2024) and APP framework when processing personal information."
+  - id: "au_financial_services"
+    severity: "high"
+    rule: "Financial product advice, recommendations, or analysis may trigger AFSL (Australian Financial Services License) requirements; disclaim and recommend qualified review."
+  - id: "australian_consumer_law"
+    severity: "medium"
+    rule: "Consider ACL (Australian Consumer Law) guarantees, unfair contract terms, and consumer rights when drafting commercial outputs."
+  - id: "indigenous_data_sovereignty"
+    severity: "low"
+    rule: "Be mindful of Indigenous data sovereignty principles when processing data relating to Aboriginal and Torres Strait Islander peoples."

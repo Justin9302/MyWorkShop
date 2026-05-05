@@ -1,0 +1,111 @@
+{
+  "run_id": "run_sample_001",
+  "workflow_id": "business_model_validation",
+  "workflow_version": "0.1.0",
+  "workflow_state": {
+    "status": "completed",
+    "current_node": "decision_gate",
+    "checkpoint_id": "cp_001",
+    "completed_steps": [
+      "confirm_intent",
+      "evidence_check",
+      "unit_economics_check",
+      "decision_gate"
+    ],
+    "total_steps": 4
+  },
+  "versions": {
+    "prompt_version": "0.1.0",
+    "constraint_pack_version": "0.1.0",
+    "knowledge_base_version": "kb_0.1.0",
+    "model_version": "deepseek-chat",
+    "evaluator_version": "0.1.0",
+    "git_commit": "f686ea3"
+  },
+  "context_intent_gate": {
+    "completed": true,
+    "intent_summary": "Validate a B2B SaaS business model before seed round pitch. Target: US mid-market. ARPU $500/mo, estimated CAC $2000.",
+    "workflow_selected": "business_model_validation",
+    "industry": "business",
+    "jurisdiction": "US",
+    "risk_level": "high",
+    "missing_information": ["churn_rate_actuals", "competitor_pricing"],
+    "allowed_scope": ["internal_validation", "investor_ready_review"],
+    "approval_required": true
+  },
+  "context_load_plan": {
+    "layers_loaded": ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"],
+    "loaded_files": [
+      "config/active-release.yaml",
+      "config/context-loading.yaml",
+      "config/model-routing.yaml",
+      "constraints/baseline/privacy.yaml",
+      "constraints/baseline/citation.yaml",
+      "constraints/baseline/human_review.yaml",
+      "constraints/industries/business.yaml",
+      "prompts/business/business_model_validation.system.md",
+      "schemas/run_snapshot.schema.json",
+      "evaluators/rubrics/business_model_validation.yaml"
+    ]
+  },
+  "input_summary": {
+    "business_model": "B2B SaaS, mid-market US, $500 ARPU, $2000 CAC",
+    "assumptions": "12-month payback, 5% monthly churn, 80% gross margin",
+    "evidence": "10 customer interviews, 3 pricing surveys, industry benchmark data",
+    "decision_context": "pre-seed fundraising"
+  },
+  "retrieved_sources": [
+    {
+      "source_id": "src_001",
+      "title": "SaaS Benchmarks 2025",
+      "authority": "industry_report",
+      "excerpt": "Median CAC payback for B2B SaaS: 18 months"
+    },
+    {
+      "source_id": "src_002",
+      "title": "Customer Interview Summary Q1",
+      "authority": "internal_research",
+      "excerpt": "8/10 respondents willing to pay $400-600/mo"
+    }
+  ],
+  "output_summary": {
+    "sections": [
+      "validation_summary",
+      "assumption_evidence_matrix",
+      "unit_economics_review",
+      "risk_register",
+      "recommended_experiments",
+      "decision_gate"
+    ],
+    "fact_count": 12,
+    "assumption_count": 8,
+    "inference_count": 5,
+    "unknown_count": 3,
+    "risk_flags": [
+      "CAC payback optimistic vs benchmark",
+      "churn unvalidated",
+      "competitor pricing unknown"
+    ],
+    "human_review_flagged": true
+  },
+  "constraints_triggered": [
+    {
+      "constraint_id": "no_investment_advice",
+      "severity": "high",
+      "action": "flagged_for_review",
+      "message": "Output used for fundraising — requires finance review"
+    }
+  ],
+  "tool_calls": [
+    { "tool": "read_file", "purpose": "Load rubric for evaluation" },
+    { "tool": "read_file", "purpose": "Load business constraints" }
+  ],
+  "human_review": {
+    "required": true,
+    "reviewer_role": "finance_reviewer_or_business_owner",
+    "reason": "pre-seed fundraising material"
+  },
+  "interruptions": [],
+  "resume_events": [],
+  "created_at": "2026-05-05T10:00:00Z"
+}

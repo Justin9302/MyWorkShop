@@ -35,12 +35,26 @@ Excluded from Git:
 
 ## Current Stage
 
-Stage 1 creates the workspace skeleton and Git boundary:
+Stage 4 — Audit Logging & Run Snapshots (`stage_4_audit_logging`, draft)
+
+Completed stages:
+
+| Stage   | Description                                                         | Status                |
+| ------- | ------------------------------------------------------------------- | --------------------- |
+| Stage 1 | Workspace skeleton & Git boundary                                   | ✅ Complete           |
+| Stage 2 | Core platform config + 12 industry workflows                        | ✅ Complete           |
+| Stage 3 | Constraints & reference metadata (baseline, industry, jurisdiction) | ✅ Complete           |
+| Stage 4 | Audit logging, run snapshots, evaluator rules                       | ✅ Complete (current) |
+
+Key assets:
 
 - `docs/` for planning and architecture documents
 - `config/` for versioned platform configuration
-- `schemas/` for shared data contracts
-- `workflows/`, `constraints/`, `prompts/`, and `evaluators/` for platform behavior
+- `schemas/` for shared data contracts (workflow, run_snapshot, eval_report, citation, context_load_plan, interruption_event)
+- `workflows/` — 12 workflows across 4 industries (legal, business, finance, operations)
+- `constraints/` — baseline (5), industry (4), jurisdiction (4) constraint packs
+- `prompts/` — 12 system prompts
+- `evaluators/` — 3 rule packs + 1 rubric
 - `runtime/`, `outputs/`, and `logs/` for local-only run data
 
 ## Review Entry Points

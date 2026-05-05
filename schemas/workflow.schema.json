@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/workflow.schema.json",
+  "title": "Workflow",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workflow",
+    "context_intent_gate",
+    "context_loading",
+    "inputs",
+    "retrieval",
+    "constraints",
+    "steps",
+    "interruptions",
+    "outputs",
+    "human_review",
+    "version"
+  ],
+  "properties": {
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "industry",
+        "description",
+        "role",
+        "risk_default"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "industry": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "risk_default": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "model_routing": {
+          "type": "string",
+          "description": "Route ID reference to config/model-routing.yaml. Determines model family, reasoning effort, and output validation mode."
+        }
+      }
+    },
+    "context_intent_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "required_reads",
+        "confirmation_outputs",
+        "block_conditions"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "const": true
+        },
+        "required_reads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "confirmation_outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "block_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "context_loading": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "layers"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["layered_and_task_specific"]
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "required"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "data_class": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "source_filters"],
+      "properties": {
+        "scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_filters": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "action"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "interruptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "node_id",
+          "pause_reason",
+          "resume_condition",
+          "cancel_condition",
+          "audit_fields"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "pause_reason": {
+            "type": "string"
+          },
+          "resume_condition": {
+            "type": "string"
+          },
+          "cancel_condition": {
+            "type": "string"
+          },
+          "audit_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template", "required_sections"],
+      "properties": {
+        "template": {
+          "type": "string"
+        },
+        "required_sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "schema_ref": {
+          "type": "string"
+        }
+      }
+    },
+    "human_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_when", "reviewer_role"],
+      "properties": {
+        "required_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewer_role": {
+          "type": "string"
+        }
+      }
+    },
+    "version": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+workflow:
+  id: "unit_economics_check"
+  name: "单位经济模型校验"
+  industry: "business"
+  description: "校验收入、毛利、获客成本、回本周期和留存假设。"
+  role: "unit_economics_reviewer"
+  risk_default: "high"
+  model_routing: "business_validation"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "config/model-routing.yaml", "constraints/industries/business.yaml"]
+  confirmation_outputs: ["商业模式、收入单位、成本口径、校验用途"]
+  block_conditions: ["缺少收入或成本口径", "用户要求投资结论且无人审"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"]
+inputs:
+  - name: "unit_economics_inputs"
+    required: true
+    data_class: "confidential"
+  - name: "business_model"
+    required: true
+  - name: "decision_context"
+    required: false
+retrieval:
+  scope: ["financial_assumptions", "pricing_notes", "customer_research_summaries"]
+  source_filters: ["version_current", "confidentiality_allowed"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/business.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认模型口径"
+    action: "identify revenue unit, cost unit, timeframe, decision use"
+  - id: "metric_check"
+    name: "指标一致性检查"
+    action: "check ARPU, gross margin, CAC, payback, churn, LTV assumptions"
+  - id: "sensitivity_review"
+    name: "敏感性与阈值"
+    action: "state key drivers, breakpoints, failure thresholds"
+interruptions:
+  - node_id: "metric_check"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies missing metric or accepts explicit unknown"
+    cancel_condition: "user cancels check"
+    audit_fields: ["missing_metrics", "model_scope", "checkpoint_id"]
+  - node_id: "sensitivity_review"
+    pause_reason: "requires_human_approval"
+    resume_condition: "finance reviewer approves output for decision use"
+    cancel_condition: "reviewer rejects output"
+    audit_fields: ["approval_status", "decision_context", "failure_thresholds"]
+outputs:
+  template: "prompts/business/unit_economics_check.system.md"
+  required_sections: ["metric_table", "consistency_findings", "sensitivity_drivers", "failure_thresholds", "human_review_required"]
+human_review:
+  required_when: ["investment decision", "fundraising use", "financial forecast"]
+  reviewer_role: "finance_reviewer_or_business_owner"
+version: "0.1.0"

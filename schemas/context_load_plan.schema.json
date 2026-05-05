@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/context_load_plan.schema.json",
+  "title": "Context Load Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "workflow_id",
+    "layers",
+    "excluded_assets",
+    "context_budget"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "workflow_id": {
+      "type": "string"
+    },
+    "context_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_tokens",
+        "overflow_strategy"
+      ],
+      "properties": {
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "overflow_strategy": {
+          "type": "string",
+          "enum": [
+            "summarize",
+            "rank_and_trim",
+            "interrupt_for_scope",
+            "secondary_retrieval"
+          ]
+        }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "layer_id",
+          "purpose",
+          "assets",
+          "status"
+        ],
+        "properties": {
+          "layer_id": {
+            "type": "string",
+            "enum": [
+              "L0",
+              "L1",
+              "L2",
+              "L3",
+              "L4",
+              "L5",
+              "L6",
+              "L7",
+              "L8"
+            ]
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path_or_id",
+                "asset_type",
+                "reason"
+              ],
+              "properties": {
+                "path_or_id": {
+                  "type": "string"
+                },
+                "asset_type": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "loaded_summary": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "loaded",
+              "skipped",
+              "blocked"
+            ]
+          }
+        }
+      }
+    },
+    "excluded_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path_or_id",
+          "reason"
+        ],
+        "properties": {
+          "path_or_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

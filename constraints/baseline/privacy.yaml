@@ -1,0 +1,14 @@
+constraint_pack:
+  id: "baseline_privacy"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "no_secrets_in_git"
+    severity: "critical"
+    rule: "Do not place secrets, raw customer files, runtime logs, model outputs, or vector indexes in Git-managed assets."
+  - id: "minimize_sensitive_content"
+    severity: "high"
+    rule: "Use summaries or redacted excerpts for confidential inputs unless exact text is necessary and approved."
+  - id: "record_data_class"
+    severity: "medium"
+    rule: "Record the confidentiality class for user-provided or retrieved material in the run snapshot."

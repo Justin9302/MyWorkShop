@@ -1,28 +1,88 @@
 active_release:
   id: "release_2026_05_05_001"
   git_commit: "f686ea3fdf0ef07cacf3e3b9772b1604563a60c6"
-  stage: "stage_1_workspace_skeleton"
+  stage: "stage_4_audit_logging"
   workflow_version: "0.1.0"
-  constraint_pack_version: "0.1.0"
+  constraint_pack_version: "0.2.0"
   prompt_version: "0.1.0"
   evaluator_version: "0.1.0"
   knowledge_base_version: "kb_0.1.0"
   status: "draft"
   governance:
     context_loading: "config/context-loading.yaml"
+    model_routing: "config/model-routing.yaml"
+    permissions: "config/permissions.yaml"
+    feature_flags: "config/feature-flags.yaml"
+    mcp_tools: "config/mcp-tools.yaml"
+    interruption_policy: "config/interruption-policy.yaml"
     required_entrypoint: "docs/model_context.md"
+    copilot_entrypoint: ".github/copilot-instructions.md"
+    vscode_mcp_config: ".vscode/mcp.json"
+    workflow_schema: "schemas/workflow.schema.json"
     run_snapshot_schema: "schemas/run_snapshot.schema.json"
+    context_load_plan_schema: "schemas/context_load_plan.schema.json"
+    interruption_event_schema: "schemas/interruption_event.schema.json"
+    citation_schema: "schemas/citation.schema.json"
     eval_report_schema: "schemas/eval_report.schema.json"
   active_components:
-    workflows: []
-    constraints: []
-    prompts: []
-    evaluators: []
-    mcp_tools: []
+    workflows:
+      - "workflows/legal/contract_review.yaml"
+      - "workflows/legal/policy_qa.yaml"
+      - "workflows/business/business_model_design.yaml"
+      - "workflows/business/business_model_validation.yaml"
+      - "workflows/business/go_to_market_review.yaml"
+      - "workflows/business/unit_economics_check.yaml"
+      - "workflows/finance/investment_research.yaml"
+      - "workflows/finance/risk_summary.yaml"
+      - "workflows/finance/due_diligence.yaml"
+      - "workflows/operations/sop_generation.yaml"
+      - "workflows/operations/meeting_summary.yaml"
+      - "workflows/operations/project_retrospective.yaml"
+    constraints:
+      - "constraints/baseline/privacy.yaml"
+      - "constraints/baseline/citation.yaml"
+      - "constraints/baseline/human_review.yaml"
+      - "constraints/baseline/tool_permissions.yaml"
+      - "constraints/baseline/safety.yaml"
+      - "constraints/industries/legal.yaml"
+      - "constraints/industries/business.yaml"
+      - "constraints/industries/finance.yaml"
+      - "constraints/industries/operations.yaml"
+      - "constraints/jurisdictions/us.yaml"
+      - "constraints/jurisdictions/eu.yaml"
+      - "constraints/jurisdictions/cn.yaml"
+      - "constraints/jurisdictions/au.yaml"
+    prompts:
+      - "prompts/legal/contract_review.system.md"
+      - "prompts/legal/policy_qa.system.md"
+      - "prompts/business/business_model_design.system.md"
+      - "prompts/business/business_model_validation.system.md"
+      - "prompts/business/go_to_market_review.system.md"
+      - "prompts/business/unit_economics_check.system.md"
+      - "prompts/finance/research_summary.system.md"
+      - "prompts/finance/risk_summary.system.md"
+      - "prompts/finance/due_diligence.system.md"
+      - "prompts/operations/sop_generation.system.md"
+      - "prompts/operations/meeting_summary.system.md"
+      - "prompts/operations/project_retrospective.system.md"
+    agents:
+      - ".github/agents/task-planner.agent.md"
+      - ".github/agents/task-reviewer.agent.md"
+    evaluators:
+      - "evaluators/rules/citation_check.yaml"
+      - "evaluators/rules/risk_check.yaml"
+      - "evaluators/rules/schema_check.yaml"
+      - "evaluators/rubrics/business_model_validation.yaml"
+    mcp_tools:
+      - "filesystem_read"
+      - "filesystem_write"
+      - "git_status"
+      - "fetch_official_sources"
     knowledge_bases: []
   available_asset_roots:
     workflows:
       - "workflows/legal/"
+      - "workflows/business/"
       - "workflows/finance/"
       - "workflows/operations/"
     constraints:
@@ -31,8 +91,11 @@ active_release:
       - "constraints/jurisdictions/"
     prompts:
       - "prompts/legal/"
+      - "prompts/business/"
       - "prompts/finance/"
       - "prompts/operations/"
+    agents:
+      - ".github/agents/"
     evaluators:
       - "evaluators/rules/"
       - "evaluators/rubrics/"
@@ -42,6 +105,11 @@ active_release:
   git_boundary:
     include:
       - "README.md"
+      - ".github/"
+      - ".vscode/settings.json"
+      - ".vscode/tasks.json"
+      - ".vscode/extensions.json"
+      - ".vscode/mcp.json"
       - "docs/"
       - "config/"
       - "schemas/"
@@ -49,9 +117,9 @@ active_release:
       - "constraints/"
       - "prompts/"
       - "evaluators/"
+      - "scripts/"
       - "tests/"
       - "examples/"
-      - "scripts/"
       - ".env.example"
       - ".gitignore"
     exclude:
@@ -69,6 +137,18 @@ active_release:
       - "feedback/raw/"
       - "traces/"
   notes:
-    - "Initial local workspace skeleton."
+    - "Stage 2 core configuration and first workflow set added."
     - "git_commit points to the initial skeleton baseline commit."
-    - "No production workflow, prompt, or evaluator is active yet."
+    - "All active components remain draft contracts until validated by the workflow runner and evaluator sidecar."
+    - "2026-05-05 Phase 1: VS Code infrastructure (.vscode/, .github/copilot-instructions.md, .gitignore update)."
+    - "2026-05-05 Phase 2: Config adaptation (mcp-tools.yaml v0.2.0 with VS Code mappings, active-release.yaml governance)."
+    - "Environment: VS Code + GitHub Copilot Agent (migrated from Codex)."
+    - "2026-05-05 Phase 3: Workflow validation complete — 12/12 PASS. Report: docs/phase3_validation_report.md."
+    - "2026-05-05 Phase 4: Evaluator integration complete. Script: scripts/eval_runner.py. Tasks: .vscode/tasks.json."
+    - "2026-05-05 Enhancement: Added Intent-to-Workflow Auto-Matching to .github/copilot-instructions.md."
+    - "2026-05-05 Enhancement: Added model_routing field to workflow.schema.json + all 12 workflows. Updated model-routing.yaml v0.2.0 with explicit workflow_id routes."
+    - "2026-05-05 Enhancement: Added Source Freshness & Constraint Update Check to workflow execution rules (copilot-instructions.md, context-loading.yaml, feature-flags.yaml)."
+    - "Migration from Codex to VS Code: ALL PHASES COMPLETE."
+    - "2026-05-05 Stage 3: Constraints completed — baseline/safety.yaml + 4 jurisdiction packs (us/eu/cn/au)."
+    - "2026-05-05 Stage 4: Audit logging complete — evaluators/rules/ (citation/risk/schema check) added."
+    - "2026-05-05 Stage advancement: stage_2 → stage_4_audit_logging, constraint_pack_version 0.1.0 → 0.2.0."

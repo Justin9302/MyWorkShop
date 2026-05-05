@@ -1,0 +1,41 @@
+permissions:
+  version: "0.1.0"
+  status: "draft"
+  default_policy: "least_privilege"
+  data_classes:
+    public:
+      read: true
+      quote: true
+      store_in_git: true
+    internal:
+      read: true
+      quote: false
+      store_in_git: false
+    confidential:
+      read: "requires_user_confirmation"
+      quote: false
+      store_in_git: false
+    restricted:
+      read: "requires_human_approval"
+      quote: false
+      store_in_git: false
+  actions:
+    read_platform_assets:
+      allowed: true
+      requires_confirmation: false
+    modify_platform_assets:
+      allowed: true
+      requires_confirmation: true
+    read_business_files:
+      allowed: "only_from_runtime_or_approved_sources"
+      requires_confirmation: true
+    external_fetch:
+      allowed: "only_when_registered_tool_and_user_approved"
+      requires_confirmation: true
+    publish_or_send_external:
+      allowed: false
+      requires_human_approval: true
+  audit:
+    record_permission_decision: true
+    record_denied_actions: true
+    target_schema: "schemas/run_snapshot.schema.json"

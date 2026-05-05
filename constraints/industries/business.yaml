@@ -1,0 +1,17 @@
+constraint_pack:
+  id: "industry_business"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "separate_fact_assumption_inference"
+    severity: "high"
+    rule: "Business model outputs must explicitly separate facts, assumptions, inferences, and unknowns."
+  - id: "evidence_level_required"
+    severity: "high"
+    rule: "Key claims about customer demand, pricing, channels, market size, and unit economics must include evidence level or be labeled unvalidated."
+  - id: "validation_threshold_required"
+    severity: "medium"
+    rule: "Validation plans must define success metrics, failure thresholds, and next decision gates."
+  - id: "financial_forecast_review"
+    severity: "critical"
+    rule: "Financial forecasts, fundraising claims, or investment recommendations require human review."

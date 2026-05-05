@@ -1,0 +1,53 @@
+workflow:
+  id: "project_retrospective"
+  name: "项目复盘"
+  industry: "operations"
+  description: "整理项目结果、经验、问题根因和改进动作。"
+  role: "project_retrospective_facilitator"
+  risk_default: "medium"
+  model_routing: "summarization"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "constraints/industries/operations.yaml"]
+  confirmation_outputs: ["项目范围、目标、结果、复盘受众、敏感等级"]
+  block_conditions: ["项目范围或结果缺失", "涉及人事评价且无审批"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L7", "L8"]
+inputs:
+  - name: "project_context"
+    required: true
+  - name: "outcomes"
+    required: true
+  - name: "issues"
+    required: false
+retrieval:
+  scope: ["approved_project_docs", "meeting_summaries", "metrics_summaries"]
+  source_filters: ["confidentiality_allowed", "version_current"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/operations.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认复盘目标"
+    action: "identify goals, outcomes, audience, sensitivity"
+  - id: "root_cause_review"
+    name: "根因分析"
+    action: "separate facts, contributing factors, assumptions, unknowns"
+  - id: "improvement_plan"
+    name: "改进行动"
+    action: "produce action items, owners, timelines, follow-up metrics"
+interruptions:
+  - node_id: "root_cause_review"
+    pause_reason: "evidence_gap"
+    resume_condition: "user supplies project evidence or accepts unknowns"
+    cancel_condition: "user cancels retrospective"
+    audit_fields: ["evidence_gap", "project_scope", "checkpoint_id"]
+outputs:
+  template: "prompts/operations/project_retrospective.system.md"
+  required_sections: ["outcome_summary", "what_worked", "what_failed", "root_causes", "actions", "follow_up_metrics"]
+human_review:
+  required_when: ["personnel-sensitive conclusions", "external publication", "critical operational failure"]
+  reviewer_role: "project_owner_or_operations_lead"
+version: "0.1.0"

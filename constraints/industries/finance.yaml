@@ -1,0 +1,14 @@
+constraint_pack:
+  id: "industry_finance"
+  version: "0.1.0"
+  status: "draft"
+rules:
+  - id: "no_personalized_investment_advice"
+    severity: "critical"
+    rule: "Do not provide personalized investment advice or final investment recommendations without authorized review."
+  - id: "source_dates_required"
+    severity: "high"
+    rule: "Financial and market claims must include source date or effective period when available."
+  - id: "risk_and_uncertainty_required"
+    severity: "high"
+    rule: "Finance outputs must include risk, uncertainty, and evidence-gap sections."

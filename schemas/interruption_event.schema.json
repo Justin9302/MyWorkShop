@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/interruption_event.schema.json",
+  "title": "Interruption Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "interruption_id",
+    "type",
+    "pause_reason",
+    "checkpoint_id",
+    "resume_condition",
+    "cancel_condition",
+    "audit_fields",
+    "created_at"
+  ],
+  "properties": {
+    "interruption_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "workflow_pause",
+        "interrupted_by_user",
+        "cancelled_by_user"
+      ]
+    },
+    "pause_reason": {
+      "type": "string"
+    },
+    "checkpoint_id": {
+      "type": "string"
+    },
+    "resume_condition": {
+      "type": "string"
+    },
+    "cancel_condition": {
+      "type": "string"
+    },
+    "audit_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

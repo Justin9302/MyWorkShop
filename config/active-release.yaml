@@ -1,222 +1,237 @@
 active_release:
-  id: "release_2026_05_05_001"
-  git_commit: "49decbc1f62b1234c7338bdef7ff88db040c3cae"
-  git_tag: "release_2026_05_05_001"
-  stage: "stage_6_version_governance"
-  workflow_version: "0.1.0"
-  constraint_pack_version: "0.4.0"
-  prompt_version: "0.1.0"
-  evaluator_version: "0.1.0"
-  knowledge_base_version: "kb_0.2.0"
-  status: "draft"
+  id: release_2026_05_05_001
+  git_commit: be034d142f122510ea0702aa039b9e247cee9c15
+  git_tag: release_2026_05_05_001
+  stage: stage_6_version_governance
+  workflow_version: 0.1.0
+  constraint_pack_version: 0.4.0
+  prompt_version: 0.1.0
+  evaluator_version: 0.1.0
+  knowledge_base_version: kb_0.2.0
+  status: published
   lifecycle:
-    current_phase: "draft"
+    current_phase: published
     transitions:
-      - from: null
-        to: "draft"
-        timestamp: "2026-05-05T00:00:00Z"
-        actor: "system"
-        reason: "Phase 6 接管 — 发布治理初始化"
+    - from: null
+      to: draft
+      timestamp: '2026-05-05T00:00:00Z'
+      actor: system
+      reason: Phase 6 接管 — 发布治理初始化
+    - from: draft
+      to: published
+      timestamp: '2026-05-05T09:00:00Z'
+      actor: feng
+      reason: Phase 6 complete — 发布治理体系上线
   governance:
-    context_loading: "config/context-loading.yaml"
-    model_routing: "config/model-routing.yaml"
-    permissions: "config/permissions.yaml"
-    feature_flags: "config/feature-flags.yaml"
-    mcp_tools: "config/mcp-tools.yaml"
-    interruption_policy: "config/interruption-policy.yaml"
-    required_entrypoint: "docs/model_context.md"
-    copilot_entrypoint: ".github/copilot-instructions.md"
-    vscode_mcp_config: ".vscode/mcp.json"
-    workflow_schema: "schemas/workflow.schema.json"
-    run_snapshot_schema: "schemas/run_snapshot.schema.json"
-    context_load_plan_schema: "schemas/context_load_plan.schema.json"
-    interruption_event_schema: "schemas/interruption_event.schema.json"
-    citation_schema: "schemas/citation.schema.json"
-    eval_report_schema: "schemas/eval_report.schema.json"
-    release_manifest_schema: "schemas/release_manifest.schema.json"
+    context_loading: config/context-loading.yaml
+    model_routing: config/model-routing.yaml
+    permissions: config/permissions.yaml
+    feature_flags: config/feature-flags.yaml
+    mcp_tools: config/mcp-tools.yaml
+    interruption_policy: config/interruption-policy.yaml
+    required_entrypoint: docs/model_context.md
+    copilot_entrypoint: .github/copilot-instructions.md
+    vscode_mcp_config: .vscode/mcp.json
+    workflow_schema: schemas/workflow.schema.json
+    run_snapshot_schema: schemas/run_snapshot.schema.json
+    context_load_plan_schema: schemas/context_load_plan.schema.json
+    interruption_event_schema: schemas/interruption_event.schema.json
+    citation_schema: schemas/citation.schema.json
+    eval_report_schema: schemas/eval_report.schema.json
+    release_manifest_schema: schemas/release_manifest.schema.json
   active_components:
     workflows:
-      - "workflows/legal/contract_review.yaml"
-      - "workflows/legal/policy_qa.yaml"
-      - "workflows/business/business_model_design.yaml"
-      - "workflows/business/business_model_validation.yaml"
-      - "workflows/business/go_to_market_review.yaml"
-      - "workflows/business/unit_economics_check.yaml"
-      - "workflows/finance/investment_research.yaml"
-      - "workflows/finance/risk_summary.yaml"
-      - "workflows/finance/due_diligence.yaml"
-      - "workflows/operations/sop_generation.yaml"
-      - "workflows/operations/meeting_summary.yaml"
-      - "workflows/operations/project_retrospective.yaml"
+    - workflows/legal/contract_review.yaml
+    - workflows/legal/policy_qa.yaml
+    - workflows/business/business_model_design.yaml
+    - workflows/business/business_model_validation.yaml
+    - workflows/business/go_to_market_review.yaml
+    - workflows/business/unit_economics_check.yaml
+    - workflows/finance/investment_research.yaml
+    - workflows/finance/risk_summary.yaml
+    - workflows/finance/due_diligence.yaml
+    - workflows/operations/sop_generation.yaml
+    - workflows/operations/meeting_summary.yaml
+    - workflows/operations/project_retrospective.yaml
     constraints:
-      - "constraints/baseline/privacy.yaml"
-      - "constraints/baseline/citation.yaml"
-      - "constraints/baseline/human_review.yaml"
-      - "constraints/baseline/tool_permissions.yaml"
-      - "constraints/baseline/safety.yaml"
-      - "constraints/baseline/context_intent_gate.yaml"
-      - "constraints/industries/legal.yaml"
-      - "constraints/industries/energy.yaml"
-      - "constraints/industries/business.yaml"
-      - "constraints/industries/finance.yaml"
-      - "constraints/industries/operations.yaml"
-      - "constraints/jurisdictions/us.yaml"
-      - "constraints/jurisdictions/eu.yaml"
-      - "constraints/jurisdictions/cn.yaml"
-      - "constraints/jurisdictions/au.yaml"
+    - constraints/baseline/privacy.yaml
+    - constraints/baseline/citation.yaml
+    - constraints/baseline/human_review.yaml
+    - constraints/baseline/tool_permissions.yaml
+    - constraints/baseline/safety.yaml
+    - constraints/baseline/context_intent_gate.yaml
+    - constraints/industries/legal.yaml
+    - constraints/industries/energy.yaml
+    - constraints/industries/business.yaml
+    - constraints/industries/finance.yaml
+    - constraints/industries/operations.yaml
+    - constraints/jurisdictions/us.yaml
+    - constraints/jurisdictions/eu.yaml
+    - constraints/jurisdictions/cn.yaml
+    - constraints/jurisdictions/au.yaml
     prompts:
-      - "prompts/legal/contract_review.system.md"
-      - "prompts/legal/policy_qa.system.md"
-      - "prompts/business/business_model_design.system.md"
-      - "prompts/business/business_model_validation.system.md"
-      - "prompts/business/go_to_market_review.system.md"
-      - "prompts/business/unit_economics_check.system.md"
-      - "prompts/finance/research_summary.system.md"
-      - "prompts/finance/risk_summary.system.md"
-      - "prompts/finance/due_diligence.system.md"
-      - "prompts/operations/sop_generation.system.md"
-      - "prompts/operations/meeting_summary.system.md"
-      - "prompts/operations/project_retrospective.system.md"
+    - prompts/legal/contract_review.system.md
+    - prompts/legal/policy_qa.system.md
+    - prompts/business/business_model_design.system.md
+    - prompts/business/business_model_validation.system.md
+    - prompts/business/go_to_market_review.system.md
+    - prompts/business/unit_economics_check.system.md
+    - prompts/finance/research_summary.system.md
+    - prompts/finance/risk_summary.system.md
+    - prompts/finance/due_diligence.system.md
+    - prompts/operations/sop_generation.system.md
+    - prompts/operations/meeting_summary.system.md
+    - prompts/operations/project_retrospective.system.md
     agents:
-      - ".github/agents/task-planner.agent.md"
-      - ".github/agents/task-reviewer.agent.md"
+    - .github/agents/task-planner.agent.md
+    - .github/agents/task-reviewer.agent.md
     evaluators:
-      - "evaluators/rules/citation_check.yaml"
-      - "evaluators/rules/risk_check.yaml"
-      - "evaluators/rules/schema_check.yaml"
-      - "evaluators/rubrics/business_model_validation.yaml"
-      - "evaluators/rubrics/contract_review.yaml"
-      - "evaluators/rubrics/due_diligence.yaml"
-      - "evaluators/rubrics/sop_generation.yaml"
+    - evaluators/rules/citation_check.yaml
+    - evaluators/rules/risk_check.yaml
+    - evaluators/rules/schema_check.yaml
+    - evaluators/rubrics/business_model_validation.yaml
+    - evaluators/rubrics/contract_review.yaml
+    - evaluators/rubrics/due_diligence.yaml
+    - evaluators/rubrics/sop_generation.yaml
     schemas:
-      - "schemas/workflow.schema.json"
-      - "schemas/run_snapshot.schema.json"
-      - "schemas/eval_report.schema.json"
-      - "schemas/context_load_plan.schema.json"
-      - "schemas/interruption_event.schema.json"
-      - "schemas/citation.schema.json"
-      - "schemas/evaluation-api.openapi.yaml"
-      - "schemas/release_manifest.schema.json"
+    - schemas/workflow.schema.json
+    - schemas/run_snapshot.schema.json
+    - schemas/eval_report.schema.json
+    - schemas/context_load_plan.schema.json
+    - schemas/interruption_event.schema.json
+    - schemas/citation.schema.json
+    - schemas/evaluation-api.openapi.yaml
+    - schemas/release_manifest.schema.json
     release_governance:
-      manifest_schema: "schemas/release_manifest.schema.json"
-      manifest_dir: "config/releases/"
-      active_manifest: "config/releases/release_2026_05_05_001.yaml"
-      promote_script: "scripts/release_promote.sh"
-      rollback_script: "scripts/rollback.sh"
-      governance_doc: "docs/release_governance.md"
-      changelog: "CHANGELOG.md"
+      manifest_schema: schemas/release_manifest.schema.json
+      manifest_dir: config/releases/
+      active_manifest: config/releases/release_2026_05_05_001.yaml
+      promote_script: scripts/release_promote.sh
+      rollback_script: scripts/rollback.sh
+      governance_doc: docs/release_governance.md
+      changelog: CHANGELOG.md
     evaluation:
-      runner: "scripts/eval_runner.py"
-      api_contract: "schemas/evaluation-api.openapi.yaml"
-      architecture_doc: "docs/evaluation_sidecar.md"
-      evolution_plan_doc: "docs/evaluation_evolution_plan.md"
+      runner: scripts/eval_runner.py
+      api_contract: schemas/evaluation-api.openapi.yaml
+      architecture_doc: docs/evaluation_sidecar.md
+      evolution_plan_doc: docs/evaluation_evolution_plan.md
       test_snapshots:
-        - "tests/eval_cases/synthetic/run_snapshot_sample_001.json"
-        - "tests/eval_cases/synthetic/run_snapshot_sample_002.json"
-        - "tests/eval_cases/synthetic/run_snapshot_sample_003.json"
+      - tests/eval_cases/synthetic/run_snapshot_sample_001.json
+      - tests/eval_cases/synthetic/run_snapshot_sample_002.json
+      - tests/eval_cases/synthetic/run_snapshot_sample_003.json
       regression_tests:
-        - "tests/regression/workflows/business_model_validation_vpp.yaml"
-        - "tests/regression/workflows/unit_economics_check_charging.yaml"
+      - tests/regression/workflows/business_model_validation_vpp.yaml
+      - tests/regression/workflows/unit_economics_check_charging.yaml
     mcp_tools:
-      - "filesystem_read"
-      - "filesystem_write"
-      - "git_status"
-      - "fetch_official_sources"
+    - filesystem_read
+    - filesystem_write
+    - git_status
+    - fetch_official_sources
     knowledge_bases:
-      - id: "ndrc_policy_2026"
-        name: "国家发改委电力市场政策文件 2025-2026"
-        source: "https://www.ndrc.gov.cn/xxgk/zcfb/"
-        last_fetched: "2026-05-05"
-        documents:
-          - "发改办体改〔2026〕275号 省间电力现货交易规则修订"
-      - id: "scb_nea_policy"
-        name: "四川能源监管办政策文件"
-        source: "https://scb.nea.gov.cn/"
-        last_fetched: "2026-05-05"
-        documents:
-          - "四川省电力辅助服务管理实施细则（2026版）"
-          - "四川省电力并网运行管理实施细则（2026版）"
-          - "2026年四川省供电监管工作会议"
-      - id: "nea_data_2026q1"
-        name: "国家能源局 2026年Q1 数据"
-        source: "https://www.nea.gov.cn/"
-        last_fetched: "2026-05-05"
-        documents:
-          - "2026年Q1全国电力市场交易电量数据"
-          - "2026年3月全国电动汽车充电设施数据"
+    - id: ndrc_policy_2026
+      name: 国家发改委电力市场政策文件 2025-2026
+      source: https://www.ndrc.gov.cn/xxgk/zcfb/
+      last_fetched: '2026-05-05'
+      documents:
+      - 发改办体改〔2026〕275号 省间电力现货交易规则修订
+    - id: scb_nea_policy
+      name: 四川能源监管办政策文件
+      source: https://scb.nea.gov.cn/
+      last_fetched: '2026-05-05'
+      documents:
+      - 四川省电力辅助服务管理实施细则（2026版）
+      - 四川省电力并网运行管理实施细则（2026版）
+      - 2026年四川省供电监管工作会议
+    - id: nea_data_2026q1
+      name: 国家能源局 2026年Q1 数据
+      source: https://www.nea.gov.cn/
+      last_fetched: '2026-05-05'
+      documents:
+      - 2026年Q1全国电力市场交易电量数据
+      - 2026年3月全国电动汽车充电设施数据
   available_asset_roots:
     workflows:
-      - "workflows/legal/"
-      - "workflows/business/"
-      - "workflows/finance/"
-      - "workflows/operations/"
+    - workflows/legal/
+    - workflows/business/
+    - workflows/finance/
+    - workflows/operations/
     constraints:
-      - "constraints/baseline/"
-      - "constraints/industries/"
-      - "constraints/jurisdictions/"
+    - constraints/baseline/
+    - constraints/industries/
+    - constraints/jurisdictions/
     prompts:
-      - "prompts/legal/"
-      - "prompts/business/"
-      - "prompts/finance/"
-      - "prompts/operations/"
+    - prompts/legal/
+    - prompts/business/
+    - prompts/finance/
+    - prompts/operations/
     agents:
-      - ".github/agents/"
+    - .github/agents/
     evaluators:
-      - "evaluators/rules/"
-      - "evaluators/rubrics/"
+    - evaluators/rules/
+    - evaluators/rubrics/
     releases:
-      - "config/releases/"
+    - config/releases/
     tests:
-      - "tests/eval_cases/"
-      - "tests/regression/"
+    - tests/eval_cases/
+    - tests/regression/
   git_boundary:
     include:
-      - "README.md"
-      - ".github/"
-      - ".vscode/settings.json"
-      - ".vscode/tasks.json"
-      - ".vscode/extensions.json"
-      - ".vscode/mcp.json"
-      - "docs/"
-      - "config/"
-      - "schemas/"
-      - "workflows/"
-      - "constraints/"
-      - "prompts/"
-      - "evaluators/"
-      - "scripts/"
-      - "tests/"
-      - "examples/"
-      - ".env.example"
-      - ".gitignore"
-      - "CHANGELOG.md"
+    - README.md
+    - .github/
+    - .vscode/settings.json
+    - .vscode/tasks.json
+    - .vscode/extensions.json
+    - .vscode/mcp.json
+    - docs/
+    - config/
+    - schemas/
+    - workflows/
+    - constraints/
+    - prompts/
+    - evaluators/
+    - scripts/
+    - tests/
+    - examples/
+    - .env.example
+    - .gitignore
+    - CHANGELOG.md
     exclude:
-      - ".env"
-      - "runtime/"
-      - "outputs/"
-      - "logs/"
-      - "data/"
-      - "uploads/"
-      - "customer_docs/"
-      - "client_files/"
-      - "vector_store/"
-      - "indexes/"
-      - "embeddings/"
-      - "feedback/raw/"
-      - "traces/"
+    - .env
+    - runtime/
+    - outputs/
+    - logs/
+    - data/
+    - uploads/
+    - customer_docs/
+    - client_files/
+    - vector_store/
+    - indexes/
+    - embeddings/
+    - feedback/raw/
+    - traces/
   notes:
-    - "Stage 2 core configuration and first workflow set added."
-    - "git_commit points to the initial skeleton baseline commit."
-    - "All active components remain draft contracts until validated by the workflow runner and evaluator sidecar."
-    - "2026-05-05 Phase 1: VS Code infrastructure (.vscode/, .github/copilot-instructions.md, .gitignore update)."
-    - "2026-05-05 Phase 2: Config adaptation (mcp-tools.yaml v0.2.0 with VS Code mappings, active-release.yaml governance)."
-    - "Environment: VS Code + GitHub Copilot Agent (migrated from Codex)."
-    - "2026-05-05 Phase 3: Workflow validation complete — 12/12 PASS. Report: docs/phase3_validation_report.md."
-    - "2026-05-05 Phase 4: Evaluator integration complete. Script: scripts/eval_runner.py. Tasks: .vscode/tasks.json."
-    - "2026-05-05 Enhancement: Added Intent-to-Workflow Auto-Matching to .github/copilot-instructions.md."
-    - "2026-05-05 Enhancement: Added model_routing field to workflow.schema.json + all 12 workflows. Updated model-routing.yaml v0.2.0 with explicit workflow_id routes."
-    - "2026-05-05 Enhancement: Added Source Freshness & Constraint Update Check to workflow execution rules (copilot-instructions.md, context-loading.yaml, feature-flags.yaml)."
-    - "Migration from Codex to VS Code: ALL PHASES COMPLETE."
-    - "2026-05-05 Stage 3: Constraints completed — baseline/safety.yaml + 4 jurisdiction packs (us/eu/cn/au)."
-    - "2026-05-05 Stage 4: Audit logging complete — evaluators/rules/ (citation/risk/schema check) added."
-    - "2026-05-05 Stage advancement: stage_2 → stage_4_audit_logging, constraint_pack_version 0.1.0 → 0.2.0."
+  - Stage 2 core configuration and first workflow set added.
+  - git_commit points to the initial skeleton baseline commit.
+  - All active components remain draft contracts until validated by the workflow runner
+    and evaluator sidecar.
+  - '2026-05-05 Phase 1: VS Code infrastructure (.vscode/, .github/copilot-instructions.md,
+    .gitignore update).'
+  - '2026-05-05 Phase 2: Config adaptation (mcp-tools.yaml v0.2.0 with VS Code mappings,
+    active-release.yaml governance).'
+  - 'Environment: VS Code + GitHub Copilot Agent (migrated from Codex).'
+  - '2026-05-05 Phase 3: Workflow validation complete — 12/12 PASS. Report: docs/phase3_validation_report.md.'
+  - '2026-05-05 Phase 4: Evaluator integration complete. Script: scripts/eval_runner.py.
+    Tasks: .vscode/tasks.json.'
+  - '2026-05-05 Enhancement: Added Intent-to-Workflow Auto-Matching to .github/copilot-instructions.md.'
+  - '2026-05-05 Enhancement: Added model_routing field to workflow.schema.json + all
+    12 workflows. Updated model-routing.yaml v0.2.0 with explicit workflow_id routes.'
+  - '2026-05-05 Enhancement: Added Source Freshness & Constraint Update Check to workflow
+    execution rules (copilot-instructions.md, context-loading.yaml, feature-flags.yaml).'
+  - 'Migration from Codex to VS Code: ALL PHASES COMPLETE.'
+  - '2026-05-05 Stage 3: Constraints completed — baseline/safety.yaml + 4 jurisdiction
+    packs (us/eu/cn/au).'
+  - '2026-05-05 Stage 4: Audit logging complete — evaluators/rules/ (citation/risk/schema
+    check) added.'
+  - '2026-05-05 Stage advancement: stage_2 → stage_4_audit_logging, constraint_pack_version
+    0.1.0 → 0.2.0.'
+  updated_at: '2026-05-05T08:55:06Z'

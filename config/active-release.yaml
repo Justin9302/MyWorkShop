@@ -1,6 +1,6 @@
 active_release:
   id: "release_2026_05_05_001"
-  git_commit: ""
+  git_commit: "f686ea3fdf0ef07cacf3e3b9772b1604563a60c6"
   stage: "stage_1_workspace_skeleton"
   workflow_version: "0.1.0"
   constraint_pack_version: "0.1.0"
@@ -70,4 +70,5 @@ active_release:
       - "traces/"
   notes:
     - "Initial local workspace skeleton."
+    - "git_commit points to the initial skeleton baseline commit."
     - "No production workflow, prompt, or evaluator is active yet."

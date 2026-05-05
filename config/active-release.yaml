@@ -1,13 +1,22 @@
 active_release:
   id: "release_2026_05_05_001"
-  git_commit: "cfa268e12ecdd1432d0faf0dcecd69eb2d902b0a"
-  stage: "stage_5_evaluation_sidecar"
+  git_commit: "49decbc1f62b1234c7338bdef7ff88db040c3cae"
+  git_tag: "release_2026_05_05_001"
+  stage: "stage_6_version_governance"
   workflow_version: "0.1.0"
   constraint_pack_version: "0.4.0"
   prompt_version: "0.1.0"
   evaluator_version: "0.1.0"
   knowledge_base_version: "kb_0.2.0"
   status: "draft"
+  lifecycle:
+    current_phase: "draft"
+    transitions:
+      - from: null
+        to: "draft"
+        timestamp: "2026-05-05T00:00:00Z"
+        actor: "system"
+        reason: "Phase 6 接管 — 发布治理初始化"
   governance:
     context_loading: "config/context-loading.yaml"
     model_routing: "config/model-routing.yaml"
@@ -24,6 +33,7 @@ active_release:
     interruption_event_schema: "schemas/interruption_event.schema.json"
     citation_schema: "schemas/citation.schema.json"
     eval_report_schema: "schemas/eval_report.schema.json"
+    release_manifest_schema: "schemas/release_manifest.schema.json"
   active_components:
     workflows:
       - "workflows/legal/contract_review.yaml"
@@ -86,6 +96,15 @@ active_release:
       - "schemas/interruption_event.schema.json"
       - "schemas/citation.schema.json"
       - "schemas/evaluation-api.openapi.yaml"
+      - "schemas/release_manifest.schema.json"
+    release_governance:
+      manifest_schema: "schemas/release_manifest.schema.json"
+      manifest_dir: "config/releases/"
+      active_manifest: "config/releases/release_2026_05_05_001.yaml"
+      promote_script: "scripts/release_promote.sh"
+      rollback_script: "scripts/rollback.sh"
+      governance_doc: "docs/release_governance.md"
+      changelog: "CHANGELOG.md"
     evaluation:
       runner: "scripts/eval_runner.py"
       api_contract: "schemas/evaluation-api.openapi.yaml"
@@ -145,6 +164,8 @@ active_release:
     evaluators:
       - "evaluators/rules/"
       - "evaluators/rubrics/"
+    releases:
+      - "config/releases/"
     tests:
       - "tests/eval_cases/"
       - "tests/regression/"
@@ -168,6 +189,7 @@ active_release:
       - "examples/"
       - ".env.example"
       - ".gitignore"
+      - "CHANGELOG.md"
     exclude:
       - ".env"
       - "runtime/"

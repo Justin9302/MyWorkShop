@@ -1,0 +1,180 @@
+# Release Manifest: release_2026_05_05_001
+# 创建日期: 2026-05-05
+# 状态: draft — Phase 6 实施后首次正式记录
+---
+release_id: "release_2026_05_05_001"
+git_commit: "cfa268e12ecdd1432d0faf0dcecd69eb2d902b0a"
+git_tag: "release_2026_05_05_001"
+previous_release: null
+stage: "stage_5_evaluation_sidecar"
+
+status: "draft"
+lifecycle:
+  current_phase: "draft"
+  transitions:
+    - from: null
+      to: "draft"
+      timestamp: "2026-05-05T00:00:00Z"
+      actor: "system"
+      reason: "初始创建 — Phase 6 发布治理接管"
+
+created_at: "2026-05-05T00:00:00Z"
+updated_at: "2026-05-05T00:00:00Z"
+
+components:
+  workflow_version: "0.1.0"
+  constraint_pack_version: "0.4.0"
+  prompt_version: "0.1.0"
+  evaluator_version: "0.1.0"
+  knowledge_base_version: "kb_0.2.0"
+
+component_compatibility:
+  min_workflow_for_constraint: "0.1.0"
+  min_prompt_for_workflow: "0.1.0"
+  notes:
+    - "约束包 0.4.0 兼容所有 0.1.x 工作流"
+    - "Prompt 0.1.0 为初始版本，后续升级需验证输出格式兼容性"
+
+changes:
+  # Stage 1: Workspace skeleton & Git boundary
+  - type: "added"
+    component: ".gitignore"
+    description: "项目 Git 边界定义 — 排除 secrets/runtime/outputs/customer 等目录"
+  - type: "added"
+    component: "docs/"
+    description: "平台架构文档目录 — workspace_plan.md, gitman.md, eval.md"
+  - type: "added"
+    component: "README.md"
+    description: "项目概述与入口文档"
+  # Stage 2: Core platform config + workflows + prompts
+  - type: "added"
+    component: "config/"
+    description: "核心平台配置 — active-release, model-routing, feature-flags, permissions, context-loading, mcp-tools, interruption-policy"
+  - type: "added"
+    component: "workflows/"
+    description: "12 个行业工作流 (legal×2, business×4, finance×3, operations×3)"
+  - type: "added"
+    component: "prompts/"
+    description: "12 个 system prompt"
+  - type: "added"
+    component: "schemas/"
+    description: "数据契约 — workflow, run_snapshot, eval_report, context_load_plan, interruption_event, citation"
+  # Stage 3: Constraints
+  - type: "added"
+    component: "constraints/"
+    description: "约束包 — 6 基线 + 5 行业 + 4 地区"
+  # Stage 4: Evaluation rules
+  - type: "added"
+    component: "evaluators/"
+    description: "评估规则与量规 — 3 rules + 4 rubrics"
+  # Stage 5: Evaluation Sidecar
+  - type: "added"
+    component: "scripts/eval_runner.py"
+    description: "评估旁路运行器 — 支持单次与批量评估"
+  - type: "added"
+    component: "docs/evaluation_sidecar.md"
+    description: "评估旁路架构文档"
+  - type: "added"
+    component: "docs/evaluation_evolution_plan.md"
+    description: "Phase 7 动态评估与进化规划"
+  - type: "added"
+    component: "schemas/evaluation-api.openapi.yaml"
+    description: "评估 API OpenAPI 3.1 契约"
+  - type: "added"
+    component: "tests/eval_cases/synthetic/"
+    description: "3 个合成测试快照"
+  - type: "added"
+    component: "tests/regression/"
+    description: "2 个回归测试用例"
+  - type: "added"
+    component: ".github/copilot-instructions.md"
+    description: "Copilot 指令文件 — Codex 迁移入口"
+  - type: "added"
+    component: ".github/agents/"
+    description: "三 Agent 编排 — task-planner + task-reviewer"
+  # Stage 6 (this manifest creation)
+  - type: "added"
+    component: "schemas/release_manifest.schema.json"
+    description: "Phase 6: 发布 Manifest Schema"
+  - type: "added"
+    component: "config/releases/"
+    description: "Phase 6: 正式 Release 清单目录"
+  - type: "added"
+    component: "docs/release_governance.md"
+    description: "Phase 6: 版本治理文档"
+  - type: "added"
+    component: "CHANGELOG.md"
+    description: "Phase 6: 变更日志"
+  - type: "added"
+    component: "scripts/release_promote.sh"
+    description: "Phase 6: 发布晋升脚本"
+  - type: "added"
+    component: "scripts/rollback.sh"
+    description: "Phase 6: 回滚验证脚本"
+
+governance_refs:
+  context_loading: "config/context-loading.yaml"
+  model_routing: "config/model-routing.yaml"
+  permissions: "config/permissions.yaml"
+  feature_flags: "config/feature-flags.yaml"
+  mcp_tools: "config/mcp-tools.yaml"
+  interruption_policy: "config/interruption-policy.yaml"
+  workflow_schema: "schemas/workflow.schema.json"
+  run_snapshot_schema: "schemas/run_snapshot.schema.json"
+  release_manifest_schema: "schemas/release_manifest.schema.json"
+
+workflow_list:
+  - "workflows/legal/contract_review.yaml"
+  - "workflows/legal/policy_qa.yaml"
+  - "workflows/business/business_model_design.yaml"
+  - "workflows/business/business_model_validation.yaml"
+  - "workflows/business/go_to_market_review.yaml"
+  - "workflows/business/unit_economics_check.yaml"
+  - "workflows/finance/investment_research.yaml"
+  - "workflows/finance/risk_summary.yaml"
+  - "workflows/finance/due_diligence.yaml"
+  - "workflows/operations/sop_generation.yaml"
+  - "workflows/operations/meeting_summary.yaml"
+  - "workflows/operations/project_retrospective.yaml"
+
+constraint_list:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/baseline/tool_permissions.yaml"
+  - "constraints/baseline/safety.yaml"
+  - "constraints/baseline/context_intent_gate.yaml"
+  - "constraints/industries/legal.yaml"
+  - "constraints/industries/energy.yaml"
+  - "constraints/industries/business.yaml"
+  - "constraints/industries/finance.yaml"
+  - "constraints/industries/operations.yaml"
+  - "constraints/jurisdictions/us.yaml"
+  - "constraints/jurisdictions/eu.yaml"
+  - "constraints/jurisdictions/cn.yaml"
+  - "constraints/jurisdictions/au.yaml"
+
+prompt_list:
+  - "prompts/legal/contract_review.system.md"
+  - "prompts/legal/policy_qa.system.md"
+  - "prompts/business/business_model_design.system.md"
+  - "prompts/business/business_model_validation.system.md"
+  - "prompts/business/go_to_market_review.system.md"
+  - "prompts/business/unit_economics_check.system.md"
+  - "prompts/finance/research_summary.system.md"
+  - "prompts/finance/risk_summary.system.md"
+  - "prompts/finance/due_diligence.system.md"
+  - "prompts/operations/sop_generation.system.md"
+  - "prompts/operations/meeting_summary.system.md"
+  - "prompts/operations/project_retrospective.system.md"
+
+evaluator_list:
+  - "evaluators/rules/citation_check.yaml"
+  - "evaluators/rules/risk_check.yaml"
+  - "evaluators/rules/schema_check.yaml"
+  - "evaluators/rubrics/business_model_validation.yaml"
+  - "evaluators/rubrics/contract_review.yaml"
+  - "evaluators/rubrics/due_diligence.yaml"
+  - "evaluators/rubrics/sop_generation.yaml"
+
+rollback: null

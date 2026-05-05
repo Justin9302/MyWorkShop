@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/release_manifest.schema.json",
+  "title": "Release Manifest",
+  "description": "正式发布清单 Schema — 记录每次 release 的所有组件版本、变更记录和晋升状态",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_id",
+    "git_commit",
+    "stage",
+    "status",
+    "created_at",
+    "components",
+    "changes"
+  ],
+  "properties": {
+    "release_id": {
+      "type": "string",
+      "pattern": "^release_\\d{4}_\\d{2}_\\d{2}_\\d{3}$",
+      "description": "Release 唯一标识，格式: release_YYYY_MM_DD_NNN"
+    },
+    "git_commit": {
+      "type": "string",
+      "minLength": 7,
+      "description": "此 release 对应的 Git commit hash"
+    },
+    "git_tag": {
+      "type": "string",
+      "description": "对应的 Git tag 名称（如有）"
+    },
+    "previous_release": {
+      "type": "string",
+      "description": "前一个 release ID，用于回滚追溯"
+    },
+    "stage": {
+      "type": "string",
+      "pattern": "^stage_\\d+_[a-z_]+$",
+      "description": "当前平台建设阶段标识"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "published", "deprecated", "rolled_back"],
+      "description": "Release 生命周期状态"
+    },
+    "lifecycle": {
+      "type": "object",
+      "description": "晋升状态机记录",
+      "additionalProperties": false,
+      "required": ["current_phase", "transitions"],
+      "properties": {
+        "current_phase": {
+          "type": "string",
+          "enum": ["draft", "review", "published", "deprecated", "rolled_back"]
+        },
+        "transitions": {
+          "type": "array",
+          "description": "状态变更历史",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to", "timestamp", "actor"],
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" },
+              "actor": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "components": {
+      "type": "object",
+      "description": "此 release 包含的所有组件版本",
+      "additionalProperties": false,
+      "required": [
+        "workflow_version",
+        "constraint_pack_version",
+        "prompt_version",
+        "evaluator_version",
+        "knowledge_base_version"
+      ],
+      "properties": {
+        "workflow_version": {
+          "type": "string",
+          "description": "工作流版本号 (SemVer)"
+        },
+        "constraint_pack_version": {
+          "type": "string",
+          "description": "约束包版本号 (SemVer)"
+        },
+        "prompt_version": {
+          "type": "string",
+          "description": "Prompt 模板版本号 (SemVer)"
+        },
+        "evaluator_version": {
+          "type": "string",
+          "description": "评估器版本号 (SemVer)"
+        },
+        "knowledge_base_version": {
+          "type": "string",
+          "description": "知识库版本标识"
+        }
+      }
+    },
+    "component_compatibility": {
+      "type": "object",
+      "description": "组件兼容性声明",
+      "properties": {
+        "min_workflow_for_constraint": {
+          "type": "string",
+          "description": "当前约束包兼容的最低工作流版本"
+        },
+        "min_prompt_for_workflow": {
+          "type": "string",
+          "description": "当前 prompt 兼容的最低工作流版本"
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "兼容性注意事项"
+        }
+      }
+    },
+    "changes": {
+      "type": "array",
+      "description": "本次 release 相对上一次的变更记录",
+      "items:": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "component", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "added",
+              "modified",
+              "deprecated",
+              "removed",
+              "fixed",
+              "security"
+            ]
+          },
+          "component": { "type": "string", "description": "变更的组件路径" },
+          "description": { "type": "string" },
+          "ticket_ref": {
+            "type": "string",
+            "description": "关联任务/Issue 引用"
+          }
+        }
+      }
+    },
+    "governance_refs": {
+      "type": "object",
+      "description": "引用的治理配置文件",
+      "properties": {
+        "context_loading": { "type": "string" },
+        "model_routing": { "type": "string" },
+        "permissions": { "type": "string" },
+        "feature_flags": { "type": "string" },
+        "mcp_tools": { "type": "string" },
+        "interruption_policy": { "type": "string" },
+        "workflow_schema": { "type": "string" },
+        "run_snapshot_schema": { "type": "string" },
+        "release_manifest_schema": { "type": "string" }
+      }
+    },
+    "workflow_list": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "此 release 包含的活动工作流路径列表"
+    },
+    "constraint_list": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "此 release 包含的活动约束路径列表"
+    },
+    "prompt_list": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "此 release 包含的活动 prompt 路径列表"
+    },
+    "evaluator_list": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "此 release 包含的评估器路径列表"
+    },
+    "rollback": {
+      "type": "object",
+      "description": "回滚记录（仅当 status=rolled_back 时存在）",
+      "additionalProperties": false,
+      "properties": {
+        "rolled_back_from": {
+          "type": "string",
+          "description": "从哪个 release 回滚"
+        },
+        "rolled_back_to": {
+          "type": "string",
+          "description": "回滚到哪个 release"
+        },
+        "reason": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "verified": { "type": "boolean", "description": "回滚后验证是否通过" }
+      }
+    }
+  }
+}

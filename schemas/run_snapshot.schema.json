@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/run_snapshot.schema.json",
+  "title": "Run Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "workflow_id",
+    "workflow_version",
+    "versions",
+    "input_summary",
+    "retrieved_sources",
+    "output_summary",
+    "constraints_triggered",
+    "tool_calls",
+    "human_review",
+    "created_at"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_version",
+        "constraint_pack_version",
+        "knowledge_base_version",
+        "model_version"
+      ],
+      "properties": {
+        "prompt_version": {
+          "type": "string"
+        },
+        "constraint_pack_version": {
+          "type": "string"
+        },
+        "knowledge_base_version": {
+          "type": "string"
+        },
+        "model_version": {
+          "type": "string"
+        },
+        "evaluator_version": {
+          "type": "string"
+        },
+        "git_commit": {
+          "type": "string"
+        }
+      }
+    },
+    "input_summary": {
+      "type": "object",
+      "description": "A minimized or redacted summary of user input.",
+      "additionalProperties": true
+    },
+    "retrieved_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "title",
+          "version",
+          "authority_level",
+          "citation_allowed"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "authority_level": {
+            "type": "string"
+          },
+          "jurisdiction": {
+            "type": "string"
+          },
+          "excerpt_summary": {
+            "type": "string"
+          },
+          "citation_allowed": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "output_summary": {
+      "type": "object",
+      "description": "A minimized or redacted summary of the model output.",
+      "additionalProperties": true
+    },
+    "constraints_triggered": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "constraint_id",
+          "severity",
+          "action"
+        ],
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "action": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tool_name",
+          "status"
+        ],
+        "properties": {
+          "tool_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "approved",
+              "completed",
+              "failed",
+              "blocked"
+            ]
+          },
+          "input_summary": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "output_summary": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "human_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "status"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_required",
+            "pending",
+            "approved",
+            "rejected",
+            "modified"
+          ]
+        },
+        "reviewer_role": {
+          "type": "string"
+        },
+        "notes_summary": {
+          "type": "string"
+        }
+      }
+    },
+    "user_feedback": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

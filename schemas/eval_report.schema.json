@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/eval_report.schema.json",
+  "title": "Evaluation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "evaluator_version",
+    "score",
+    "risk_level",
+    "passed",
+    "findings",
+    "suggestions",
+    "created_at"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluator_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      },
+      "properties": {
+        "citation_accuracy": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "constraint_compliance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "format_compliance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "risk_detection": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "adoption_signal": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "target",
+          "recommendation"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "enum": [
+              "prompts",
+              "workflow_steps",
+              "constraint_rules",
+              "retrieval_strategy",
+              "knowledge_base_metadata",
+              "output_templates",
+              "tool_permissions",
+              "model_routing"
+            ]
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "requires_human_approval": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+active_release:
+  id: "release_2026_05_05_001"
+  git_commit: ""
+  stage: "stage_1_workspace_skeleton"
+  workflow_version: "0.1.0"
+  constraint_pack_version: "0.1.0"
+  prompt_version: "0.1.0"
+  evaluator_version: "0.1.0"
+  knowledge_base_version: "kb_0.1.0"
+  status: "draft"
+  governance:
+    context_loading: "config/context-loading.yaml"
+    required_entrypoint: "docs/model_context.md"
+    run_snapshot_schema: "schemas/run_snapshot.schema.json"
+    eval_report_schema: "schemas/eval_report.schema.json"
+  active_components:
+    workflows: []
+    constraints: []
+    prompts: []
+    evaluators: []
+    mcp_tools: []
+    knowledge_bases: []
+  available_asset_roots:
+    workflows:
+      - "workflows/legal/"
+      - "workflows/finance/"
+      - "workflows/operations/"
+    constraints:
+      - "constraints/baseline/"
+      - "constraints/industries/"
+      - "constraints/jurisdictions/"
+    prompts:
+      - "prompts/legal/"
+      - "prompts/finance/"
+      - "prompts/operations/"
+    evaluators:
+      - "evaluators/rules/"
+      - "evaluators/rubrics/"
+    tests:
+      - "tests/eval_cases/"
+      - "tests/regression/"
+  git_boundary:
+    include:
+      - "README.md"
+      - "docs/"
+      - "config/"
+      - "schemas/"
+      - "workflows/"
+      - "constraints/"
+      - "prompts/"
+      - "evaluators/"
+      - "tests/"
+      - "examples/"
+      - "scripts/"
+      - ".env.example"
+      - ".gitignore"
+    exclude:
+      - ".env"
+      - "runtime/"
+      - "outputs/"
+      - "logs/"
+      - "data/"
+      - "uploads/"
+      - "customer_docs/"
+      - "client_files/"
+      - "vector_store/"
+      - "indexes/"
+      - "embeddings/"
+      - "feedback/raw/"
+      - "traces/"
+  notes:
+    - "Initial local workspace skeleton."
+    - "No production workflow, prompt, or evaluator is active yet."

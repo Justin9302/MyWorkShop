@@ -1,0 +1,47 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Runtime data
+data/
+uploads/
+runtime/*
+outputs/*
+logs/*
+tmp/
+
+# Customer or business content
+customer_docs/
+client_files/
+workspaces/*/documents/
+workspaces/*/outputs/
+workspaces/*/logs/
+
+# Vector, index, and cache data
+vector_store/
+indexes/
+embeddings/
+.cache/
+
+# Raw feedback and traces
+feedback/raw/
+traces/
+
+# Local OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dependency and build outputs
+node_modules/
+dist/
+build/
+coverage/
+__pycache__/
+*.pyc

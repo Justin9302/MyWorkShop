@@ -1,0 +1,33 @@
+context_loading:
+  version: "0.1.0"
+  status: "draft"
+  mandatory_entrypoint:
+    file: "docs/model_context.md"
+    required_before:
+      - "answering_project_level_questions"
+      - "modifying_platform_assets"
+      - "creating_or_updating_workflows"
+      - "creating_or_updating_constraints"
+      - "creating_or_updating_prompts"
+      - "creating_or_updating_schemas"
+      - "creating_or_updating_evaluators"
+      - "proposing_implementation_plans"
+  required_startup_sequence:
+    - "docs/model_context.md"
+    - "config/active-release.yaml"
+    - "README.md"
+    - "docs/current_workspace_creation_plan.md"
+  on_missing_entrypoint: "block_and_report"
+  loading_policy:
+    mode: "layered_and_task_specific"
+    rules:
+      - "Load the mandatory entrypoint and active release manifest first."
+      - "Load global governance context before task-specific workflow context."
+      - "Load only relevant workflow, constraint, prompt, schema, evaluator, and metadata files."
+      - "Do not load unrelated industry packages, jurisdictions, prompts, or tools."
+      - "Summarize or run a second retrieval pass when context exceeds the task budget."
+  audit_expectations:
+    record_loaded_files: true
+    record_skipped_relevant_files: true
+    record_context_reasoning_summary: true
+    target_schema: "schemas/run_snapshot.schema.json"

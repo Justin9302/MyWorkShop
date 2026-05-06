@@ -1,0 +1,48 @@
+rubric:
+  id: "due_diligence"
+  version: "0.1.0"
+  status: "draft"
+  description: "尽职调查工作流评估量规。评估DD清单完整性、风险覆盖度、信息来源可追溯性和决策建议质量。"
+  workflow_id: "due_diligence"
+  industry: "finance"
+
+criteria:
+  - id: "dd_scope_completeness"
+    weight: 0.20
+    description: "DD清单是否覆盖财务、法律、商业、运营、技术、人事等核心维度。"
+
+  - id: "red_flag_detection"
+    weight: 0.25
+    description: "是否识别关键红旗信号（财务异常、法律纠纷、客户集中度、关键人风险等）。"
+
+  - id: "source_traceability"
+    weight: 0.15
+    description: "每项发现是否可追溯到具体来源文档、访谈或数据。"
+
+  - id: "risk_classification_quality"
+    weight: 0.20
+    description: "风险是否按严重程度（低/中/高/关键）正确分级，是否有量化影响评估。"
+
+  - id: "decision_readiness"
+    weight: 0.10
+    description: "输出是否清晰标记哪些问题已解决、哪些待进一步调查、哪些是deal-breaker。"
+
+  - id: "no_investment_advice"
+    weight: 0.10
+    description: "是否避免给出明确的投资/交易建议，仅提供风险分析和信息摘要。"
+
+pass_threshold: 0.60
+
+# 金融行业特殊要求
+finance_specific:
+  no_investment_recommendation: true
+  assumptions_must_be_disclosed: true
+  data_gaps_must_be_flagged: true
+  deal_breaker_threshold: "critical"
+  required_dimensions:
+    - "financial"
+    - "legal"
+    - "commercial"
+    - "operational"
+    - "technology"
+    - "people"

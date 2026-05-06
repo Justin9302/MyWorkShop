@@ -1,0 +1,50 @@
+rubric:
+  id: "solar_financial_model"
+  version: "0.1.0"
+  status: "draft"
+  industry: "energy"
+  description: "光伏/储能项目财务测算结果评估准则"
+criteria:
+  - id: "parameter_accuracy"
+    weight: 0.20
+    description: "边界条件参数（CAPEX/OPEX/电价/融资）来源清晰，数值在区域参考范围内，偏差已标注"
+    checks:
+      - "CAPEX 拆解为设备+EPC+其他，非单一取值"
+      - "电价参数区分光伏现货、储能充放电、LGC、FCAS"
+      - "参数来源标注（模型提取/用户提供/市场参考/分析师假设）"
+  - id: "revenue_model_completeness"
+    weight: 0.20
+    description: "收入模型覆盖所有收益来源，储能使用日内价差而非平均电价"
+    checks:
+      - "光伏收入含现货/PPA + LGC"
+      - "储能收入含日内价差套利 + FCAS"
+      - "BESS 价差参数独立于 merchant_price，非简化比例模型"
+  - id: "cost_structure_integrity"
+    weight: 0.15
+    description: "成本结构完整，含中期大修、接入费、预备费，无双重计费"
+    checks:
+      - "CAPEX 含设备+安装+接入+开发+预备费"
+      - "中期大修成本（电池/逆变器更换）已计入且金额合理"
+      - "OPEX 区分固定/可变，含通胀递增"
+  - id: "calculation_correctness"
+    weight: 0.20
+    description: "财务计算逻辑正确，无已知 BUG"
+    checks:
+      - "IRR 为年化值（非月度）"
+      - "中期大修按月分摊（非全额 12x）"
+      - "BESS 吞吐量 degradation 参数使用正确"
+      - "项目 IRR vs 股权 IRR 区分正确"
+  - id: "result_interpretation"
+    weight: 0.15
+    description: "结果解读包含行业对比、敏感性分析和局限性说明"
+    checks:
+      - "IRR/NPV/LCOE/LCOS 与行业基准对比"
+      - "含电价/CAPEX/FCAS 敏感性分析"
+      - "标注数据不确定性和假设条件"
+  - id: "input_confidence"
+    weight: 0.10
+    description: "数据源新鲜度检查执行，过时数据已标注或更新"
+    checks:
+      - "检查 data/market_reference_*.yaml 新鲜度"
+      - "训练知识数据与在线获取数据已区分"
+      - "缺失 EPC 报价/PPA 合同等已标注为待确认"

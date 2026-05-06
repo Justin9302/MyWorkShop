@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Regression Report",
+  "description": "Phase 7d 沙箱回归测试报告 Schema — 记录候选变更的回归测试结果",
+  "type": "object",
+  "required": [
+    "change_id",
+    "status",
+    "baseline_version",
+    "patched_version",
+    "eval_set_info",
+    "sample_count",
+    "summary",
+    "created_at"
+  ],
+  "properties": {
+    "change_id": {
+      "type": "string",
+      "pattern": "^change_",
+      "description": "对应的候选变更 ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["sandbox_pass", "sandbox_warning", "sandbox_fail"],
+      "description": "回归测试结论: pass=全部通过, warning=部分下降但可接受, fail=关键维度下降"
+    },
+    "baseline_version": {
+      "type": "string",
+      "description": "Baseline 组件版本标识 (如 0.1.0)"
+    },
+    "patched_version": {
+      "type": "string",
+      "description": "Patch 后的版本标识 (如 0.1.1-candidate)"
+    },
+    "eval_set_info": {
+      "type": "object",
+      "description": "评估集信息",
+      "properties": {
+        "directories": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "评估集目录列表"
+        },
+        "test_cases_found": {
+          "type": "integer",
+          "description": "找到的测试用例数"
+        },
+        "test_cases_run": {
+          "type": "integer",
+          "description": "实际运行的测试用例数"
+        }
+      }
+    },
+    "sample_count": {
+      "type": "integer",
+      "description": "评估样本总数"
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "overall_score_change",
+        "dimensions",
+        "passed_count",
+        "failed_count"
+      ],
+      "properties": {
+        "overall_score_change": {
+          "type": "number",
+          "description": "综合评分变化 (正数=提升, 负数=下降)"
+        },
+        "dimensions": {
+          "type": "object",
+          "description": "各维度分数对比",
+          "patternProperties": {
+            "^[a-z_]+$": {
+              "type": "object",
+              "required": ["baseline", "patched", "delta", "passed", "status"],
+              "properties": {
+                "baseline": {
+                  "type": "number",
+                  "description": "Baseline 分数"
+                },
+                "patched": { "type": "number", "description": "Patch 后分数" },
+                "delta": { "type": "number", "description": "分数变化" },
+                "passed": {
+                  "type": "boolean",
+                  "description": "该维度是否通过"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "improved",
+                    "unchanged",
+                    "regressed",
+                    "critical_regression"
+                  ],
+                  "description": "维度状态"
+                }
+              }
+            }
+          }
+        },
+        "regressions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "回归维度列表"
+        },
+        "improvements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "改进维度列表"
+        },
+        "passed_count": { "type": "integer", "description": "通过的维度数" },
+        "failed_count": { "type": "integer", "description": "失败的维度数" }
+      }
+    },
+    "patched_config": {
+      "type": "object",
+      "description": "Patch 配置信息",
+      "properties": {
+        "temp_dir": { "type": "string", "description": "临时配置目录" },
+        "modified_files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "修改的文件列表"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "报告生成时间"
+    }
+  }
+}

@@ -2,12 +2,13 @@ active_release:
   id: release_2026_05_05_001
   git_commit: be034d142f122510ea0702aa039b9e247cee9c15
   git_tag: release_2026_05_05_001
-  stage: stage_6_version_governance
-  workflow_version: 0.1.0
+  stage: stage_7_dynamic_evolution
+  workflow_version: 0.2.0
   constraint_pack_version: 0.4.0
   prompt_version: 0.1.0
-  evaluator_version: 0.1.0
-  knowledge_base_version: kb_0.2.0
+  evaluator_version: 0.2.0
+  judge_version: 0.1.0
+  knowledge_base_version: kb_0.3.0
   status: published
   lifecycle:
     current_phase: published
@@ -28,6 +29,33 @@ active_release:
     permissions: config/permissions.yaml
     feature_flags: config/feature-flags.yaml
     mcp_tools: config/mcp-tools.yaml
+    knowledge_bases:
+    - id: aemo_market_data
+      name: AEMO NEM 电力市场数据
+      source: https://aemo.com.au/energy-systems/electricity
+      last_fetched: '2026-05-06'
+      documents:
+      - AEMO Connections Scorecard Q1 2026
+      - ElectraNet TAPR 2026
+      - Intium Grid Connection Survey Nov 2025
+      data_ref: "data/market_reference_au.yaml"
+      notes: "澳洲 NEM 区域参考数据 V0.3（CAPEX/PPA/MLF/并网接入/AI数据中心需求），数据文件每 90 天建议更新"
+    - id: cer_lgc_market
+      name: CER LGC 市场报告
+      source: https://cer.gov.au/markets/reports
+      last_fetched: null
+      documents: []
+      data_ref: "data/market_reference_au.yaml"
+      notes: "LGC 价格和供应数据"
+    - id: sichuan_energy_policy
+      name: 四川省电力市场政策文件 2025-2026
+      source: https://scb.nea.gov.cn/
+      last_fetched: '2026-05-05'
+      data_ref: "data/market_reference_cn.yaml"
+      documents:
+      - 四川省电力辅助服务管理实施细则（2026版）
+      - 川发改能源〔2025〕255号 需求侧市场化响应
+      - 川发改价格〔2025〕185号 分时电价机制
     interruption_policy: config/interruption-policy.yaml
     required_entrypoint: docs/model_context.md
     copilot_entrypoint: .github/copilot-instructions.md
@@ -39,6 +67,7 @@ active_release:
     citation_schema: schemas/citation.schema.json
     eval_report_schema: schemas/eval_report.schema.json
     release_manifest_schema: schemas/release_manifest.schema.json
+    eval_set_schema: schemas/eval_set.schema.json
   active_components:
     workflows:
     - workflows/legal/contract_review.yaml
@@ -47,6 +76,7 @@ active_release:
     - workflows/business/business_model_validation.yaml
     - workflows/business/go_to_market_review.yaml
     - workflows/business/unit_economics_check.yaml
+    - workflows/energy/solar_financial_model.yaml
     - workflows/finance/investment_research.yaml
     - workflows/finance/risk_summary.yaml
     - workflows/finance/due_diligence.yaml
@@ -76,12 +106,19 @@ active_release:
     - prompts/business/business_model_validation.system.md
     - prompts/business/go_to_market_review.system.md
     - prompts/business/unit_economics_check.system.md
+    - prompts/energy/solar_financial_model.system.md
     - prompts/finance/research_summary.system.md
     - prompts/finance/risk_summary.system.md
     - prompts/finance/due_diligence.system.md
     - prompts/operations/sop_generation.system.md
     - prompts/operations/meeting_summary.system.md
     - prompts/operations/project_retrospective.system.md
+    - prompts/evaluation/llm_judge.system.md
+    judge_config: evaluators/rubrics/shared_judge_config.yaml
+    judge_models:
+    - deepseek-chat
+    - gpt-4o
+    - claude-3-opus
     agents:
     - .github/agents/task-planner.agent.md
     - .github/agents/task-reviewer.agent.md
@@ -89,19 +126,43 @@ active_release:
     - evaluators/rules/citation_check.yaml
     - evaluators/rules/risk_check.yaml
     - evaluators/rules/schema_check.yaml
+    - evaluators/rubrics/shared_judge_config.yaml
+    judge_scripts:
+    - scripts/llm_judge.py
+    promote_suggestion: scripts/promote_suggestion.py
+    eval_set_manager: scripts/eval_set_manager.py
+    eval_set_schema: schemas/eval_set.schema.json
+    eval_set_config: config/eval-set-config.yaml
+    candidate_change_schema: schemas/candidate_change.schema.json
+    promote_suggestion_script: scripts/promote_suggestion.py
+    candidate_change_dir: runtime/candidate_changes/
+    regression_test_script: scripts/regression_test.py
+    regression_report_schema: schemas/regression_report.schema.json
+    regression_test_dir: tests/phase7d/
+    regression_output_dir: outputs/eval_reports/regression/
+    eval_set_directories:
+    - tests/eval_cases/golden/
+    - tests/eval_cases/regression/failures/
+    - tests/eval_cases/regression/human_corrected/
+    - tests/eval_cases/regression/risk_samples/
+    - tests/eval_cases/baseline/
     - evaluators/rubrics/business_model_validation.yaml
     - evaluators/rubrics/contract_review.yaml
     - evaluators/rubrics/due_diligence.yaml
     - evaluators/rubrics/sop_generation.yaml
+    - evaluators/rubrics/solar_financial_model.yaml
     schemas:
     - schemas/workflow.schema.json
     - schemas/run_snapshot.schema.json
+    - schemas/solar_financial_run_snapshot.schema.json
     - schemas/eval_report.schema.json
     - schemas/context_load_plan.schema.json
     - schemas/interruption_event.schema.json
     - schemas/citation.schema.json
     - schemas/evaluation-api.openapi.yaml
     - schemas/release_manifest.schema.json
+    - schemas/candidate_change.schema.json
+    - schemas/regression_report.schema.json
     release_governance:
       manifest_schema: schemas/release_manifest.schema.json
       manifest_dir: config/releases/
@@ -122,33 +183,21 @@ active_release:
       regression_tests:
       - tests/regression/workflows/business_model_validation_vpp.yaml
       - tests/regression/workflows/unit_economics_check_charging.yaml
+    regression:
+      runner: scripts/regression_test.py
+      schema: schemas/regression_report.schema.json
+      test_dir: tests/phase7d/
+      output_dir: outputs/eval_reports/regression/
+      default_judge_mode: heuristic
+      thresholds:
+        critical_delta: -0.10
+        warning_delta: -0.05
+        overall_critical_delta: -0.08
     mcp_tools:
     - filesystem_read
     - filesystem_write
     - git_status
     - fetch_official_sources
-    knowledge_bases:
-    - id: ndrc_policy_2026
-      name: 国家发改委电力市场政策文件 2025-2026
-      source: https://www.ndrc.gov.cn/xxgk/zcfb/
-      last_fetched: '2026-05-05'
-      documents:
-      - 发改办体改〔2026〕275号 省间电力现货交易规则修订
-    - id: scb_nea_policy
-      name: 四川能源监管办政策文件
-      source: https://scb.nea.gov.cn/
-      last_fetched: '2026-05-05'
-      documents:
-      - 四川省电力辅助服务管理实施细则（2026版）
-      - 四川省电力并网运行管理实施细则（2026版）
-      - 2026年四川省供电监管工作会议
-    - id: nea_data_2026q1
-      name: 国家能源局 2026年Q1 数据
-      source: https://www.nea.gov.cn/
-      last_fetched: '2026-05-05'
-      documents:
-      - 2026年Q1全国电力市场交易电量数据
-      - 2026年3月全国电动汽车充电设施数据
   available_asset_roots:
     workflows:
     - workflows/legal/
@@ -169,11 +218,14 @@ active_release:
     evaluators:
     - evaluators/rules/
     - evaluators/rubrics/
+    data:
+    - data/
     releases:
     - config/releases/
     tests:
     - tests/eval_cases/
     - tests/regression/
+    - tests/phase7d/
   git_boundary:
     include:
     - README.md

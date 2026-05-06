@@ -1,0 +1,63 @@
+# evaluators/rubrics/shared_judge_config.yaml — LLM-as-Judge 评判行为配置 (Phase 7a)
+#
+# 定义混合评分策略：默认使用启发式评分，指定标准使用 LLM 语义评分，
+# 低分触发 LLM 复核。
+#
+# 版本: 0.1.0
+
+# ── 混合策略 ──
+judge_strategy:
+  # 默认评分模式: heuristic | llm | hybrid
+  #   heuristic: 全部使用关键词启发式评分（Phase 5 行为，完全向后兼容）
+  #   llm:       全部使用 LLM 语义评分
+  #   hybrid:    按 criteria_requiring_llm + low_score_threshold 规则混合
+  default_mode: "hybrid"
+
+  # 强制使用 LLM 评分的 criterion ID 列表
+  # 通常选择需要语义理解、无法用关键词准确评估的标准
+  criteria_requiring_llm:
+    - "legal_citation_quality"      # 法律引用质量需要理解上下文
+    - "jurisdiction_awareness"      # 法域意识需要语义判断
+    - "no_investment_advice"        # 投资建议规避需要细致判断
+    - "fact_assumption_separation"  # 事实/假设区分需要语义理解
+    - "evidence_quality"            # 证据质量难以用关键词衡量
+
+  # 启发式得分低于此阈值时，自动触发 LLM 复核
+  low_score_threshold: 0.4
+
+  # LLM 调用失败时的降级模式: heuristic | raise
+  #   heuristic: 降级回启发式评分并记录日志
+  #   raise:     抛出异常，阻止评估继续
+  fallback_mode: "heuristic"
+
+# ── LLM 连接配置 ──
+llm:
+  # 默认评判模型
+  model: "deepseek-chat"
+
+  # API 基础地址（留空则使用环境变量 LLM_JUDGE_API_BASE 或 OPENAI_API_BASE）
+  api_base: ~
+
+  # API 密钥的环境变量名
+  api_key_env: "LLM_JUDGE_API_KEY"
+
+  # 生成参数
+  max_tokens: 1024
+  temperature: 0.3
+
+  # 请求超时（秒）
+  timeout_seconds: 60
+
+# ── 评判行为控制 ──
+judge_behavior:
+  # 证据片段最大数量
+  max_evidence_items: 10
+
+  # 输出摘要最大字符数（超出部分截断）
+  max_output_chars: 8000
+
+  # 来源描述最大字符数
+  max_source_chars: 300
+
+  # 语言偏好: auto | zh | en
+  language: "auto"

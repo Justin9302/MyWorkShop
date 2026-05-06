@@ -21,7 +21,7 @@ feature_flags:
       enabled: true
       rollout: "registered_tools_only"
     external_fetch:
-      enabled: false
+      enabled: true
       rollout: "manual_approval_only"
       freshness_check:
         description: "When the active knowledge base is empty or outdated, the workflow may request user approval to fetch current official sources online."
@@ -30,7 +30,18 @@ feature_flags:
           - "gov.cn"
           - "pkulaw.com/law"
           - "law.cas.cn"
+          - "aemo.com.au"
+          - "cer.gov.au"
+          - "nrel.gov"
+          - "solargis.com"
+          - "power.larc.nasa.gov"
         citation_required: true
+    market_reference_data:
+      enabled: true
+      rollout: "solar_financial_model"
+      description: "使用 data/market_reference_*.yaml 文件作为区域参考值对比的数据源"
+      freshness_check:
+        description: "在 confirm_boundary_parameters 步骤中检查数据文件的新鲜度，若超过 90 天未更新则提示用户"
     evaluation_sidecar:
       enabled: false
       rollout: "contract_only"

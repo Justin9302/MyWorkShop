@@ -1,0 +1,49 @@
+rubric:
+  id: "contract_review"
+  version: "0.1.0"
+  status: "draft"
+  description: "合同审查工作流评估量规。评估合同风险识别、条款分析、法律引用和人工审批标记的质量。"
+  workflow_id: "contract_review"
+  industry: "legal"
+
+criteria:
+  - id: "risk_clause_coverage"
+    weight: 0.25
+    description: "关键风险条款（赔偿、责任限制、终止、保密、争议解决）是否全部覆盖。"
+
+  - id: "jurisdiction_awareness"
+    weight: 0.20
+    description: "是否识别并标注适用法域，法域特定条款是否正确解读。"
+
+  - id: "legal_citation_quality"
+    weight: 0.20
+    description: "法律引用是否准确、可追溯，是否标注权威等级和时效性。"
+
+  - id: "missing_clause_detection"
+    weight: 0.15
+    description: "是否识别缺失的关键条款或异常条款，并给出补充建议。"
+
+  - id: "human_review_flagging"
+    weight: 0.10
+    description: "高风险条款、法律结论是否标记为需要人工律师审查。"
+
+  - id: "no_legal_advice_disclaimer"
+    weight: 0.10
+    description: "输出是否包含适当的免责声明，明确不构成最终法律建议。"
+
+pass_threshold: 0.65
+
+# 法律行业特殊要求
+legal_specific:
+  disclaimer_required: true
+  jurisdiction_must_be_explicit: true
+  cannot_provide_final_legal_advice: true
+  high_risk_clauses:
+    - "indemnification"
+    - "limitation_of_liability"
+    - "termination"
+    - "confidentiality"
+    - "dispute_resolution"
+    - "governing_law"
+    - "force_majeure"
+    - "assignment"

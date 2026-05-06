@@ -21,6 +21,29 @@
   - `scripts/rollback.sh` — 回滚验证脚本
 - `active-release.yaml`: 增加 lifecycle 字段、release_manifest 引用
 
+- Phase 7a: LLM-as-Judge 评估引擎升级
+  - `scripts/llm_judge.py` — LLM 评判封装模块 (judge_criterion 核心接口)
+  - `prompts/evaluation/llm_judge.system.md` — LLM-as-Judge system prompt
+  - `evaluators/rubrics/shared_judge_config.yaml` — 评判行为配置
+  - `eval_runner.py`: 新增 --judge-mode 参数 (heuristic/llm/hybrid)
+  - `eval_report.schema.json`: 新增 llm_reasoning/confidence 字段
+  - 39 项自动化测试全部通过
+
+- Phase 7b: 动态评估集沉淀
+  - `scripts/eval_set_manager.py` — 评估集管理器 (自动分类/去重/标注)
+  - `schemas/eval_set.schema.json` — 评估集 Schema
+  - `config/eval-set-config.yaml` — 自动分类规则配置
+  - 5 个评估样本目录 (golden/regression_failures/human_corrected/risk_samples/baseline)
+  - 30 项自动化测试全部通过
+
+- Phase 7c: 改进建议 → 候选变更管线
+  - `schemas/candidate_change.schema.json` — 候选变更 Schema (8 必填字段)
+  - `scripts/promote_suggestion.py` — 建议提升为候选变更脚本 (CLI: create/list/approve/reject)
+  - `runtime/candidate_changes/.gitkeep` — 候选变更存储目录
+  - 43 项自动化测试全部通过
+- `active-release.yaml`: Stage 更新为 stage_7_dynamic_evolution，注册 judge 组件、eval_set 组件、candidate_change 组件
+- `.gitignore`: 排除 runtime/candidate_changes/, outputs/dashboard/, outputs/eval_reports/regression/
+
 ---
 
 ## [release_2026_05_05_001] - 2026-05-05

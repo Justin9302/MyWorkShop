@@ -1,0 +1,153 @@
+{
+  "run_id": "run_sample_003",
+  "workflow_id": "due_diligence",
+  "workflow_version": "0.1.0",
+  "workflow_state": {
+    "status": "completed",
+    "current_node": "output_generation",
+    "checkpoint_id": "cp_003",
+    "completed_steps": [
+      "context_intent_gate",
+      "scope_definition",
+      "financial_review",
+      "legal_review",
+      "commercial_review",
+      "operational_review",
+      "technology_review",
+      "red_flag_synthesis",
+      "decision_gate",
+      "output_generation"
+    ],
+    "total_steps": 10
+  },
+  "versions": {
+    "prompt_version": "0.1.0",
+    "constraint_pack_version": "0.2.0",
+    "knowledge_base_version": "kb_0.1.0",
+    "model_version": "deepseek-chat",
+    "evaluator_version": "0.1.0",
+    "git_commit": "f686ea3"
+  },
+  "context_intent_gate": {
+    "completed": true,
+    "intent_summary": "对目标公司进行B轮融资前的初步尽职调查。目标：某中国企业服务SaaS公司，ARR约5000万人民币，团队120人。",
+    "workflow_selected": "due_diligence",
+    "industry": "finance",
+    "jurisdiction": "CN",
+    "risk_level": "high",
+    "missing_information": ["客户合同明细", "员工股权结构", "知识产权登记证明"],
+    "allowed_scope": ["preliminary_dd", "internal_assessment"],
+    "approval_required": true
+  },
+  "context_load_plan": {
+    "layers_loaded": ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"],
+    "loaded_files": [
+      "config/active-release.yaml",
+      "config/context-loading.yaml",
+      "constraints/baseline/privacy.yaml",
+      "constraints/baseline/citation.yaml",
+      "constraints/baseline/human_review.yaml",
+      "constraints/industries/finance.yaml",
+      "constraints/jurisdictions/cn.yaml",
+      "prompts/finance/due_diligence.system.md",
+      "schemas/run_snapshot.schema.json"
+    ]
+  },
+  "input_summary": {
+    "target_company": "某中国企业服务SaaS公司",
+    "stage": "B轮",
+    "arr_cny": 50000000,
+    "employees": 120,
+    "jurisdiction": "CN"
+  },
+  "retrieved_sources": [
+    {
+      "source_id": "src_005",
+      "title": "目标公司2024审计报告摘要",
+      "authority": "audited_financial",
+      "excerpt": "2024 ARR 5000万，同比增长80%，毛利率72%，净亏损1200万。"
+    },
+    {
+      "source_id": "src_006",
+      "title": "目标公司客户合同抽样分析",
+      "authority": "internal_analysis",
+      "excerpt": "前3大客户占比45%，客户集中度偏高。平均合同期限1.5年。"
+    },
+    {
+      "source_id": "src_007",
+      "title": "中国企业服务SaaS行业报告2025",
+      "authority": "industry_report",
+      "excerpt": "行业平均毛利率65-75%，净留存率(NDR)中位数110%。"
+    }
+  ],
+  "output_summary": {
+    "sections": [
+      "executive_summary",
+      "financial_analysis",
+      "legal_risk_assessment",
+      "commercial_review",
+      "operational_review",
+      "technology_assessment",
+      "people_and_culture",
+      "red_flag_register",
+      "deal_breaker_analysis",
+      "next_steps"
+    ],
+    "dimensions_covered": [
+      "financial",
+      "legal",
+      "commercial",
+      "operational",
+      "technology",
+      "people"
+    ],
+    "red_flags": [
+      "客户集中度偏高（前3客户45%）",
+      "持续亏损，现金流需关注",
+      "知识产权登记不完整"
+    ],
+    "risk_classification": {
+      "critical": 0,
+      "high": 3,
+      "medium": 5,
+      "low": 8
+    },
+    "deal_breakers": "无。关键风险可通过交易结构设计和尽调补充材料管理。",
+    "open_questions": [
+      "员工期权池规模和行权情况",
+      "核心专利/软著登记证明",
+      "主要客户续约意向"
+    ],
+    "structured_output": {
+      "overall_assessment": "中等风险。商业模式验证度较高，但财务和法务需补充材料。建议继续推进但需关注客户集中度和IP风险。",
+      "investment_readiness": "conditional_yes",
+      "conditions": ["补充IP登记材料", "客户续约意向确认", "员工股权清晰化"]
+    }
+  },
+  "constraints_triggered": [
+    {
+      "constraint_id": "no_investment_advice",
+      "severity": "high",
+      "action": "flagged_for_review",
+      "message": "DD结论仅作信息参考，不构成投资建议。需投资委员会最终决策。"
+    },
+    {
+      "constraint_id": "data_gap_flagging",
+      "severity": "medium",
+      "action": "applied",
+      "message": "已标注3项信息缺口"
+    }
+  ],
+  "tool_calls": [
+    { "tool": "read_file", "purpose": "加载金融约束与尽调规则" },
+    { "tool": "fetch_webpage", "purpose": "检索行业基准数据" }
+  ],
+  "human_review": {
+    "required": true,
+    "review_status": "pending",
+    "review_items": ["红旗信号确认", "deal-breaker判断", "下一步建议"]
+  },
+  "interruptions": [],
+  "resume_events": [],
+  "created_at": "2026-05-05T06:00:00Z"
+}

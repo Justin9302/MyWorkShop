@@ -17,6 +17,11 @@ tmp/
 input/
 output/
 
+# Phase 7c-e: 候选变更 & 仪表盘（显式排除，不走 Git）
+runtime/candidate_changes/
+outputs/dashboard/
+outputs/eval_reports/regression/
+
 # Customer or business content
 customer_docs/
 client_files/

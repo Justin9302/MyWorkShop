@@ -1,0 +1,366 @@
+workflow:
+  id: "solar_financial_model"
+  name: "光伏/储能项目财务测算与可视化"
+  industry: "energy"
+  description: >
+    读取澳洲光伏/储能项目财务模型 Excel（带 VBA 宏），提取关键财务指标、
+    收入拆解、现金流和偿债比率数据，生成结构化报告和可视化图表。
+    适用于项目早期可行性分析、中期融资评估和敏感性分析。
+
+    注意：输入的模型可能是多年前的历史版本（如 MODEL2019），其成本参数
+    （CAPEX/OPEX/电价）可能严重过时。工作流将自动检测模型年代，标记过时数据，
+    并在关键参数不确定性时询问用户当前市场数据。
+  role: "solar_project_financial_analyst"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+
+context_intent_gate:
+  required: true
+  required_reads:
+    - "config/active-release.yaml"
+    - "constraints/industries/energy.yaml"
+    - "constraints/jurisdictions/au.yaml"
+  confirmation_outputs:
+    - "项目名称与场景"
+    - "核心技术参数（MW/MWh、光伏/储能/混合）"
+    - "关键财务指标摘要（IRR/NPV/回收期）"
+    - "模型文件年代（是否来自 2019 年或更早）"
+    - "过时参数标记清单"
+    - "缺失信息清单"
+    - "边界条件参数清单（见 confirm_boundary_parameters 步骤）"
+  block_conditions:
+    - "无法定位 Excel 模型文件"
+    - "模型中的关键财务指标（IRR/NPV）为空"
+    - "输出将用于最终投资决策且无人审"
+    - "模型为历史版本（如 2019）且用户未提供当前市场参数替代"
+
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers:
+    - "L0"
+    - "L1"
+    - "L2"
+    - "L3"
+    - "L4"
+    - "L5"
+    - "L6"
+    - "L8"
+
+inputs:
+  - name: "model_file"
+    required: true
+    description: "财务模型 Excel 文件路径（.xlsm / .xlsb / .xlsx）"
+    data_class: "financial_model"
+  - name: "scenario_name"
+    required: false
+    description: "要分析的场景名称（默认使用当前活动场景）"
+  - name: "discount_rate"
+    required: false
+    description: "用于 NPV 计算的折现率（默认取模型设定值）"
+  - name: "sensitivity_vars"
+    required: false
+    description: "敏感性分析的变量列表（默认：电价、容量因子、CAPEX、折现率）"
+  - name: "project_currency"
+    required: false
+    description: "项目货币（默认 AUD）"
+  - name: "project_coordinates"
+    required: false
+    description: "项目地址坐标（纬度,经度），用于推导太阳能资源、接入距离、地形数据等"
+    data_class: "project_site"
+  - name: "acquisition_type"
+    required: false
+    description: "项目获取方式: greenfield / development_acquisition / operational_acquisition / not_applicable"
+    data_class: "deal_type"
+  - name: "development_costs"
+    required: false
+    description: "开发费用明细（并购项目），包括前期开发费、审批费、土地期权、技术顾问费等"
+    data_class: "financial_model"
+
+retrieval:
+  scope:
+    - "approved_market_reference"
+    - "australian_energy_regulation"
+    - "solar_financial_model_templates"
+  source_filters:
+    - "authority_level_recorded"
+    - "effective_date_valid"
+
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/industries/energy.yaml"
+  - "constraints/jurisdictions/au.yaml"
+
+steps:
+  - id: "confirm_intent"
+    name: "确认分析范围与意图"
+    action: >
+      读取并确认用户提供的模型文件路径，识别项目名称、技术方案（光伏/储能/混合）、
+      场景选择和风险等级。输出意图确认清单并等待用户确认。
+
+  - id: "confirm_boundary_parameters"
+    name: "输出并确认边界条件参数"
+    action: >
+      在运行财务模型引擎之前，**必须**输出以下边界条件参数清单，逐项列出
+      并等待用户确认后方可进入下一阶段。
+
+      若用户提供了项目坐标（project_coordinates），应优先基于坐标推导
+      以下选址相关参数后再进入手动确认环节。
+
+      **前置检查：参考数据新鲜度**
+      在执行参数输出前，先执行数据新鲜度检查：
+
+      1. 从 `data/market_reference_index.yaml` 读取区域索引，根据坐标或
+          jurisdiction 确定匹配的数据文件（au → market_reference_au.yaml, cn → market_reference_cn.yaml）
+      2. 加载对应数据文件的 `metadata.last_updated` 和 `metadata.freshness_threshold_days`
+      3. 若当前日期 - last_updated > threshold_days（默认90天），标记 🟡 数据可能过期
+      4. 询问用户：
+         - (a) 使用现有数据继续
+         - (b) 批准在线获取最新数据（external_fetch）
+         - (c) 用户自行提供当前市场数据
+      5. 若用户选 (b)，根据 `metadata.data_sources[].url` 列表使用 fetch_webpage 获取最新数据，
+         提取关键指标后用于本次会话，在 run snapshot 中记录获取来源和获取时间
+      6. 若获取失败，回退使用文件内现有数据并标记 ⚠️ 获取失败
+
+      ### 必须输出的边界条件参数
+
+      1. **项目规模与技术参数**
+         - 光伏装机容量（MWp）
+         - 储能装机容量（MW）与时长（小时）/ 容量（MWh）
+         - 技术方案类型（纯光伏/纯储能/光储混合）
+         - 容量因子（光伏 CF、储能充放电效率、循环次数）
+
+      2. **选址推导参数**（仅在提供坐标 project_coordinates 时产生）
+         - **太阳能资源**: 年 GHI（kWh/m²）、峰值日照小时数（PSH）、气候区
+         - **年发电量估算**: 首年发电量（MWh）、衰减后 25 年平均年发电量
+         - **实际上网电量**: 厂用电折算、限电率假设 → 上网电量（MWh）
+         - **电网接入评估**:
+           - 最近输电线路类型与电压等级
+           - 接入距离估算（km）
+           - 建议接入电压等级（按容量经验法则）
+           - NEM 区域 / 省级电网
+           - MLF 边际损耗因子近似值（如可查）
+         - **场地条件**: 地形坡度、土地覆盖类型、年平均气温（温度折损）
+         - **极端气候风险**: 飓风/冰雹/洪水历史频次标记
+         - **接入成本估算**: 按接入距离 × 单位线路成本 + 变电站间隔费
+         - 以上推导值均标注「选址推导」来源，并附推导依据和置信度
+
+      3. **投资成本参数** — CAPEX 须按以下结构逐项拆解并确认
+
+         **设备采购成本（Equipment Supply）**
+         - 光伏组件采购（AUD/Wp 或总额）
+         - 逆变器采购（AUD/W 或总额）
+         - 储能电池包/电芯采购（AUD/kWh 或总额）
+         - 储能 PCS/EMS/BMS（AUD/kW 或总额）
+         - 支架与跟踪系统（AUD/Wp 或总额）
+         - 变压器/开关柜等电气设备（总额）
+         - 以上各项的设备品牌/型号/产地（影响质量假设和寿命预期）
+
+         **EPC / 安装工程成本（Balance of System + Construction）**
+         - 土建与场地准备（AUD 或 AUD/W）
+         - 电气安装与布线
+         - 调试与试运行
+         - EPC 管理费与利润
+         - 工程设计与技术咨询
+         - 建设期保险
+
+         以上两项合并为**建设总成本（Total Installed Cost）**，
+         再以此为基础计算 AUD/kW 或 AUD/W 单位成本。
+         需标注: 是否已含 EPC 溢价 / 是否含 contingency（通常 5-10%）
+
+         **其他资本化成本**
+         - 建设期利息（IDC）估算
+         - 融资费用（安排费、法务费 — 通常按债务期限摊销）
+         - 首年运营资本（working capital）
+         - 接入设施成本（线路 + 变电站 — 合并自选址推导估算）
+
+         **运维成本（OPEX）** — 区分固定和可变，逐项确认
+         - 固定运维费: 日常巡检、安保、监控系统（AUD/kW/年）
+         - 可变运维费: 组件清洗、植被管理、故障维修（AUD/MWh 或 AUD/kW/年）
+         - 土地租金 / 路权费（AUD/年）
+         - 保险费（财产险/责任险/中断险 — AUD/年）
+         - 电网运营费（TUOS/DUOS — AUD/年）
+         - 管理费（SPV 管理、报告合规 — AUD/年）
+
+         **中期大修成本**
+         - 电池更换/增容（第10-12年，约初始 BESS CAPEX 的 60-70%）
+         - 逆变器更换（第12-15年，约初始逆变器成本的 100% + 安装）
+         - 组件更换 / 翻新（如有假设）
+
+      4. **开发费用（并购项目）**
+         - 项目获取方式标识: greenfield / development_acquisition / operational_acquisition
+         - **前期开发费**: 可行性研究、资源评估、环境评估、社区咨询、法务费
+         - **审批与许可费**: 规划许可、并网审批、环保审批、施工许可
+         - **土地相关费用**: 土地期权 / 购地款 / 长期租约预付租金
+         - **技术顾问费**: 独立技术顾问（ITE）、法律顾问、税务顾问
+         - **收购溢价**: 相对于绿地方案的开发溢价（如有）
+         - **已投入开发成本沉没**: 并购时已发生的且未资本化的开发支出
+         - 开发费用分期处理：哪些应资本化（加入资产基数折旧），哪些应费用化（当期税前抵扣）
+
+      5. **收入参数**
+         - PPA 电价（AUD/MWh）及合同期限
+         - 现货市场电价假设
+         - LGC 绿证价格假设
+         - FCAS 辅助服务收入假设（如适用）
+
+      6. **融资与税务参数**
+         - 杠杆率（债务比例 %）
+         - 贷款利率与期限
+         - 还款方式（等额本息/等额本金）
+         - 折现率（用于 NPV 计算）
+         - 公司税率假设
+         - 折旧方法与寿命（对照 ATO 标准）
+
+      7. **项目时间线**
+         - 建设开始/结束日期
+         - 运营开始日期
+         - 运营年限
+         - 项目退出/处置假设（如有）
+
+      输出格式：以上参数整理为结构化表格或清单，标注每个参数的
+      「来源」（模型提取值 / 选址推导 / 用户提供 / 市场参考值 / 分析师假设）。
+      若存在不确定性或参数缺失，以 ⚠️ 标记并说明待确认项。
+
+      **区域参考值对比**：每个参数**必须**附上所在区域的参考范围
+      （如 NSW/VIC/QLD/SA 的 CAPEX/PPA/MLF 范围，或四川省参考值），
+      使用六栏表格格式：参数 | 输入值 | 区域参考范围 | 偏差标记 | 来源 | 状态。
+      偏差标记规则：偏离 < ±10% ✅ 正常，±10-25% 🟡 注意，> ±25% 🔴 偏离大。
+
+      用户确认后才能进入 run_financial_model 步骤。若用户对任何参数
+      提出修改，应更新参数后重新展示并再次确认。
+
+  - id: "run_financial_model"
+    name: "运行财务模型引擎"
+    action: >
+      调用 scripts/solar_financial_engine.py 执行完整财务模型计算：
+      - 接受用户提供的项目参数（装机、CAPEX、OPEX、电价、融资等）
+      - 按月精度构建现金流模型（建设期+运营期）
+      - 计算收入（PPA/现货/LGC/FCAS 多来源）
+      - 计算 ATO 合规折旧与所得税
+      - 计算债务服务与偿债覆盖比率
+      - 计算股权现金流与 IRR/NPV/回收期
+      - 支持多场景对比
+      输入方式：通过 --scenarios 参数传入 JSON 配置文件，
+      或使用 --interactive 交互模式。
+      输出为结构化 JSON。
+
+      可选：当有历史 Excel 模型文件时，先用 solar_excel_extractor.py
+      提取参数作为起点，再由用户确认后传入引擎。
+
+  - id: "validate_data_integrity"
+    name: "数据完整性校验与年代检测"
+    action: >
+      检查提取的数据是否完整，同时检测模型数据年代：
+      - 资产负债表平衡
+      - 现金流来源与使用匹配
+      - IRR/NPV 合理性
+      - 偿债比率是否在合理范围
+      - 检测模型文件年代（文件名含 2019 等年份标记）
+      - 对比模型中的成本参数（CAPEX/MWh、OPEX/MWh/年）与当前市场参考值
+      - 标记严重偏离当前市场的参数（如 2019 年 BESS CAPEX $1,000+/kW vs 当前 $500-700/kW）
+      - 标记缺失或异常数据点
+      若关键参数不确定或明显过时，生成询问清单向用户确认。
+
+  - id: "generate_charts"
+    name: "生成可视化图表"
+    action: >
+      调用 scripts/solar_financial_charts.py 根据提取数据生成：
+      1. 收入构成饼图/柱状图（分年度）
+      2. 累计现金流曲线（项目 vs 股权）
+      3. 敏感性分析龙卷风图
+      4. LCOE/LCOS 分解图
+      5. 偿债比率趋势图
+      图表输出为 PNG 格式到 outputs/charts/ 目录。
+
+  - id: "generate_report"
+    name: "生成财务分析报告"
+    action: >
+      基于提取数据和图表，按照输出模板生成 Markdown 格式的
+      财务分析报告，包含项目概览、关键指标、图表嵌入、
+      敏感性分析和风险提示。
+
+  - id: "human_review_gate"
+    name: "人工审核门禁"
+    action: >
+      对于用于融资决策或外部用途的报告，标记为需要人工审核。
+      输出审核摘要、风险等级和审核建议。
+
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_model_file"
+    resume_condition: "用户提供有效的模型文件路径"
+    cancel_condition: "用户取消分析"
+    audit_fields: ["model_file_path", "scenario_selected", "checkpoint_id"]
+  - node_id: "confirm_boundary_parameters"
+    pause_reason: "boundary_parameters_not_confirmed"
+    resume_condition: "用户确认边界条件参数，或提出修改后重新确认"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      - "boundary_parameters_snapshot"
+      - "user_modifications"
+      - "confirmation_timestamp"
+      - "checkpoint_id"
+  - node_id: "confirm_boundary_parameters"
+    pause_reason: "missing_boundary_parameters"
+    resume_condition: "用户补充缺失的边界条件参数"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      - "missing_parameters"
+      - "user_supplied_values"
+      - "checkpoint_id"
+  - node_id: "confirm_boundary_parameters"
+    pause_reason: "reference_data_outdated"
+    resume_condition: "用户批准在线获取最新数据 / 用户确认使用现有数据 / 用户提供替代数据"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      - "reference_data_file"
+      - "last_updated"
+      - "freshness_days"
+      - "fetch_attempted"
+      - "fetch_result"
+      - "fallback_used"
+      - "checkpoint_id"
+  - node_id: "run_financial_model"
+    pause_reason: "model_parse_error"
+    resume_condition: "用户修复模型或提供替换文件"
+    cancel_condition: "用户取消分析"
+    audit_fields: ["parse_error", "file_path", "checkpoint_id"]
+  - node_id: "run_financial_model"
+    pause_reason: "missing_parameter"
+    resume_condition: "用户补充缺失的参数（电价/CAPEX/折现率等）"
+    cancel_condition: "用户取消分析"
+    audit_fields: ["missing_params", "checkpoint_id"]
+  - node_id: "validate_data_integrity"
+    pause_reason: "outdated_market_data"
+    resume_condition: "用户提供当前市场参数（CAPEX/OPEX/电价）替代过时模型数据"
+    cancel_condition: "用户选择使用原有模型数据（确认接受过时风险）"
+    audit_fields: ["outdated_parameters", "model_vintage", "user_provided_replacements", "checkpoint_id"]
+  - node_id: "human_review_gate"
+    pause_reason: "requires_human_approval"
+    resume_condition: "业务负责人批准报告对外使用"
+    cancel_condition: "审核人驳回报告"
+    audit_fields: ["approval_status", "risk_level", "checkpoint_id"]
+
+outputs:
+  template: "prompts/energy/solar_financial_model.system.md"
+  schema_ref: "schemas/solar_financial_run_snapshot.schema.json"
+  required_sections:
+    - "project_overview"
+    - "key_financial_metrics"
+    - "revenue_analysis"
+    - "cash_flow_analysis"
+    - "funding_structure"
+    - "debt_service_ratios"
+    - "sensitivity_analysis"
+    - "charts_embedded"
+    - "risk_disclaimer"
+
+human_review:
+  required_when:
+    - "输出用于融资决策或外部披露"
+    - "模型数据存在重大不确定性"
+    - "敏感性分析显示高风险敞口"
+  reviewer_role: "project_finance_lead_or_independent_reviewer"
+
+version: "0.6.0"

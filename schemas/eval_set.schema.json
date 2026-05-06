@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/eval_set.schema.json",
+  "title": "Eval Set",
+  "description": "Phase 7b 动态评估集 Schema。定义从运行快照自动分类沉淀的评估样本集结构。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eval_set_id", "version", "category", "samples", "created_at"],
+  "properties": {
+    "eval_set_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "评估集唯一标识符"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "评估集版本号"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "golden",
+        "regression_failure",
+        "regression_human_corrected",
+        "regression_risk",
+        "synthetic"
+      ],
+      "description": "样本分类：golden=黄金样本, regression_failure=回归失败, regression_human_corrected=人工修正, regression_risk=风险样本, synthetic=合成样本"
+    },
+    "source_workflow_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "该评估集中样本来源的工作流 ID 列表"
+    },
+    "rubric_id": {
+      "type": "string",
+      "description": "使用的评估量规 ID"
+    },
+    "samples": {
+      "type": "array",
+      "description": "评估样本列表",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["snapshot_id", "input_hash"],
+        "properties": {
+          "_dedup_key": {
+            "type": "string",
+            "description": "内部去重键（自动生成，不参与业务逻辑）"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "description": "运行快照 ID"
+          },
+          "input_hash": {
+            "type": "string",
+            "description": "输入摘要哈希（用于去重）"
+          },
+          "output_hash": {
+            "type": "string",
+            "description": "输出摘要哈希（用于去重）"
+          },
+          "workflow_id": {
+            "type": "string",
+            "description": "工作流 ID"
+          },
+          "original_report_path": {
+            "type": "string",
+            "description": "原始评估报告路径"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "原始评估得分"
+          },
+          "expected_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "期望得分（黄金样本人工标注）"
+          },
+          "critical_findings": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "关键发现列表"
+          },
+          "human_notes": {
+            "type": "string",
+            "description": "人工备注"
+          },
+          "requires_human_approval": {
+            "type": "boolean",
+            "default": false,
+            "description": "是否需要人工审批才能纳入该分类"
+          },
+          "classified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "自动分类时间"
+          },
+          "classified_by": {
+            "type": "string",
+            "description": "分类执行者标识"
+          }
+        }
+      }
+    },
+    "golden_standard": {
+      "type": "boolean",
+      "default": false,
+      "description": "是否为黄金标准评估集"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "评估集创建时间"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "评估集最后更新时间"
+    }
+  }
+}

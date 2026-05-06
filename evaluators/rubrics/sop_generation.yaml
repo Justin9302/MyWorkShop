@@ -1,0 +1,48 @@
+rubric:
+  id: "sop_generation"
+  version: "0.1.0"
+  status: "draft"
+  description: "SOP 生成工作流评估量规。评估操作规范的结构完整性、可执行性、安全合规性和角色清晰度。"
+  workflow_id: "sop_generation"
+  industry: "operations"
+
+criteria:
+  - id: "sop_structure_completeness"
+    weight: 0.20
+    description: "SOP 是否包含目的、范围、定义、职责、步骤、异常处理、记录和附录等标准章节。"
+
+  - id: "step_actionability"
+    weight: 0.25
+    description: "每个步骤是否具体、可操作、可验证，避免模糊描述（如'适当处理'）。"
+
+  - id: "role_clarity"
+    weight: 0.15
+    description: "每个步骤是否明确指定责任人/角色（RACI 或等效模型）。"
+
+  - id: "safety_compliance"
+    weight: 0.15
+    description: "是否识别安全、合规和质量关键控制点，并标注不可跳过的强制步骤。"
+
+  - id: "exception_handling"
+    weight: 0.15
+    description: "是否定义了常见异常场景和升级路径（什么情况找谁）。"
+
+  - id: "measurable_success_criteria"
+    weight: 0.10
+    description: "是否包含可衡量的成功标准或验收条件。"
+
+pass_threshold: 0.65
+
+# 运营行业特殊要求
+operations_specific:
+  must_include_safety_controls: true
+  roles_must_be_explicit: true
+  exception_escalation_required: true
+  required_sections:
+    - "purpose"
+    - "scope"
+    - "definitions"
+    - "responsibilities"
+    - "procedure_steps"
+    - "exception_handling"
+    - "records"

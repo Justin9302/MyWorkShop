@@ -2,14 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/schemas/eval_report.schema.json",
   "title": "Evaluation Report",
+  "description": "Phase 5 评估旁路服务输出契约。8维评分 + 发现 + 建议 + 改进计划。只读输入，只输出建议，不自动修改生产配置。",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "run_id",
+    "workflow_id",
+    "rubric_id",
     "evaluator_version",
+    "evaluation_mode",
     "score",
     "risk_level",
     "passed",
+    "metrics",
     "findings",
     "suggestions",
     "created_at"
@@ -17,109 +22,201 @@
   "properties": {
     "run_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "被评估的运行快照 ID"
+    },
+    "workflow_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "被评估的工作流 ID，如 contract_review"
+    },
+    "rubric_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "使用的评估量规 ID"
     },
     "evaluator_version": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "评估器版本号，升级不改变历史记录解释方式"
+    },
+    "evaluation_mode": {
+      "type": "string",
+      "enum": ["sync_blocking", "async_nonblocking"],
+      "default": "async_nonblocking",
+      "description": "sync_blocking=高风险同步拦截, async_nonblocking=默认后置评估"
     },
     "score": {
       "type": "number",
       "minimum": 0,
-      "maximum": 1
+      "maximum": 1,
+      "description": "加权综合评分 (0-1)"
     },
     "risk_level": {
       "type": "string",
-      "enum": [
-        "low",
-        "medium",
-        "high",
-        "critical"
-      ]
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "本次评估的风险等级"
     },
     "passed": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "是否通过评估 (score >= 阈值)"
+    },
+    "pass_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.6,
+      "description": "通过阈值"
     },
     "metrics": {
       "type": "object",
-      "additionalProperties": {
-        "type": "number"
-      },
+      "description": "8 维评估指标，按计划 Section 8 定义",
+      "additionalProperties": false,
       "properties": {
         "citation_accuracy": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1
+          "maximum": 1,
+          "description": "引用准确率：是否基于资料回答，引用是否正确"
         },
+        "constraint_compliance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "约束合规率：是否遵守行业、地区、组织规则"
+        },
+        "format_compliance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "格式合规率：输出是否符合规定模板结构"
+        },
+        "risk_detection": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "风险识别率：是否识别高风险事项"
+        },
+        "human_modification_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "人工修改率：输出被人工修改的幅度 (0=无修改, 1=完全重写)"
+        },
+        "output_adoption_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "输出采纳率：用户直接采纳/使用的比例"
+        },
+        "high_risk_miss_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "高风险漏检率：应识别但未识别的高风险事项比例"
+        },
+        "cost_latency": {
+          "type": "number",
+          "minimum": 0,
+          "description": "成本与延迟评分：模型调用成本+延迟的综合评分 (0=最优, 越高越差)",
+          "comment": "normalized_cost_ms = (actual_cost / budget_cost) * (actual_latency_ms / sla_latency_ms)"
+        }
+      }
+    },
+    "metric_weights": {
+      "type": "object",
+      "description": "各维度在综合评分中的权重配置",
+      "additionalProperties": false,
+      "properties": {
+        "citation_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
         "constraint_compliance": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
-        "format_compliance": {
+        "format_compliance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "risk_detection": { "type": "number", "minimum": 0, "maximum": 1 },
+        "human_modification_rate": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
-        "risk_detection": {
+        "output_adoption_rate": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
-        "adoption_signal": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        }
+        "high_risk_miss_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cost_latency": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     },
     "findings": {
       "type": "array",
+      "description": "评估发现的问题列表",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "type",
-          "severity",
-          "message"
-        ],
+        "required": ["type", "severity", "message"],
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "description": "问题类别：citation_gap, constraint_violation, format_error, risk_missed, completeness_gap, evidence_insufficient, latency_exceeded 等"
           },
           "severity": {
             "type": "string",
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "critical"
-            ]
+            "enum": ["low", "medium", "high", "critical"]
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "人类可读的问题描述"
+          },
+          "llm_reasoning": {
+            "type": "string",
+            "description": "Phase 7a: LLM 评判的评分理由。仅当该 finding 由 LLM 评判时存在。"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Phase 7a: LLM 对自身判断的置信度 (0-1)。仅当该 finding 由 LLM 评判时存在。"
+          },
+          "affected_dimension": {
+            "type": "string",
+            "description": "受影响的评估维度 ID",
+            "enum": [
+              "citation_accuracy",
+              "constraint_compliance",
+              "format_compliance",
+              "risk_detection",
+              "human_modification_rate",
+              "output_adoption_rate",
+              "high_risk_miss_rate",
+              "cost_latency"
+            ]
           },
           "evidence": {
             "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "items": { "type": "string" },
+            "description": "支持该发现的证据片段"
+          },
+          "remediation": {
+            "type": "string",
+            "description": "建议的修复方向"
           }
         }
       }
     },
     "suggestions": {
       "type": "array",
+      "description": "改进建议列表（只输出建议，不自动修改生产配置）",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "target",
-          "recommendation"
-        ],
+        "required": ["target", "recommendation"],
         "properties": {
           "target": {
             "type": "string",
+            "description": "建议修改的目标组件",
             "enum": [
               "prompts",
               "workflow_steps",
@@ -128,22 +225,81 @@
               "knowledge_base_metadata",
               "output_templates",
               "tool_permissions",
-              "model_routing"
+              "model_routing",
+              "evaluator_rubric",
+              "context_loading"
             ]
           },
           "recommendation": {
-            "type": "string"
+            "type": "string",
+            "description": "具体改进建议"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "default": "medium"
           },
           "requires_human_approval": {
             "type": "boolean",
-            "default": true
+            "default": true,
+            "description": "是否必须人工审批后才能应用"
+          },
+          "expected_impact": {
+            "type": "object",
+            "properties": {
+              "affected_metrics": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "estimated_improvement": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           }
+        }
+      }
+    },
+    "improvement_plan": {
+      "type": "object",
+      "description": "结构化改进计划（Phase 7 动态进化预留）",
+      "properties": {
+        "generated": {
+          "type": "boolean",
+          "default": false
+        },
+        "candidate_changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target_file": { "type": "string" },
+              "change_type": { "type": "string" },
+              "rationale": { "type": "string" },
+              "diff_summary": { "type": "string" },
+              "approval_status": {
+                "type": "string",
+                "enum": ["pending", "approved", "rejected"],
+                "default": "pending"
+              }
+            }
+          }
+        },
+        "rollback_plan": {
+          "type": "string",
+          "description": "如果改进导致质量下降的回滚方案"
         }
       }
     },
     "created_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "evaluated_by": {
+      "type": "string",
+      "description": "评估执行者标识（模型/人/脚本）",
+      "default": "eval_runner.py"
     }
   }
 }

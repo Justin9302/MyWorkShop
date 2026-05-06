@@ -1,0 +1,127 @@
+rubric:
+  id: solar_financial_model
+  version: 1.0.0
+  status: active
+  industry: energy
+  description: 光伏/储能项目财务测算结果评估准则 V1.0。基于 2026-05-06 全部教训重写。
+evaluation_gate:
+  pass_threshold: 0.7
+  block_on_critical_fail: true
+  require_sensitivity: true
+  require_benchmarking: true
+criteria:
+- id: parameter_completeness
+  weight: 0.1
+  severity: critical
+  description: 所有边界参数已声明且有来源标注
+  checks:
+  - id: all_params_sourced
+    description: 每个参数标注来源
+    rule: count(params_without_source) == 0
+  - id: data_freshness
+    description: market_reference_au.yaml < 90天
+    rule: days_since_last_update <= 90
+  - id: vintage_warning
+    description: CAPEX vintage < 2023 须标注
+    rule: 'if capex_vintage < 2023: warn_and_confirm'
+- id: capex_structure
+  weight: 0.1
+  severity: critical
+  description: CAPEX拆解到设备级，无双重计费
+  checks:
+  - id: capex_breakdown
+    rule: 'has categories: equipment, epc, development, connection, contingency'
+  - id: no_double_count
+    rule: 'if pv_capex_per_kwp > 800 and bop_epc_pct > 0: FAIL'
+  - id: capex_in_range
+    rule: abs(pv_capex - market_median)/market_median <= 0.30 or has_explanation
+- id: price_structure
+  weight: 0.12
+  severity: critical
+  description: 电价按时段拆分，区分捕获价/充电压/放电压，含负电价
+  checks:
+  - id: solar_capture_set
+    rule: 'if is_hybrid: solar_capture_price_aud_mwh is not None'
+  - id: bess_spread_defined
+    rule: bess_charge and bess_discharge are not None
+  - id: negative_price_considered
+    rule: 'if is_pure_bess: has_negative_price_strategy'
+  - id: fcas_differentiated
+    rule: 'pure: fcas>=30, hybrid: fcas<=25'
+- id: dispatch_strategy
+  weight: 0.12
+  severity: critical
+  description: 混合项目用光伏优先充电调度，纯储能最优窗口调度
+  checks:
+  - id: hybrid_not_independent
+    rule: 'if is_hybrid: dispatch_model != ''independent'''
+  - id: solar_to_bess_priority
+    rule: solar_to_bess = min(pv_gen, bess_capacity)
+  - id: strategy_comparison
+    rule: len(dispatch_strategies_compared) >= 2
+- id: battery_lifecycle
+  weight: 0.06
+  severity: high
+  description: 中期维护按电池化学类型设定
+  checks:
+  - id: chemistry_matched
+    rule: 'LFP: replacement_pct<=0.35, NMC: replacement_pct>=0.60'
+  - id: replacement_amortized
+    rule: monthly_midlife == annual_midlife / 12
+- id: lcoe_lcos_correctness
+  weight: 0.12
+  severity: critical
+  description: LCOE/LCOS用贴现公式，成本按资产拆分
+  checks:
+  - id: discounted_formula
+    rule: lcoe_discounted is computed and reported
+  - id: cost_split_by_asset
+    rule: lcoe_numerator != lcos_numerator
+  - id: charge_cost_in_lcos
+    rule: lcos_numerator includes charge_cost
+  - id: aux_consumption_deducted
+    rule: lcoe_denominator uses net_generation or explicitly gross
+- id: irr_npv_correctness
+  weight: 0.1
+  severity: critical
+  description: IRR年化, gearing=0时 equity=project
+  checks:
+  - id: irr_annualized
+    rule: abs(annual_irr - ((1+monthly)**12-1)) < 0.0001
+  - id: equity_equals_project_zero_gearing
+    rule: 'if gearing==0: abs(equity_irr - project_irr) < 0.0001'
+  - id: no_payout_cap
+    rule: equity_payout_ratio == 1.0
+- id: sensitivity_analysis
+  weight: 0.1
+  severity: high
+  description: 关键变量敏感性，≥3变量+组合情景+杠杆
+  checks:
+  - id: variable_count
+    rule: len(sensitivity_variables) >= 3
+  - id: combined_scenarios
+    rule: len(combined_scenarios) >= 1
+  - id: leverage_scenario
+    rule: 'if gearing==0: has_leveraged_scenario'
+- id: industry_benchmarking
+  weight: 0.08
+  severity: medium
+  description: 结果与CSIRO/AEMO/Lazard基准对比
+  checks:
+  - id: lcoe_benchmarked
+    rule: has_lcoe_benchmark_comparison
+  - id: irr_benchmarked
+    rule: has_irr_benchmark
+  - id: deviation_explained
+    rule: 'if deviation > 0.20: has_explanation'
+- id: output_completeness
+  weight: 0.1
+  severity: medium
+  description: 输出含快照/参数来源/假设清单/局限声明
+  checks:
+  - id: snapshot_saved
+    rule: snapshot_file_exists in runtime/
+  - id: assumptions_listed
+    rule: has_assumptions_section
+  - id: limitations_stated
+    rule: has_limitations_section

@@ -15,36 +15,29 @@ Core operating idea:
 
 ## Current Stage
 
-Current release status: draft.
+Current release: `release_2026_05_05_001`, status: **published**.
 
-The workspace is at Stage 1: platform skeleton and Git boundary.
+The workspace is at **Stage 6: Version Governance**.
 
 Already present:
 
-- Planning and architecture documents.
-- Initial repository structure.
-- Active release manifest.
-- Run snapshot schema.
-- Evaluation report schema.
-
-Not active yet:
-
-- Production workflows.
-- Production prompt templates.
-- Production constraint packs.
-- Production evaluators.
-- MCP tool manifest.
+- All 6 stages complete (skeleton → workflows → constraints → audit → eval sidecar → version governance).
+- 10 active workflows across 4 industries (legal, business, finance, energy).
+- System prompts, constraint packs (baseline + industry + jurisdiction), evaluator rules + rubric.
+- Schema contracts (workflow, run_snapshot, eval_report, citation, context_load_plan, interruption_event, release_manifest).
+- Three-agent orchestration (task-planner + task-reviewer).
+- Knowledge bases: AEMO NEM market data, CER LGC, Sichuan energy policy 2025-2026.
+- Release governance: promote/rollback scripts, CHANGELOG, release manifests.
 
 ## Required Startup Reading
 
 Before answering project-level questions, modifying platform assets, creating workflows, adding rules, or proposing implementation plans, read these files in order:
 
-1. `docs/model_context.md`
-2. `config/active-release.yaml`
-3. `README.md`
-4. `docs/current_workspace_creation_plan.md`
+1. `config/active-release.yaml` — active component versions
+2. `README.md` — project overview
+3. `docs/current_workspace_creation_plan.md` — platform governance rules
 
-Then load additional files only as needed:
+Then load only as needed:
 
 - Overall platform design: `docs/workspace_plan.md`
 - Git and rollback boundary: `docs/gitman.md`
@@ -100,23 +93,28 @@ Use layered context loading:
 
 Context loading decisions should be auditable in future run snapshots.
 
-## Current Planned Platform Capabilities
+## Current Platform Capabilities
 
-Core platform:
+Core platform (all active):
 
-- Multi-model routing.
-- RAG and auditable reference library.
-- Tool system, eventually including MCP-style tools/resources/prompts.
-- Permission controls.
-- Workflow runner.
-- Audit logs.
-- Human approval nodes.
+- Multi-model routing (`config/model-routing.yaml`).
+- RAG and auditable reference library (knowledge bases in `active-release.yaml`).
+- Tool system, including MCP-style tools/resources/prompts (`config/mcp-tools.yaml`).
+- Permission controls (`config/permissions.yaml`).
+- Workflow runner with 10 workflows across 4 industries.
+- Audit logs and run snapshots (`schemas/run_snapshot.schema.json`).
+- Human approval nodes (`config/interruption-policy.yaml`).
+- Evaluation sidecar service (`scripts/eval_runner.py`).
+- Version governance (release manifest, promote/rollback, CHANGELOG).
 
-Industry workflow packages planned first:
+Active industry workflow packages:
 
-- Legal/compliance: contract review, policy Q&A, compliance checklist.
-- Finance/research: industry research, risk summary, due diligence checklist.
-- Operations: SOP generation, meeting summary, project review, sales support.
+- Legal: contract review, policy Q&A.
+- Business: business model design & validation, go-to-market review, unit economics check.
+- Finance: investment research, risk summary, due diligence.
+- Energy: solar financial model.
+
+Three-Agent Orchestration: task-planner → execution → task-reviewer (with auto-retry and human escalation).
 
 Governance and evaluation:
 
@@ -153,4 +151,3 @@ Recommended next assets:
 8. `schemas/interruption_event.schema.json`
 9. First draft workflow YAML files for legal, finance, and operations.
 10. Baseline constraint packs for privacy, safety, citation, and human review.
-

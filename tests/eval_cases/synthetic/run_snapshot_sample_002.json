@@ -1,0 +1,134 @@
+{
+  "run_id": "run_sample_002",
+  "workflow_id": "contract_review",
+  "workflow_version": "0.1.0",
+  "workflow_state": {
+    "status": "completed",
+    "current_node": "output_generation",
+    "checkpoint_id": "cp_002",
+    "completed_steps": [
+      "context_intent_gate",
+      "clause_extraction",
+      "risk_assessment",
+      "legal_reference_check",
+      "human_review_flagging",
+      "output_generation"
+    ],
+    "total_steps": 6
+  },
+  "versions": {
+    "prompt_version": "0.1.0",
+    "constraint_pack_version": "0.2.0",
+    "knowledge_base_version": "kb_0.1.0",
+    "model_version": "deepseek-chat",
+    "evaluator_version": "0.1.0",
+    "git_commit": "f686ea3"
+  },
+  "context_intent_gate": {
+    "completed": true,
+    "intent_summary": "审查一份SaaS服务协议中的风险条款。签约方：甲方(某科技公司) vs 乙方(某云服务商)。适用中国法律。",
+    "workflow_selected": "contract_review",
+    "industry": "legal",
+    "jurisdiction": "CN",
+    "risk_level": "high",
+    "missing_information": ["签约方背景信息", "行业监管要求详情"],
+    "allowed_scope": ["internal_review", "risk_analysis"],
+    "approval_required": true
+  },
+  "context_load_plan": {
+    "layers_loaded": ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"],
+    "loaded_files": [
+      "config/active-release.yaml",
+      "config/context-loading.yaml",
+      "constraints/baseline/privacy.yaml",
+      "constraints/baseline/citation.yaml",
+      "constraints/baseline/human_review.yaml",
+      "constraints/industries/legal.yaml",
+      "constraints/jurisdictions/cn.yaml",
+      "prompts/legal/contract_review.system.md",
+      "schemas/run_snapshot.schema.json"
+    ]
+  },
+  "input_summary": {
+    "contract_type": "SaaS服务协议",
+    "parties": "甲方(科技公司) vs 乙方(云服务商)",
+    "jurisdiction": "中华人民共和国",
+    "key_concern": "责任限制条款是否对甲方不利"
+  },
+  "retrieved_sources": [
+    {
+      "source_id": "src_003",
+      "title": "中华人民共和国民法典 合同编",
+      "authority": "statute",
+      "effective_date": "2021-01-01",
+      "excerpt": "第五百零六条 合同中的下列免责条款无效：(一)造成对方人身损害的；(二)因故意或者重大过失造成对方财产损失的。"
+    },
+    {
+      "source_id": "src_004",
+      "title": "SaaS行业标准合同条款对比分析",
+      "authority": "industry_benchmark",
+      "effective_date": "2025-03-01",
+      "excerpt": "行业惯例：SaaS服务商责任上限通常为12个月服务费，数据丢失赔偿另议。"
+    }
+  ],
+  "output_summary": {
+    "sections": [
+      "executive_summary",
+      "clause_by_clause_analysis",
+      "risk_register",
+      "legal_references",
+      "recommended_amendments",
+      "disclaimer"
+    ],
+    "clauses_reviewed": 24,
+    "high_risk_clauses": [
+      "责任限制",
+      "数据安全",
+      "服务等级协议(SLA)",
+      "终止条款"
+    ],
+    "medium_risk_clauses": ["知识产权", "保密", "不可抗力"],
+    "cited_sources": ["民法典第506条", "SaaS行业基准2025"],
+    "human_review_flagged": true,
+    "disclaimer_included": true,
+    "structured_output": {
+      "risk_summary": "整体风险：中高。责任限制条款对甲方保护不足，建议在签署前修改。",
+      "top_3_risks": [
+        "责任上限仅为3个月服务费，远低于行业12个月惯例",
+        "数据丢失赔偿上限过低，与潜在损失不成比例",
+        "SLA仅承诺99.5%可用性，无实质性赔偿机制"
+      ],
+      "amendment_suggestions": [
+        "责任上限提高至12个月服务费或合同总金额（取高者）",
+        "增加数据安全专项赔偿条款",
+        "SLA增加阶梯式赔偿机制"
+      ]
+    }
+  },
+  "constraints_triggered": [
+    {
+      "constraint_id": "no_final_legal_advice",
+      "severity": "high",
+      "action": "flagged_for_review",
+      "message": "合同审查结论需执业律师确认后方可作为签约依据"
+    },
+    {
+      "constraint_id": "jurisdiction_cn_mandatory_law",
+      "severity": "high",
+      "action": "applied",
+      "message": "已适用中国民法典相关条款"
+    }
+  ],
+  "tool_calls": [
+    { "tool": "read_file", "purpose": "加载法律约束与法域规则" },
+    { "tool": "fetch_webpage", "purpose": "检索民法典合同编最新条款" }
+  ],
+  "human_review": {
+    "required": true,
+    "review_status": "pending",
+    "review_items": ["责任限制条款修改建议", "数据安全条款补充建议"]
+  },
+  "interruptions": [],
+  "resume_events": [],
+  "created_at": "2026-05-05T06:00:00Z"
+}

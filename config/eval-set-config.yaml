@@ -1,0 +1,61 @@
+# config/eval-set-config.yaml — Phase 7b 动态评估集自动分类规则配置
+#
+# 定义从 outputs/eval_reports/ 到 tests/eval_cases/ 各分类目录的自动映射规则。
+# 版本: 0.1.0
+
+# ── 自动分类规则 ──
+eval_set_rules:
+  # 每条规则按顺序匹配，首个匹配的规则决定分类目标
+  auto_classify:
+    # 1. 低分样本 → 回归测试失败集
+    - condition: "report.score < 0.4"
+      target: "tests/eval_cases/regression/failures/"
+      description: "综合评分低于 0.4 的评估报告，表示输出质量严重不足"
+      dedup_key: "workflow_id + input_hash"
+      max_samples_per_category: 200
+
+    # 2. 人工修改过 → 人工修正集
+    - condition: "snapshot.human_review.review_status in ('approved_with_changes', 'rejected')"
+      target: "tests/eval_cases/regression/human_corrected/"
+      description: "用户对评估输出进行了修改或打回"
+      dedup_key: "workflow_id + input_hash"
+      max_samples_per_category: 200
+
+    # 3. 触发关键约束 → 风险样本集
+    - condition: "any(c.severity == 'critical' for c in snapshot.constraints_triggered)"
+      target: "tests/eval_cases/regression/risk_samples/"
+      description: "评估过程中触发了 critical 级别的约束规则"
+      dedup_key: "constraint_id + workflow_id"
+      max_samples_per_category: 200
+
+    # 4. 用户反馈高分或人工未修改 → 候选黄金样本
+    - condition: "report.metrics.output_adoption_rate >= 0.8 and not snapshot.human_review.required"
+      target: "tests/eval_cases/golden/"
+      description: "输出采纳率高且无需人工审查的优质输出"
+      dedup_key: "workflow_id + output_hash"
+      requires_human_approval: true
+      max_samples_per_category: 100
+
+  # ── 全局限制 ──
+  max_samples_per_category: 200
+  retention_days: 180
+
+# ── 哈希配置 ──
+hashing:
+  # 用于去重的哈希算法
+  algorithm: "sha256"
+  # 输入摘要截取长度（字符数），超出部分截断后再哈希
+  max_input_chars: 2000
+  max_output_chars: 2000
+
+# ── 报告扫描配置 ──
+scan:
+  # 默认报告目录
+  report_dir: "outputs/eval_reports/"
+  # 报告文件匹配模式
+  report_pattern: "*_eval.json"
+  # 排除的文件模式
+  exclude_patterns:
+    - "_batch_summary.json"
+    - "_trend_data.json"
+    - "_alerts.json"

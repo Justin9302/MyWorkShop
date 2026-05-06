@@ -1,0 +1,876 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/solar_financial_run_snapshot.schema.json",
+  "title": "Solar Financial Model Run Snapshot",
+  "description": "运行快照 schema，扩展自基础 run_snapshot，针对光伏/储能项目财务测算",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "workflow_id",
+    "project_info",
+    "scenario_info",
+    "key_metrics",
+    "annual_data",
+    "funding_structure",
+    "debt_ratios",
+    "tax_depreciation",
+    "model_vintage",
+    "sensitivity_results",
+    "charts_generated",
+    "extraction_metadata"
+  ],
+  "properties": {
+    "run_id": { "type": "string" },
+    "workflow_id": { "type": "string", "const": "solar_financial_model" },
+    "project_info": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "location", "technology_type"],
+      "properties": {
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "technology_type": {
+          "type": "string",
+          "enum": ["solar_pv", "bess", "solar_plus_bess", "hybrid"]
+        },
+        "pv_capacity_mwp": { "type": "number" },
+        "bess_capacity_mw": { "type": "number" },
+        "bess_duration_hrs": { "type": "number" },
+        "bess_storage_mwh": { "type": "number" },
+        "construction_start": { "type": "string", "format": "date" },
+        "construction_end": { "type": "string", "format": "date" },
+        "operation_start": { "type": "string", "format": "date" },
+        "operation_end": { "type": "string", "format": "date" },
+        "operation_years": { "type": "integer" }
+      }
+    },
+    "scenario_info": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario_name"],
+      "properties": {
+        "scenario_name": { "type": "string" },
+        "scenario_description": { "type": "string" },
+        "is_active": { "type": "boolean" }
+      }
+    },
+    "boundary_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "边界条件参数确认记录 — 在运行财务模型引擎前经用户确认的关键输入参数",
+      "required": ["confirmation_status", "confirmation_timestamp"],
+      "properties": {
+        "confirmation_status": {
+          "type": "string",
+          "enum": ["confirmed", "modified_after_confirmation", "not_confirmed"],
+          "description": "用户对边界参数的确认状态"
+        },
+        "confirmation_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "用户确认边界参数的时间戳"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "经确认的边界条件参数快照",
+          "properties": {
+            "pv_capacity_mwp": {
+              "type": "number",
+              "description": "光伏装机容量 (MWp)"
+            },
+            "bess_capacity_mw": {
+              "type": "number",
+              "description": "储能装机容量 (MW)"
+            },
+            "bess_duration_hrs": {
+              "type": "number",
+              "description": "储能时长 (小时)"
+            },
+            "bess_storage_mwh": {
+              "type": "number",
+              "description": "储能容量 (MWh)"
+            },
+            "technology_type": {
+              "type": "string",
+              "enum": ["solar_pv", "bess", "solar_plus_bess", "hybrid"],
+              "description": "技术方案类型"
+            },
+            "pv_capex_aud_kw": {
+              "type": "number",
+              "description": "光伏 CAPEX (AUD/kW) — 建设总成本"
+            },
+            "pv_capex_source": {
+              "type": "string",
+              "description": "光伏 CAPEX 来源: model_extracted / user_provided / market_reference / analyst_assumption"
+            },
+            "bess_capex_aud_kw": {
+              "type": "number",
+              "description": "储能 CAPEX (AUD/kW) — 建设总成本"
+            },
+            "bess_capex_source": {
+              "type": "string",
+              "description": "储能 CAPEX 来源"
+            },
+            "capex_breakdown": {
+              "type": "object",
+              "description": "CAPEX 三层拆解明细",
+              "properties": {
+                "equipment_supply": {
+                  "type": "object",
+                  "description": "设备采购成本",
+                  "properties": {
+                    "pv_modules_aud": {
+                      "type": "number",
+                      "description": "光伏组件采购 (AUD)"
+                    },
+                    "pv_module_brand": {
+                      "type": "string",
+                      "description": "组件品牌/型号"
+                    },
+                    "pv_module_tier": {
+                      "type": "string",
+                      "description": "组件 Tier 级别"
+                    },
+                    "inverters_aud": {
+                      "type": "number",
+                      "description": "逆变器采购 (AUD)"
+                    },
+                    "inverter_type": {
+                      "type": "string",
+                      "description": "逆变器类型: central / string"
+                    },
+                    "bess_battery_aud": {
+                      "type": "number",
+                      "description": "储能电池包/电芯采购 (AUD)"
+                    },
+                    "bess_chemistry": {
+                      "type": "string",
+                      "description": "电化学体系: LFP / NMC"
+                    },
+                    "bess_pcs_ems_aud": {
+                      "type": "number",
+                      "description": "PCS/EMS/BMS 采购 (AUD)"
+                    },
+                    "racking_tracker_aud": {
+                      "type": "number",
+                      "description": "支架与跟踪系统 (AUD)"
+                    },
+                    "electrical_equipment_aud": {
+                      "type": "number",
+                      "description": "变压器/开关柜等电气设备 (AUD)"
+                    },
+                    "equipment_total_aud": {
+                      "type": "number",
+                      "description": "设备采购合计 (AUD)"
+                    }
+                  }
+                },
+                "epc_construction": {
+                  "type": "object",
+                  "description": "EPC / 安装工程成本",
+                  "properties": {
+                    "civil_works_aud": {
+                      "type": "number",
+                      "description": "土建与场地准备 (AUD)"
+                    },
+                    "electrical_installation_aud": {
+                      "type": "number",
+                      "description": "电气安装与布线 (AUD)"
+                    },
+                    "commissioning_aud": {
+                      "type": "number",
+                      "description": "调试与试运行 (AUD)"
+                    },
+                    "epc_mgmt_profit_aud": {
+                      "type": "number",
+                      "description": "EPC 管理费与利润 (AUD)"
+                    },
+                    "engineering_design_aud": {
+                      "type": "number",
+                      "description": "工程设计与技术咨询 (AUD)"
+                    },
+                    "construction_insurance_aud": {
+                      "type": "number",
+                      "description": "建设期保险 (AUD)"
+                    },
+                    "contingency_aud": {
+                      "type": "number",
+                      "description": "不可预见费 (AUD)"
+                    },
+                    "contingency_pct": {
+                      "type": "number",
+                      "description": "不可预见费占比 (%)"
+                    },
+                    "epc_total_aud": {
+                      "type": "number",
+                      "description": "EPC 合计 (AUD)"
+                    },
+                    "contract_type": {
+                      "type": "string",
+                      "description": "EPC 合同类型: lump_sum_turnkey / adjustable / cost_plus"
+                    }
+                  }
+                },
+                "other_capitalized": {
+                  "type": "object",
+                  "description": "其他资本化成本",
+                  "properties": {
+                    "idc_aud": {
+                      "type": "number",
+                      "description": "建设期利息 (AUD)"
+                    },
+                    "financing_fees_aud": {
+                      "type": "number",
+                      "description": "融资费用 (AUD)"
+                    },
+                    "working_capital_aud": {
+                      "type": "number",
+                      "description": "首年运营资本 (AUD)"
+                    },
+                    "connection_cost_aud": {
+                      "type": "number",
+                      "description": "接入设施成本 (AUD)"
+                    }
+                  }
+                },
+                "total_installed_cost_aud": {
+                  "type": "number",
+                  "description": "建设总成本合计 (AUD)"
+                },
+                "total_installed_cost_aud_kw": {
+                  "type": "number",
+                  "description": "单位建设成本 (AUD/kW)"
+                },
+                "equipment_pct_of_total": {
+                  "type": "number",
+                  "description": "设备占比 (%)"
+                }
+              }
+            },
+            "pv_opex_aud_kw_year": {
+              "type": "number",
+              "description": "光伏 OPEX (AUD/kW/年)"
+            },
+            "bess_opex_aud_kw_year": {
+              "type": "number",
+              "description": "储能 OPEX (AUD/kW/年)"
+            },
+            "opex_breakdown": {
+              "type": "object",
+              "description": "运维成本 OPEX 拆解",
+              "properties": {
+                "fixed_om_aud_kw_year": {
+                  "type": "number",
+                  "description": "固定运维 (AUD/kW/年)"
+                },
+                "variable_om_aud_kw_year": {
+                  "type": "number",
+                  "description": "可变运维 (AUD/kW/年)"
+                },
+                "land_lease_aud_year": {
+                  "type": "number",
+                  "description": "土地租金/路权费 (AUD/年)"
+                },
+                "insurance_aud_year": {
+                  "type": "number",
+                  "description": "保险费 (AUD/年)"
+                },
+                "grid_tuos_duos_aud_year": {
+                  "type": "number",
+                  "description": "电网运营费 TUOS/DUOS (AUD/年)"
+                },
+                "spv_management_aud_year": {
+                  "type": "number",
+                  "description": "SPV 管理费 (AUD/年)"
+                },
+                "sinking_fund_aud_year": {
+                  "type": "number",
+                  "description": "年化大修储备 (AUD/年)"
+                },
+                "total_opex_aud_year": {
+                  "type": "number",
+                  "description": "运维成本合计 (AUD/年)"
+                }
+              }
+            },
+            "ppa_price_aud_mwh": {
+              "type": "number",
+              "description": "PPA 电价 (AUD/MWh)"
+            },
+            "ppa_price_source": {
+              "type": "string",
+              "description": "PPA 电价来源"
+            },
+            "discount_rate": {
+              "type": "number",
+              "description": "折现率 (小数)"
+            },
+            "gearing_pct": {
+              "type": "number",
+              "description": "杠杆率 (%)"
+            },
+            "loan_interest_rate": {
+              "type": "number",
+              "description": "贷款利率 (小数)"
+            },
+            "loan_term_years": {
+              "type": "integer",
+              "description": "贷款期限 (年)"
+            },
+            "tax_rate": {
+              "type": "number",
+              "description": "公司税率 (小数)"
+            },
+            "depreciation_method": {
+              "type": "string",
+              "description": "折旧方法"
+            },
+            "capacity_factor_pv": {
+              "type": "number",
+              "description": "光伏容量因子 (小数)"
+            },
+            "operation_years": {
+              "type": "integer",
+              "description": "运营年限"
+            },
+            "major_overhaul_year_bess": {
+              "type": "integer",
+              "description": "电池中期大修年份（运营后第 N 年）"
+            },
+            "major_overhaul_year_inverter": {
+              "type": "integer",
+              "description": "逆变器中期大修年份（运营后第 N 年）"
+            },
+            "acquisition_type": {
+              "type": "string",
+              "enum": [
+                "greenfield",
+                "development_acquisition",
+                "operational_acquisition",
+                "not_applicable"
+              ],
+              "description": "项目获取方式"
+            },
+            "connection_cost_aud": {
+              "type": "number",
+              "description": "接入设施成本 (AUD)，含线路和变电站"
+            },
+            "development_costs": {
+              "type": "object",
+              "description": "开发费用明细（并购项目）",
+              "properties": {
+                "pre_development_fee": {
+                  "type": "number",
+                  "description": "前期开发费（可行性/环评/社区咨询）(AUD)"
+                },
+                "approval_permit_fee": {
+                  "type": "number",
+                  "description": "审批与许可费 (AUD)"
+                },
+                "land_cost": {
+                  "type": "number",
+                  "description": "土地费用（购地/期权/租约预付）(AUD)"
+                },
+                "technical_advisory_fee": {
+                  "type": "number",
+                  "description": "技术顾问费 (AUD)"
+                },
+                "legal_tax_advisory_fee": {
+                  "type": "number",
+                  "description": "法律与税务顾问费 (AUD)"
+                },
+                "acquisition_premium": {
+                  "type": "number",
+                  "description": "收购溢价 (AUD)"
+                },
+                "sunk_development_cost": {
+                  "type": "number",
+                  "description": "已投入沉没开发成本 (AUD)"
+                },
+                "total_development_cost": {
+                  "type": "number",
+                  "description": "开发费用合计 (AUD)"
+                },
+                "capitalized_amount": {
+                  "type": "number",
+                  "description": "资本化金额 (AUD)"
+                },
+                "expensed_amount": {
+                  "type": "number",
+                  "description": "费用化金额 (AUD)"
+                }
+              }
+            }
+          }
+        },
+        "modifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "parameter_name": { "type": "string" },
+              "original_value": {},
+              "modified_value": {},
+              "reason": { "type": "string" },
+              "modified_by": {
+                "type": "string",
+                "enum": ["user", "analyst"]
+              }
+            }
+          },
+          "description": "用户或分析师对边界参数的修改记录"
+        },
+        "notes": {
+          "type": "string",
+          "description": "边界参数确认过程中的备注或待办项"
+        }
+      }
+    },
+    "site_derived_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "选址推导参数记录 — 从项目坐标 + 容量推导的太阳能资源、接入距离、场地条件等",
+      "properties": {
+        "coordinates_provided": {
+          "type": "boolean",
+          "description": "是否提供了项目坐标"
+        },
+        "coordinate_source": {
+          "type": "string",
+          "description": "坐标来源: user_provided / map_selection / address_geocoded"
+        },
+        "solar_resource": {
+          "type": "object",
+          "properties": {
+            "annual_ghi_kwh_m2": {
+              "type": "number",
+              "description": "年水平总辐射 (kWh/m²)"
+            },
+            "psh_hours": {
+              "type": "number",
+              "description": "峰值日照小时数"
+            },
+            "climate_zone": {
+              "type": "string",
+              "description": "气候区"
+            },
+            "data_source": {
+              "type": "string",
+              "description": "太阳能数据来源，如 Solargis / NASA POWER"
+            },
+            "confidence": {
+              "type": "string",
+              "enum": ["high", "medium", "low"],
+              "description": "置信度"
+            }
+          }
+        },
+        "generation_estimate": {
+          "type": "object",
+          "properties": {
+            "first_year_generation_mwh": {
+              "type": "number",
+              "description": "首年发电量 (MWh)"
+            },
+            "average_annual_generation_mwh": {
+              "type": "number",
+              "description": "25 年平均年发电量 (MWh)，含衰减折中"
+            },
+            "net_export_mwh": {
+              "type": "number",
+              "description": "实际上网电量 (MWh)，扣除厂用电和限电"
+            },
+            "system_efficiency": {
+              "type": "number",
+              "description": "系统效率假设 (小数)"
+            },
+            "auxiliary_consumption_pct": {
+              "type": "number",
+              "description": "厂用电率 (%)"
+            },
+            "curtailment_assumption_pct": {
+              "type": "number",
+              "description": "限电率假设 (%)"
+            },
+            "degradation_rate_pct": {
+              "type": "number",
+              "description": "组件年衰减率 (%)"
+            },
+            "derivation_formula": {
+              "type": "string",
+              "description": "推导公式描述"
+            }
+          }
+        },
+        "grid_connection": {
+          "type": "object",
+          "properties": {
+            "nem_region": {
+              "type": "string",
+              "description": "NEM 区域 / 省级电网"
+            },
+            "nearest_line_type": {
+              "type": "string",
+              "description": "最近输电线路类型"
+            },
+            "nearest_line_voltage_kv": {
+              "type": "number",
+              "description": "最近线路电压等级 (kV)"
+            },
+            "connection_distance_km": {
+              "type": "number",
+              "description": "接入距离估算 (km)"
+            },
+            "suggested_connection_voltage_kv": {
+              "type": "number",
+              "description": "建议接入电压等级 (kV)"
+            },
+            "mlf_approximate": {
+              "type": "number",
+              "description": "MLF 边际损耗因子近似值"
+            },
+            "connection_cost_estimate_aud": {
+              "type": "number",
+              "description": "接入成本估算 (AUD)"
+            },
+            "connection_cost_derivation": {
+              "type": "string",
+              "description": "接入成本推导方法"
+            }
+          }
+        },
+        "site_conditions": {
+          "type": "object",
+          "properties": {
+            "terrain_slope": {
+              "type": "string",
+              "description": "地形坡度描述"
+            },
+            "land_cover_type": {
+              "type": "string",
+              "description": "土地覆盖类型（耕地/荒漠/林地等）"
+            },
+            "annual_avg_temperature_c": {
+              "type": "number",
+              "description": "年平均气温 (°C)"
+            },
+            "temperature_derating_pct": {
+              "type": "number",
+              "description": "温度折损系数 (%)"
+            },
+            "extreme_weather_risk": {
+              "type": "string",
+              "description": "极端气候风险标记"
+            }
+          }
+        },
+        "derivation_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "推导备注和置信度说明"
+        }
+      }
+    },
+    "key_metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_irr_post_tax", "project_npv_post_tax"],
+      "properties": {
+        "project_irr_pre_tax": { "type": "number" },
+        "project_irr_post_tax": { "type": "number" },
+        "project_npv_pre_tax": { "type": "number", "description": "AUD k" },
+        "project_npv_pre_tax_rate": {
+          "type": "number",
+          "description": "折现率"
+        },
+        "project_npv_post_tax": { "type": "number", "description": "AUD k" },
+        "project_npv_post_tax_rate": {
+          "type": "number",
+          "description": "折现率"
+        },
+        "equity_irr": { "type": "number" },
+        "equity_npv": { "type": "number", "description": "AUD k" },
+        "equity_npv_rate": { "type": "number" },
+        "equity_payback_discounted": { "type": "string", "format": "date" },
+        "equity_payback_undiscounted": { "type": "string", "format": "date" },
+        "lcoe": { "type": "number", "description": "AUD/MWh" },
+        "lcoe_discount_rate": { "type": "number" },
+        "lcos": { "type": "number", "description": "AUD/MWh" },
+        "lcos_discount_rate": { "type": "number" },
+        "total_project_cost": { "type": "number", "description": "AUD k" },
+        "total_lifetime_revenue": { "type": "number", "description": "AUD k" },
+        "total_lifetime_ebitda": { "type": "number", "description": "AUD k" },
+        "currency": { "type": "string", "default": "AUD" }
+      }
+    },
+    "annual_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "financial_years": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "revenue": {
+          "type": "object",
+          "properties": {
+            "contracted_pv": { "type": "array", "items": { "type": "number" } },
+            "contracted_bess": {
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "uncontracted_pv": {
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "uncontracted_bess": {
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "total": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        "opex": {
+          "type": "object",
+          "properties": {
+            "pv_fixed": { "type": "array", "items": { "type": "number" } },
+            "pv_variable": { "type": "array", "items": { "type": "number" } },
+            "bess": { "type": "array", "items": { "type": "number" } },
+            "total": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        "maintenance_capex": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "ebitda": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "ebitda_margin": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "debt_interest": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "debt_principal": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "equity_injections": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "equity_returns": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "net_cash_to_equity": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "cumulative_net_cashflow": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "generation": {
+          "type": "object",
+          "properties": {
+            "bess_discharge_mwh": {
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "bess_charge_mwh": {
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "net_throughput_mwh": {
+              "type": "array",
+              "items": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "funding_structure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_sources", "total_uses"],
+      "properties": {
+        "total_sources": { "type": "number", "description": "AUD k" },
+        "total_uses": { "type": "number", "description": "AUD k" },
+        "committed_equity": { "type": "number", "description": "AUD k" },
+        "committed_equity_pct": { "type": "number" },
+        "senior_debt": { "type": "number", "description": "AUD k" },
+        "senior_debt_pct": { "type": "number" },
+        "contingent_equity": { "type": "number", "description": "AUD k" },
+        "pv_capex": { "type": "number", "description": "AUD k" },
+        "bess_capex": { "type": "number", "description": "AUD k" },
+        "idc_senior_debt": { "type": "number", "description": "AUD k" },
+        "financing_fees": { "type": "number", "description": "AUD k" },
+        "dsra_initial": { "type": "number", "description": "AUD k" },
+        "gearing_pct": { "type": "number" }
+      }
+    },
+    "debt_ratios": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_dscr": { "type": "number" },
+        "average_dscr": { "type": "number" },
+        "min_hadscr": { "type": "number" },
+        "average_hadscr": { "type": "number" },
+        "min_fadscr": { "type": "number" },
+        "average_fadscr": { "type": "number" },
+        "min_llcr": { "type": "number" },
+        "llcr": { "type": "number" }
+      }
+    },
+    "sensitivity_results": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "revenue_price_sensitivity": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "project_irr": { "type": "array", "items": { "type": "number" } },
+            "equity_irr": { "type": "array", "items": { "type": "number" } },
+            "npv": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        "capacity_factor_sensitivity": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "project_irr": { "type": "array", "items": { "type": "number" } },
+            "equity_irr": { "type": "array", "items": { "type": "number" } },
+            "npv": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        "capex_sensitivity": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "project_irr": { "type": "array", "items": { "type": "number" } },
+            "equity_irr": { "type": "array", "items": { "type": "number" } },
+            "npv": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        "discount_rate_sensitivity": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "project_npv": { "type": "array", "items": { "type": "number" } },
+            "equity_npv": { "type": "array", "items": { "type": "number" } }
+          }
+        }
+      }
+    },
+    "charts_generated": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "chart_name": { "type": "string" },
+          "chart_title": { "type": "string" },
+          "file_path": { "type": "string" },
+          "chart_type": { "type": "string" }
+        }
+      }
+    },
+    "tax_depreciation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "模型中的税收与折旧假设及合理性校验结果",
+      "properties": {
+        "tax_rate": {
+          "type": "number",
+          "description": "模型假设的公司税率（小数）"
+        },
+        "tax_rate_source": { "type": "string" },
+        "depreciation_method": {
+          "type": "string",
+          "description": "折旧方法: Straight Line / Diminishing Value"
+        },
+        "depreciation_periods": {
+          "type": "object",
+          "properties": {
+            "short_term_years": { "type": "integer" },
+            "long_term_years": { "type": "integer" },
+            "depreciation_months": { "type": "number" }
+          }
+        },
+        "depreciation_rates": {
+          "type": "object",
+          "properties": {
+            "short_term_monthly": { "type": "number" },
+            "short_term_annual": { "type": "number" },
+            "short_term_effective_life_years": { "type": "integer" },
+            "long_term_annual": { "type": "number" },
+            "long_term_effective_life_years": { "type": "integer" }
+          }
+        },
+        "asset_categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "category": { "type": "string" },
+              "capex_during_construction": {
+                "type": "number",
+                "description": "AUD k"
+              }
+            }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "税务折旧假设与 ATO 标准之间的偏差警告"
+        }
+      }
+    },
+    "model_vintage": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "模型文件年代检测结果",
+      "properties": {
+        "model_year": { "type": "integer", "description": "检测到的模型年份" },
+        "is_outdated": {
+          "type": "boolean",
+          "description": "是否判断为过时数据"
+        },
+        "detected_from": {
+          "type": "string",
+          "description": "检测来源: filename / content / none"
+        },
+        "vintage_warnings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "年代相关的警告信息"
+        }
+      }
+    },
+    "extraction_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_file", "extraction_timestamp", "engine_version"],
+      "properties": {
+        "source_file": { "type": "string" },
+        "extraction_timestamp": { "type": "string", "format": "date-time" },
+        "engine_version": { "type": "string" },
+        "data_completeness_pct": { "type": "number" },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "errors": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

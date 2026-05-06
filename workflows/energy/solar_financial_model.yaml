@@ -1,0 +1,163 @@
+workflow:
+  id: solar_financial_model
+  name: 光伏/储能项目财务测算（Python引擎）
+  version: 2.2.0
+  industry: energy
+  description: '基于 Python 引擎的月度精度光伏/储能项目财务模型。含混合调度、负电价策略、贴现LCOE/LCOS、市场均衡分析。V2.2: 集成 bess_market_equilibrium 模块。'
+  role: energy_financial_analyst
+  risk_default: medium
+engine:
+  script: scripts/solar_financial_engine.py
+  entry_point: solar_financial_engine.ScenarioManager
+  run_scripts:
+  - scripts/run_oxley_analysis.py
+  - scripts/run_oxley_multi_strategy.py
+  - scripts/run_oxley_v3_equilibrium.py
+  - scripts/run_gullen_bess.py
+  - scripts/run_gullen_v3_equilibrium.py
+  - scripts/run_oxley_debug.py
+mandatory_startup:
+- config/active-release.yaml
+- data/market_reference_au.yaml
+- constraints/jurisdictions/au.yaml
+- constraints/industries/energy.yaml
+context_intent_gate:
+  required: true
+  confirmation_outputs:
+  - 项目类型（纯光伏/纯储能/光储混合）
+  - 核心技术参数（MWp/MW/MWh/时长/化学类型）
+  - 地理位置与并网点（区域/电压等级/MLF）
+  - 商业模式（PPA%/市场化%/FCAS来源）
+  - 数据新鲜度验证结果
+  - 已知缺失信息清单
+  block_conditions:
+  - CAPEX vintage < 2023 且用户未提供当前数据
+  - 纯储能项目未设置负电价策略
+  - 混合项目未区分光伏捕获价与均价
+  - FCAS参数与项目类型不匹配
+  - 输出将用于最终投资决策且无人审核
+  - '调度策略仅使用1种: 必须从 market_reference_au.yaml 的 bess_dispatch_strategies 中加载并对比≥2种'
+  - '未执行市场均衡分析: 纯储能/混合项目必须应用 bess_market_equilibrium 模块'
+steps:
+- id: 1
+  name: 项目范围确认
+  action: 明确技术参数、商业模式、时间线，参数标注来源
+  gate: 所有参数来源已标注
+  rubric_checks:
+  - parameter_completeness
+  produces: 项目参数清单（含来源标注）
+- id: 2
+  name: 市场数据验证
+  action: 检查 market_reference_au.yaml 新鲜度，必要时在线获取
+  gate: 数据新鲜度 < 90天 或 已标注过期
+  rubric_checks:
+  - parameter_completeness.data_freshness
+  - parameter_completeness.vintage_warning
+  produces: 数据新鲜度报告
+- id: 2.5
+  name: 市场均衡分析
+  action: '调用 bess_market_equilibrium.MarketEquilibrium，根据项目COD年份投影届时BESS装机量、煤电剩余量、均衡充放电价格。基于AEMO ISP 2024 Step Change + 政策钟摆模型。'
+  gate: 均衡价格已计算，IRR在政策区间[8%-18%]内或已标注风险
+  block_conditions:
+  - 纯储能/混合项目未应用市场均衡调整
+  - COD年份未与建设期匹配
+  rubric_checks:
+  - market_equilibrium
+  produces: 市场均衡报告（COD年BESS/煤电投影、均衡价差、均衡IRR、政策评估）
+- id: 3
+  name: CAPEX建模
+  action: 拆解CAPEX到设备级（组件/电芯/PCS/EPC/开发/接入），明确全包价vs设备价模式
+  gate: 无双重计费，CAPEX在区域参考±30%内
+  rubric_checks:
+  - capex_structure
+  produces: CAPEX明细表（kAUD）
+- id: 4
+  name: OPEX建模
+  action: 区分固定/可变OPEX，按资产拆分（PV vs BESS），含通胀递增
+  gate: 首个运营年OPEX在行业范围内
+  rubric_checks: []
+  produces: OPEX明细（$/kW/年，含通胀）
+- id: 5
+  name: 中期维护建模
+  action: 按电池化学类型设定更换年份和成本（LFP30%/NMC65%），按月分摊
+  gate: 更换比例与化学类型匹配，已按月分摊
+  rubric_checks:
+  - battery_lifecycle
+  produces: 中期维护时间表（年份/金额）
+- id: 6
+  name: 电价结构分析
+  action: '获取区域价格分布，拆分光伏捕获价/储能充放电压/负电价统计。必须从 market_reference_au.yaml 加载 bess_dispatch_strategies（4种预定义策略）。'
+  gate: 充电价≠放电压≠光伏捕获价，纯储能含负价策略，dispatch_strategies 已加载
+  rubric_checks:
+  - price_structure
+  produces: 价格分布表+加权等效电价+可用调度策略清单
+- id: 7
+  name: 调度策略选择
+  action: '混合:光伏优先充储能; 纯储能:最优窗口(含负价捕获)。必须从 bess_dispatch_strategies 中选择≥2种策略运行对比（推荐组合: 简单日循环 + 60%负价捕获 + 双重优化）。禁止仅使用单一策略。'
+  gate: 调度逻辑物理可行（并网点容量约束），≥2种策略对比
+  block_conditions:
+  - 仅使用1种调度策略（必须≥2种）
+  - 未从 market_reference_au.yaml 加载 bess_dispatch_strategies
+  - '混合项目未区分 FCAS: 纯储能$30-50/kW/年 vs 混合$15-25/kW/年'
+  rubric_checks:
+  - dispatch_strategy
+  produces: 调度策略对比表（含 IRR/NPV/LCOE/LCOS/价差）
+- id: 8
+  name: 收入建模
+  action: '按来源拆分: 能量套利/售电 + FCAS + LGC + PPA。FCAS区分项目类型'
+  gate: 无遗漏收入来源，BESS充放电独立于merchant_price
+  rubric_checks:
+  - price_structure.fcas_differentiated
+  produces: 收入拆解（按来源/月度/年度）
+- id: 9
+  name: 融资结构
+  action: 设定杠杆率/利率/期限/DSRA，计算IDC
+  gate: gearing=0时equity IRR=project IRR
+  rubric_checks:
+  - irr_npv_correctness.equity_equals_project_zero_gearing
+  - irr_npv_correctness.no_payout_cap
+  produces: 融资结构表+债务服务计划
+- id: 10
+  name: 税务与折旧
+  action: 按ATO有效寿命折旧（PV20/储能15/逆变器10/土建40），30%税率，亏损结转
+  gate: 折旧年限与ATO最新指引一致
+  rubric_checks: []
+  produces: 折旧计划+税务计算
+- id: 11
+  name: 现金流与指标计算
+  action: 项目CF+股权CF, IRR年化, NPV, 回收期, DSCR, 贴现LCOE/LCOS(成本按资产拆分)
+  gate: IRR已年化, LCOE/LCOS成本已拆分, 含贴现+充电成本
+  rubric_checks:
+  - lcoe_lcos_correctness
+  - irr_npv_correctness
+  produces: 核心指标摘要+LCOE/LCOS成本明细
+- id: 12
+  name: 敏感性分析
+  action: ≥3变量单因素+ ≥1组合情景 + 杠杆情景。排序敏感度
+  gate: 至少6个情景已运行
+  rubric_checks:
+  - sensitivity_analysis
+  produces: 敏感性矩阵+龙卷风图
+- id: 13
+  name: 行业对标
+  action: IRR/NPV/LCOE/LCOS与CSIRO/AEMO/Lazard基准对比。偏差>20%须解释
+  gate: 所有指标已完成对标，大偏差有解释
+  rubric_checks:
+  - industry_benchmarking
+  produces: 行业对标表
+- id: 14
+  name: 输出与归档
+  action: 生成运行快照(runtime/), 参数来源清单, 假设条件, 局限声明
+  gate: 快照已保存，假设和局限已声明
+  rubric_checks:
+  - output_completeness
+  produces: 运行快照YAML + JSON结果文件
+evaluation:
+  rubric: evaluators/rubrics/solar_financial_model.yaml
+  pass_threshold: 0.7
+  auto_evaluate: true
+  block_on_fail: true
+outputs:
+  json: OUTPUT/oxley_analysis.json
+  snapshot: runtime/oxley_analysis_snapshot_{timestamp}.yaml
+  sensitivity: OUTPUT/oxley_sensitivity.json

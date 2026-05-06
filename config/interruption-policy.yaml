@@ -34,7 +34,11 @@ interruption_policy:
     - "type"
     - "pause_reason"
     - "checkpoint_id"
+    - "plan_file_path"
     - "resume_condition"
     - "cancel_condition"
     - "user_supplement_summary"
     - "validation_result"
+  checkpoint_anchor:
+    plan_file: "runtime/plans/task_plan_{id}.md"
+    description: "中断恢复时首先读取计划文件定位当前进度，从中断点继续执行"

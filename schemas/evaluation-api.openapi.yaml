@@ -1,0 +1,296 @@
+openapi: "3.1.0"
+info:
+  title: "AI Work Platform — Evaluation Sidecar API"
+  version: "0.1.0"
+  description: |
+    评估旁路服务（Sidecar Service）的接口契约。
+
+    核心原则：
+    - 只读输入：评估系统只能读取 run_snapshot，不能修改生产配置。
+    - 只输出建议：评估结果仅作为改进建议，不能自动发布变更。
+    - 异步运行：默认在主流程之后执行，不阻塞用户拿到结果。
+    - 版本隔离：评估逻辑自身版本化，升级不改变历史记录解释方式。
+
+servers:
+  - url: "http://localhost:9100"
+    description: "本地评估 Sidecar（第一版 VS Code Task 模式，由 eval_runner.py 模拟）"
+
+paths:
+  /evaluation/run:
+    post:
+      summary: "运行单次评估"
+      description: |
+        接收一个 run_snapshot，按指定 rubric 评估，返回 eval_report。
+        默认非阻塞（trigger: workflow_completed, blocking: false）。
+        高风险场景可配置为同步拦截（blocking: true）。
+      operationId: runEvaluation
+      tags: ["Evaluation"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationRunRequest"
+      responses:
+        "200":
+          description: "评估完成"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationReport"
+        "400":
+          description: "输入无效（缺少必需字段或格式错误）"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationError"
+        "422":
+          description: "快照与 rubric 不匹配（行业/工作流不兼容）"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationError"
+
+  /evaluation/reports/{run_id}:
+    get:
+      summary: "查询历史评估报告"
+      description: "按 run_id 检索已生成的评估报告。"
+      operationId: getEvaluationReport
+      tags: ["Evaluation"]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: "找到评估报告"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationReport"
+        "404":
+          description: "未找到该 run_id 的评估报告"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationError"
+
+  /evaluation/batch:
+    post:
+      summary: "批量评估"
+      description: |
+        对一批 run_snapshot 运行评估，返回汇总报告。
+        支持按 workflow_id、行业、日期范围、风险等级筛选。
+      operationId: runBatchEvaluation
+      tags: ["Evaluation"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchEvaluationRequest"
+      responses:
+        "200":
+          description: "批量评估完成"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchEvaluationReport"
+        "400":
+          description: "请求无效"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationError"
+
+  /evaluation/suggestions/promote:
+    post:
+      summary: "提交改进建议为候选变更（Phase 7 预留）"
+      description: |
+        将评估建议提升为候选改进项，但仅提交到审核队列，
+        不能直接修改生产 prompt、约束或工作流。
+      operationId: promoteSuggestion
+      tags: ["Evaluation (Future)"]
+      responses:
+        "501":
+          description: "Phase 7 实现"
+
+  /evaluation/evalsets/generate:
+    post:
+      summary: "从运行历史生成动态评估集（Phase 7 预留）"
+      operationId: generateEvalSet
+      tags: ["Evaluation (Future)"]
+      responses:
+        "501":
+          description: "Phase 7 实现"
+
+  /evaluation/compare:
+    post:
+      summary: "对比两次运行的评估结果（Phase 7 预留）"
+      description: "用于 A/B 测试和灰度发布场景。"
+      operationId: compareRuns
+      tags: ["Evaluation (Future)"]
+      responses:
+        "501":
+          description: "Phase 7 实现"
+
+components:
+  schemas:
+    EvaluationRunRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - run_snapshot
+        - rubric_id
+      properties:
+        run_snapshot:
+          $ref: "run_snapshot.schema.json#"
+        rubric_id:
+          type: string
+          description: "评估量规 ID，如 business_model_validation"
+        blocking:
+          type: boolean
+          default: false
+          description: "是否同步拦截（高风险场景可为 true）"
+        evaluator_version:
+          type: string
+          default: "0.1.0"
+          description: "指定评估器版本，默认使用最新"
+
+    BatchEvaluationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - snapshots
+        - rubric_id
+      properties:
+        snapshots:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            type: object
+            additionalProperties: false
+            required: [run_snapshot]
+            properties:
+              run_snapshot:
+                $ref: "run_snapshot.schema.json#"
+        rubric_id:
+          type: string
+        filters:
+          type: object
+          description: "可选的筛选条件"
+          properties:
+            workflow_id:
+              type: string
+            industry:
+              type: string
+            jurisdiction:
+              type: string
+            risk_level:
+              type: string
+              enum: ["low", "medium", "high", "critical"]
+            date_from:
+              type: string
+              format: date-time
+            date_to:
+              type: string
+              format: date-time
+
+    EvaluationReport:
+      $ref: "eval_report.schema.json#"
+
+    BatchEvaluationReport:
+      type: object
+      additionalProperties: false
+      required:
+        - batch_id
+        - total
+        - passed
+        - failed
+        - average_score
+        - reports
+        - summary
+      properties:
+        batch_id:
+          type: string
+        total:
+          type: integer
+          minimum: 0
+        passed:
+          type: integer
+          minimum: 0
+        failed:
+          type: integer
+          minimum: 0
+        average_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        reports:
+          type: array
+          items:
+            $ref: "eval_report.schema.json#"
+        summary:
+          type: object
+          properties:
+            by_workflow:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  average_score:
+                    type: number
+                  pass_rate:
+                    type: number
+            by_risk_level:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  average_score:
+                    type: number
+            top_findings:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  count:
+                    type: integer
+                  avg_severity:
+                    type: string
+            improvement_areas:
+              type: array
+              items:
+                type: object
+                properties:
+                  area:
+                    type: string
+                  affected_count:
+                    type: integer
+                  recommendation:
+                    type: string
+
+    EvaluationError:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: array
+          items:
+            type: object

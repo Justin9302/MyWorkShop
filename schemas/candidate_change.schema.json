@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/candidate_change.schema.json",
+  "title": "Candidate Change",
+  "description": "改进建议转化为结构化候选变更的 Schema，用于审核、沙箱回归、灰度发布和回滚的可追溯管理。",
+  "type": "object",
+  "required": [
+    "change_id",
+    "source",
+    "target",
+    "diff",
+    "validation",
+    "approval",
+    "rollout",
+    "created_at"
+  ],
+  "properties": {
+    "change_id": {
+      "type": "string",
+      "pattern": "^change_[a-f0-9]{8}$",
+      "description": "候选变更唯一标识，格式: change_{uuid8}"
+    },
+    "source": {
+      "type": "object",
+      "description": "来源评估报告的引用信息",
+      "required": ["run_id", "report_path", "suggestion_index"],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "description": "来源评估的运行 ID"
+        },
+        "report_path": {
+          "type": "string",
+          "description": "来源评估报告的相对路径"
+        },
+        "suggestion_index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "在评估报告 suggestions[] 数组中的索引"
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "description": "候选变更的目标组件",
+      "required": ["component", "file_path", "change_type"],
+      "properties": {
+        "component": {
+          "type": "string",
+          "enum": [
+            "prompts",
+            "workflow_steps",
+            "constraint_rules",
+            "retrieval_strategy",
+            "knowledge_base_metadata",
+            "output_templates",
+            "tool_permissions",
+            "model_routing"
+          ],
+          "description": "可进化对象类型，与 docs/eval.md 一致"
+        },
+        "file_path": {
+          "type": "string",
+          "description": "目标文件的相对路径"
+        },
+        "change_type": {
+          "type": "string",
+          "enum": [
+            "add_rule",
+            "modify_prompt",
+            "update_template",
+            "rename_step",
+            "reorder_steps",
+            "add_step",
+            "remove_step",
+            "update_retrieval_order",
+            "mark_deprecated",
+            "update_expiry",
+            "adjust_permission",
+            "switch_model"
+          ],
+          "description": "变更操作类型"
+        }
+      }
+    },
+    "diff": {
+      "type": "object",
+      "description": "变更内容的差异描述",
+      "required": ["summary", "before", "after"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "变更概要说明"
+        },
+        "before": {
+          "type": "string",
+          "description": "变更前的内容（当前配置的原文或摘要）"
+        },
+        "after": {
+          "type": "string",
+          "description": "变更后的内容（修补后的配置）"
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "description": "候选变更的验证状态，由 promote_suggestion.py 初始化为 pending，Phase 7d 沙箱回归后更新",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "sandbox_pass",
+            "sandbox_fail",
+            "approved",
+            "rejected"
+          ],
+          "description": "当前验证阶段"
+        },
+        "sandbox_report": {
+          "type": ["string", "null"],
+          "description": "沙箱回归测试报告的路径（Phase 7d 回填）"
+        },
+        "regression_result": {
+          "type": ["object", "null"],
+          "description": "回归测试结果摘要（Phase 7d 回填）",
+          "properties": {
+            "overall_score_change": { "type": "number" },
+            "regressions": { "type": "array", "items": { "type": "string" } },
+            "improvements": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "description": "人工审核记录",
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "description": "是否需要人工审核（高风险变更强制 true）"
+        },
+        "approved_by": {
+          "type": ["string", "null"],
+          "description": "审核人标识"
+        },
+        "approved_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "审核通过时间"
+        },
+        "review_notes": {
+          "type": ["string", "null"],
+          "description": "审核备注"
+        }
+      }
+    },
+    "rollout": {
+      "type": "object",
+      "description": "灰度发布配置（Phase 7e 使用）",
+      "required": ["strategy", "traffic_split", "status"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["canary", "full"],
+          "description": "发布策略"
+        },
+        "traffic_split": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "灰度流量比例 (0-1)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "canary", "full", "rolled_back"],
+          "description": "发布状态"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "候选变更创建时间"
+    }
+  }
+}

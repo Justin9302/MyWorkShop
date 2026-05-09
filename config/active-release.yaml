@@ -1,6 +1,6 @@
 active_release:
   id: release_2026_05_09_001
-  git_commit: HEAD
+  git_commit: 778032e
   git_tag: release_2026_05_09_001
   stage: stage_9_interruption_recovery
   workflow_version: 0.3.0

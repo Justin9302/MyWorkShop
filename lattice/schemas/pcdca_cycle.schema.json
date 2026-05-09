@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/pcdca_cycle.schema.json",
+  "title": "PCDCA Cycle — PCDCA循环记录",
+  "description": "记录每个原子任务的 PCDCA 循环执行过程。P: Plan, C: Check(Human-in-the-loop), D: Do, C: Check, A: Action。每次循环的完整审计轨迹。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cycle_id",
+    "task_id",
+    "cycle_number",
+    "phases",
+    "result",
+    "timestamp"
+  ],
+  "properties": {
+    "cycle_id": {
+      "type": "string",
+      "description": "循环唯一标识，如 'cycle_001'"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "关联的原子任务ID"
+    },
+    "cycle_number": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "该任务的第几次PCDCA循环"
+    },
+    "phases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan", "plan_check", "do", "check", "action"],
+      "properties": {
+        "plan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["blockers_identified", "plan_summary"],
+          "properties": {
+            "blockers_identified": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["known", "discovered", "implicit"]
+                  },
+                  "description": { "type": "string" },
+                  "severity": {
+                    "type": "string",
+                    "enum": ["low", "medium", "high", "blocking"]
+                  }
+                }
+              },
+              "description": "本循环识别的阻塞点"
+            },
+            "plan_summary": {
+              "type": "string",
+              "description": "执行计划摘要"
+            },
+            "steps_planned": {
+              "type": "integer",
+              "description": "计划中的步骤数"
+            }
+          }
+        },
+        "plan_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reviewer", "result"],
+          "properties": {
+            "reviewer": {
+              "type": "string",
+              "enum": ["human", "auto"],
+              "description": "审核者类型"
+            },
+            "result": {
+              "type": "string",
+              "enum": ["pass", "fail"],
+              "description": "审核结果"
+            },
+            "feedback": {
+              "type": ["string", "null"],
+              "description": "审核反馈"
+            },
+            "reviewed_at": {
+              "type": ["string", "null"],
+              "format": "date-time"
+            }
+          }
+        },
+        "do": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["steps_executed", "artifacts_produced"],
+          "properties": {
+            "steps_executed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "step_id": { "type": "string" },
+                  "action": { "type": "string" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["success", "failed", "skipped"]
+                  },
+                  "output_summary": { "type": "string" }
+                }
+              }
+            },
+            "artifacts_produced": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "产出的文件/数据列表"
+            }
+          }
+        },
+        "check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["validation_results", "result"],
+          "properties": {
+            "validation_results": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "check_item": { "type": "string" },
+                  "passed": { "type": "boolean" },
+                  "detail": { "type": "string" }
+                }
+              }
+            },
+            "result": {
+              "type": "string",
+              "enum": ["pass", "fail"],
+              "description": "Check阶段最终结果"
+            },
+            "fail_reason": {
+              "type": ["string", "null"],
+              "description": "失败原因（仅fail时）"
+            }
+          }
+        },
+        "action": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decision"],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "enum": ["proceed", "retry", "block", "escalate", "skip"],
+              "description": "Action阶段决策"
+            },
+            "decision_reason": {
+              "type": "string",
+              "description": "决策原因"
+            },
+            "next_cycle_plan": {
+              "type": ["string", "null"],
+              "description": "如果retry，下次循环的调整计划"
+            }
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "string",
+      "enum": ["pass", "fail", "blocked", "escalated"],
+      "description": "本循环最终结果"
+    },
+    "timestamp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["started_at", "completed_at"],
+      "properties": {
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

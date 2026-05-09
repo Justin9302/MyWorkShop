@@ -1,0 +1,130 @@
+# =============================================================================
+# PCDCA 循环工作流
+# 用途: 定义单个原子任务的 PCDCA 循环执行流程
+# =============================================================================
+
+workflow:
+  id: "pcdca_workflow_v1"
+  name: "PCDCA 循环执行工作流"
+  description: "单个原子任务的 PCDCA 循环执行流程"
+  version: "1.0.0"
+
+# ── 工作流步骤 ────────────────────────────────────────────────────────────
+steps:
+  # Step 1: 开始循环
+  - id: "start_cycle"
+    name: "开始PCDCA循环"
+    description: "创建新的PCDCA循环记录"
+    type: "execution"
+    command: "python lattice/scripts/lattice_pcdca.py start --task-id {task_id} --cycle-number {cycle_number}"
+    inputs:
+      task_id: "{task_id}"
+      cycle_number: "{cycle_number}"
+    outputs:
+      cycle_id: "cycle_id"
+
+  # Step 2: Plan 阶段
+  - id: "plan_phase"
+    name: "Plan阶段"
+    description: "识别阻塞点 + 制定执行计划"
+    type: "analysis"
+    command: "python lattice/scripts/lattice_pcdca.py plan --cycle-id {cycle_id} --plan-summary \"{plan_summary}\" --steps-planned {steps_planned}"
+    depends_on: ["start_cycle"]
+    inputs:
+      cycle_id: "{cycle_id}"
+      plan_summary: "{plan_summary}"
+      steps_planned: "{steps_planned}"
+    outputs:
+      plan_recorded: "true"
+
+  # Step 3: Plan-Check 阶段 (Human-in-the-loop)
+  - id: "plan_check_phase"
+    name: "Plan-Check阶段"
+    description: "人工审核执行计划"
+    type: "human_review"
+    command: "python lattice/scripts/lattice_pcdca.py plan-check --cycle-id {cycle_id} --result {review_result}"
+    depends_on: ["plan_phase"]
+    inputs:
+      cycle_id: "{cycle_id}"
+      review_result: "{review_result}"
+    outputs:
+      plan_approved: "review_result == 'pass'"
+    on_failure: "retry_plan"            # 如果审核失败，回退到Plan
+
+  # Step 4: Do 阶段
+  - id: "do_phase"
+    name: "Do阶段"
+    description: "执行计划中的步骤"
+    type: "execution"
+    command: "python lattice/scripts/lattice_pcdca.py do --cycle-id {cycle_id} --step-id {step_id} --action {action} --status {status}"
+    depends_on: ["plan_check_phase"]
+    inputs:
+      cycle_id: "{cycle_id}"
+      step_id: "{step_id}"
+      action: "{action}"
+      status: "{status}"
+    outputs:
+      step_recorded: "true"
+
+  # Step 5: Check 阶段
+  - id: "check_phase"
+    name: "Check阶段"
+    description: "验证产物是否符合验收标准"
+    type: "validation"
+    command: "python lattice/scripts/lattice_pcdca.py check --cycle-id {cycle_id} --result {check_result}"
+    depends_on: ["do_phase"]
+    inputs:
+      cycle_id: "{cycle_id}"
+      check_result: "{check_result}"
+    outputs:
+      validation_passed: "check_result == 'pass'"
+    on_failure: "retry_plan"            # 如果验证失败，回退到Plan
+
+  # Step 6: Action 阶段
+  - id: "action_phase"
+    name: "Action阶段"
+    description: "根据Check结果做出决策"
+    type: "decision"
+    command: "python lattice/scripts/lattice_pcdca.py action --cycle-id {cycle_id} --decision {decision}"
+    depends_on: ["check_phase"]
+    inputs:
+      cycle_id: "{cycle_id}"
+      decision: "{decision}"
+    outputs:
+      cycle_result: "decision"
+
+# ── 循环策略 ──────────────────────────────────────────────────────────────
+loop:
+  max_iterations: 5                     # 最大PCDCA循环次数
+  retry_path: "retry_plan"              # 失败时回退到Plan
+  conditions:
+    - "decision == 'proceed' → 标记完成"
+    - "decision == 'retry' → 开始新的PCDCA循环"
+    - "decision == 'block' → 暂停并通知用户"
+    - "decision == 'escalate' → 升级到人工处理"
+    - "decision == 'skip' → 跳过该任务"
+
+# ── 输入输出 ──────────────────────────────────────────────────────────────
+inputs:
+  task_id:
+    description: "原子任务ID"
+    type: "string"
+    required: true
+  cycle_number:
+    description: "循环次数"
+    type: "integer"
+    default: 1
+  plan_summary:
+    description: "计划摘要"
+    type: "string"
+    required: true
+  steps_planned:
+    description: "计划步骤数"
+    type: "integer"
+    required: true
+
+outputs:
+  cycle_id:
+    description: "循环ID"
+  cycle_result:
+    description: "循环结果 (pass/fail/blocked/escalated)"

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/blocker.schema.json",
+  "title": "Blocker — 阻塞点注册",
+  "description": "阻塞点注册表。阻塞点分为三类：已知阻塞（已知已知）、发现阻塞（已知未知）、隐含阻塞（未知未知）。阻塞点可升级到人工处理。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["blocker_id", "type", "description", "severity", "status"],
+  "properties": {
+    "blocker_id": {
+      "type": "string",
+      "description": "阻塞点唯一标识"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["known", "discovered", "implicit"],
+      "description": "阻塞点类型：known=已知已知, discovered=已知未知, implicit=未知未知"
+    },
+    "description": {
+      "type": "string",
+      "description": "阻塞点描述"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "blocking"],
+      "description": "严重程度"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "in_progress", "resolved", "escalated", "workaround"],
+      "description": "阻塞点状态"
+    },
+    "affected_tasks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "受影响的原子任务ID列表"
+    },
+    "affected_layer": {
+      "type": ["integer", "null"],
+      "description": "受影响的层级"
+    },
+    "resolution": {
+      "type": ["string", "null"],
+      "description": "解决方案描述"
+    },
+    "workaround": {
+      "type": ["string", "null"],
+      "description": "临时绕过方案"
+    },
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "escalated_to": {
+          "type": "string",
+          "description": "升级对象（如 'human', 'senior_reviewer'）"
+        },
+        "escalated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolution_provided": {
+          "type": ["string", "null"]
+        }
+      },
+      "description": "升级信息"
+    },
+    "discovered_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "发现时间（仅discovered/implicit类型）"
+    },
+    "discovered_in_cycle": {
+      "type": ["string", "null"],
+      "description": "在哪个PCDCA循环中发现"
+    },
+    "resolved_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "备注列表"
+    }
+  }
+}

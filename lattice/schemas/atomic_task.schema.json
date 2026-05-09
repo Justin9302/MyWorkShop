@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/atomic_task.schema.json",
+  "title": "Atomic Task — 原子任务定义",
+  "description": "LatticeWork 框架的最小可执行单元。每个原子任务包含完整的上下文：意图、依赖、执行计划、验证标准、阻塞点注册。CLINE 可 100% 自主执行 PCDCA 循环。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task",
+    "intent",
+    "dependencies",
+    "execution_plan",
+    "validation",
+    "state"
+  ],
+  "properties": {
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "layer", "type", "appetite"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "原子任务唯一标识，如 'task_0001'"
+        },
+        "name": { "type": "string", "description": "任务名称" },
+        "layer": { "type": "integer", "description": "所属层级编号" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "core_algorithm",
+            "data_model",
+            "interface_definition",
+            "service_implementation",
+            "adapter",
+            "configuration",
+            "test_infrastructure",
+            "documentation",
+            "validation"
+          ],
+          "description": "任务类型"
+        },
+        "appetite": {
+          "type": "string",
+          "description": "时间/上下文预算，如 '2h', '1d', '4h'"
+        }
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_goal", "acceptance_criteria"],
+      "properties": {
+        "user_goal": {
+          "type": "string",
+          "description": "该原子任务的具体目标"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "验收标准列表"
+        },
+        "non_goals": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "明确不做的事项"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires", "layer", "provides"],
+      "properties": {
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "依赖的其他 task_id 列表"
+        },
+        "layer": {
+          "type": "integer",
+          "description": "所属层级（同层依赖检查用）"
+        },
+        "provides": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "该任务产出的能力/接口/数据"
+        },
+        "contract": {
+          "type": "object",
+          "description": "接口契约定义（用于跨层依赖检查）",
+          "properties": {
+            "input_schema": {
+              "type": "string",
+              "description": "输入接口描述或引用"
+            },
+            "output_schema": {
+              "type": "string",
+              "description": "输出接口描述或引用"
+            }
+          }
+        }
+      }
+    },
+    "execution_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "description", "action"],
+            "properties": {
+              "id": { "type": "string", "description": "步骤ID" },
+              "description": { "type": "string", "description": "步骤描述" },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "write_to_file",
+                  "read_file",
+                  "execute_command",
+                  "use_mcp_tool",
+                  "ask_user"
+                ],
+                "description": "执行动作类型"
+              },
+              "params": {
+                "type": "object",
+                "description": "动作参数（根据action类型不同而不同）"
+              },
+              "files": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "涉及的文件列表"
+              }
+            }
+          }
+        },
+        "estimated_effort": {
+          "type": "string",
+          "description": "预估工作量"
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit_tests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "单元测试文件路径列表"
+        },
+        "integration_tests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "集成测试文件路径列表"
+        },
+        "pcdca_checklist": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "PCDCA循环检查点列表"
+        },
+        "manual_checks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "需要人工检查的项"
+        }
+      }
+    },
+    "blockers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "known": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "resolution": { "type": "string" }
+            }
+          },
+          "description": "已知阻塞点"
+        },
+        "discovered": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "discovered_at": { "type": "string", "format": "date-time" },
+              "status": {
+                "type": "string",
+                "enum": ["open", "resolved", "escalated"]
+              },
+              "resolution": { "type": "string" }
+            }
+          },
+          "description": "执行中发现的阻塞点"
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "blocked",
+            "in_plan",
+            "plan_approved",
+            "in_progress",
+            "in_check",
+            "pass",
+            "fail",
+            "skipped"
+          ],
+          "description": "任务执行状态"
+        },
+        "current_step": {
+          "type": ["string", "null"],
+          "description": "当前执行到的步骤ID"
+        },
+        "pcdca_cycle_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "PCDCA循环次数"
+        },
+        "last_check_result": {
+          "type": ["string", "null"],
+          "enum": [null, "pass", "fail"],
+          "description": "上次Check阶段结果"
+        },
+        "last_check_detail": {
+          "type": ["string", "null"],
+          "description": "上次Check阶段的详细结果"
+        },
+        "started_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

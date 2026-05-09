@@ -1,44 +1,104 @@
 interruption_policy:
-  version: "0.1.0"
-  status: "draft"
+  version: "0.2.0"
+  status: "active"
+  description: "Phase 9: 中断、补充、恢复与用户运行控制 — 正式版"
   interruption_types:
     workflow_pause:
       description: "A planned pause triggered by workflow logic, constraints, missing information, or approval needs."
       resume_requires_validation: true
       checkpoint_required: true
+      recovery_paths:
+        - "resume"    # 从原 checkpoint 恢复
+        - "replan"    # 需要重新生成上下文加载计划
+        - "regate"    # 需要退回上下文读取与意图确认门禁
     interrupted_by_user:
       description: "The user paused or stopped the current run before completion."
       resume_requires_validation: true
       checkpoint_required: true
+      recovery_paths:
+        - "resume"
+        - "replan"
+        - "regate"
     cancelled_by_user:
       description: "The user explicitly abandoned the current run."
       resume_requires_validation: false
       checkpoint_required: true
+      recovery_paths:
+        - "terminate"
   mandatory_pause_reasons:
-    - "missing_required_input"
-    - "high_risk_output"
-    - "requires_human_approval"
-    - "tool_permission_required"
-    - "schema_validation_failed"
-    - "context_budget_exceeded"
-    - "evidence_gap"
+    - id: "missing_required_input"
+      description: "工作流缺少必需输入 (如合同文本、审查目标)"
+      resume_condition: "用户补充了缺失的输入信息"
+      cancel_condition: "用户放弃本次审查"
+    - id: "high_risk_output"
+      description: "高风险输出需要人工审批"
+      resume_condition: "合格审查者批准或修改最终输出"
+      cancel_condition: "审查者拒绝输出"
+    - id: "requires_human_approval"
+      description: "工作流节点要求人工审批"
+      resume_condition: "用户批准、修改或拒绝"
+      cancel_condition: "用户拒绝继续"
+    - id: "tool_permission_required"
+      description: "需要用户授权工具权限"
+      resume_condition: "用户授权或拒绝工具权限"
+      cancel_condition: "用户拒绝授权"
+    - id: "schema_validation_failed"
+      description: "输出不符合 Schema 规范"
+      resume_condition: "用户确认或修改输出格式"
+      cancel_condition: "用户放弃本次运行"
+    - id: "context_budget_exceeded"
+      description: "上下文预算超限"
+      resume_condition: "用户确认继续或选择摘要策略"
+      cancel_condition: "用户放弃本次运行"
+    - id: "evidence_gap"
+      description: "引用证据不足"
+      resume_condition: "用户补充参考资料或确认当前证据足够"
+      cancel_condition: "用户放弃本次运行"
   resume_validation:
     required_checks:
-      - "supplement_answers_pause_reason"
-      - "intent_still_matches_workflow"
-      - "risk_level_recomputed"
-      - "context_load_plan_updated_if_needed"
-      - "approval_status_recorded"
+      - id: "supplement_answers_pause_reason"
+        description: "补充内容是否回答了中断问题"
+      - id: "intent_still_matches_workflow"
+        description: "用户意图、行业、地区、风险等级或目标产物是否发生变化"
+      - id: "risk_level_recomputed"
+        description: "是否触发新的约束、人审或工具权限要求"
+      - id: "context_load_plan_updated_if_needed"
+        description: "是否需要重新生成上下文加载计划"
+      - id: "approval_status_recorded"
+        description: "审批状态是否已记录"
+  structured_patches:
+    - type: "intent_patch"
+      description: "用户目标、范围、行业、地区、风险等级的变化"
+      triggers_replan: true
+      triggers_regate: true
+    - type: "context_patch"
+      description: "需要加载的资料、prompt、规则的变化"
+      triggers_replan: true
+      triggers_regate: false
+    - type: "approval_patch"
+      description: "人工审批、工具授权、继续/取消决策"
+      triggers_replan: false
+      triggers_regate: false
+    - type: "constraint_patch"
+      description: "额外限制、禁止动作或输出要求"
+      triggers_replan: true
+      triggers_regate: false
   audit_fields:
     - "interruption_id"
     - "type"
     - "pause_reason"
     - "checkpoint_id"
-    - "plan_file_path"
+    - "node_id"
     - "resume_condition"
     - "cancel_condition"
+    - "pending_questions"
     - "user_supplement_summary"
+    - "structured_patch"
     - "validation_result"
+    - "recovery_path"
   checkpoint_anchor:
     plan_file: "runtime/plans/task_plan_{id}.md"
     description: "中断恢复时首先读取计划文件定位当前进度，从中断点继续执行"
+  runtime_dirs:
+    checkpoints: "runtime/checkpoints"
+    interruptions: "runtime/interruptions"

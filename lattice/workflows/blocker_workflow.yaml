@@ -1,0 +1,149 @@
+# =============================================================================
+# 阻塞点管理工作流
+# 用途: 定义阻塞点的注册、追踪、升级和解决流程
+# =============================================================================
+
+workflow:
+  id: "blocker_workflow_v1"
+  name: "阻塞点管理工作流"
+  description: "阻塞点的全生命周期管理"
+  version: "1.0.0"
+
+# ── 工作流步骤 ────────────────────────────────────────────────────────────
+steps:
+  # Step 1: 注册阻塞点
+  - id: "register_blocker"
+    name: "注册阻塞点"
+    description: "注册新发现的阻塞点"
+    type: "registration"
+    command: "python lattice/scripts/lattice_blocker.py register --type {blocker_type} --description \"{description}\" --severity {severity} --affected-tasks {affected_tasks}"
+    inputs:
+      blocker_type: "{blocker_type}"
+      description: "{description}"
+      severity: "{severity}"
+      affected_tasks: "{affected_tasks}"
+    outputs:
+      blocker_id: "blocker_id"
+
+  # Step 2: 评估阻塞点
+  - id: "assess_blocker"
+    name: "评估阻塞点"
+    description: "评估阻塞点的影响范围和严重程度"
+    type: "analysis"
+    depends_on: ["register_blocker"]
+    inputs:
+      blocker_id: "{blocker_id}"
+    outputs:
+      assessment: "assessment_result"
+
+  # Step 3: 尝试自动解决
+  - id: "auto_resolve"
+    name: "自动解决"
+    description: "尝试自动解决阻塞点（已知类型）"
+    type: "execution"
+    depends_on: ["assess_blocker"]
+    command: "python lattice/scripts/lattice_blocker.py resolve --blocker-id {blocker_id} --resolution \"{resolution}\""
+    inputs:
+      blocker_id: "{blocker_id}"
+      resolution: "{resolution}"
+    outputs:
+      resolved: "true"
+    on_failure: "escalate_blocker"      # 如果自动解决失败，升级
+
+  # Step 4: 升级阻塞点
+  - id: "escalate_blocker"
+    name: "升级阻塞点"
+    description: "将阻塞点升级到人工处理"
+    type: "human_review"
+    command: "python lattice/scripts/lattice_blocker.py escalate --blocker-id {blocker_id} --escalate-to human"
+    depends_on: ["auto_resolve"]
+    inputs:
+      blocker_id: "{blocker_id}"
+    outputs:
+      escalated: "true"
+
+  # Step 5: 应用解决方案
+  - id: "apply_resolution"
+    name: "应用解决方案"
+    description: "应用人工提供的解决方案"
+    type: "execution"
+    depends_on: ["escalate_blocker"]
+    command: "python lattice/scripts/lattice_blocker.py resolve --blocker-id {blocker_id} --resolution \"{resolution}\""
+    inputs:
+      blocker_id: "{blocker_id}"
+      resolution: "{resolution}"
+    outputs:
+      resolved: "true"
+
+  # Step 6: 验证解决
+  - id: "verify_resolution"
+    name: "验证解决"
+    description: "验证阻塞点是否已解决"
+    type: "validation"
+    depends_on: ["apply_resolution"]
+    command: "python lattice/scripts/lattice_blocker.py status --blocker-id {blocker_id}"
+    inputs:
+      blocker_id: "{blocker_id}"
+    outputs:
+      status: "status"
+
+# ── 阻塞点分类处理 ────────────────────────────────────────────────────────
+blocker_handling:
+  known:
+    description: "已知阻塞（已知已知）"
+    action: "auto_resolve"
+    priority: "low"
+  discovered:
+    description: "发现阻塞（已知未知）"
+    action: "assess_then_resolve"
+    priority: "medium"
+  implicit:
+    description: "隐含阻塞（未知未知）"
+    action: "escalate_immediately"
+    priority: "high"
+
+# ── 严重程度响应 ──────────────────────────────────────────────────────────
+severity_response:
+  low:
+    action: "auto_resolve"
+    notify: false
+  medium:
+    action: "assess_then_resolve"
+    notify: true
+  high:
+    action: "assess_then_escalate"
+    notify: true
+  blocking:
+    action: "escalate_immediately"
+    notify: true
+
+# ── 输入输出 ──────────────────────────────────────────────────────────────
+inputs:
+  blocker_type:
+    description: "阻塞点类型 (known/discovered/implicit)"
+    type: "string"
+    required: true
+  description:
+    description: "阻塞点描述"
+    type: "string"
+    required: true
+  severity:
+    description: "严重程度 (low/medium/high/blocking)"
+    type: "string"
+    required: true
+  affected_tasks:
+    description: "受影响的任务ID列表"
+    type: "array"
+    required: true
+  resolution:
+    description: "解决方案描述"
+    type: "string"
+    default: ""
+
+outputs:
+  blocker_id:
+    description: "阻塞点ID"
+  resolved:
+    description: "是否已解决"
+  status:
+    description: "最终状态"

@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 #
 # validate_interruption_flow.sh
-# 验证中断与恢复机制的完整性和合规性
+# Phase 9: 验证中断与恢复机制的完整性和合规性
 #
 # 检查范围:
 #   1. config/interruption-policy.yaml 存在且合法
 #   2. schemas/interruption_event.schema.json 存在且合法
-#   3. 所有工作流 YAML 定义了中断节点
-#   4. 所有中断节点包含 pause_reason、resume_condition、cancel_condition、audit_fields
-#   5. 所有中断类型符合 policy 定义
+#   3. scripts/interruption_handler.py 存在且语法正确
+#   4. 所有工作流 YAML 定义了中断节点
+#   5. 所有中断节点包含 pause_reason、resume_condition、cancel_condition、audit_fields
+#   6. 所有中断类型符合 policy 定义
+#   7. 运行时快照包含中断字段
+#   8. Checkpoint 目录存在
+#   9. 中断处理脚本 CLI 子命令可用
 #
 # 用法:
 #   ./scripts/validate_interruption_flow.sh
@@ -30,14 +34,19 @@ log_err()  { echo "  ❌ $1"; EXIT_CODE=1; }
 verbose()  { $VERBOSE && echo "     $1"; }
 
 echo "============================================"
-echo "  中断流程验证 — Interruption Flow Validation"
+echo "  中断流程验证 — Phase 9"
+echo "  Interruption Flow Validation"
 echo "============================================"
 echo ""
 
 # ── 1. 检查核心配置文件 ──
-echo "【1/5】核心配置文件检查"
+echo "【1/9】核心配置文件检查"
 if [[ -f "$ROOT_DIR/config/interruption-policy.yaml" ]]; then
   log_ok "config/interruption-policy.yaml 存在"
+  # 检查版本
+  if grep -q "version: \"0.2.0\"" "$ROOT_DIR/config/interruption-policy.yaml" 2>/dev/null; then
+    log_ok "  interruption-policy.yaml 版本 0.2.0 (Phase 9)"
+  fi
 else
   log_err "config/interruption-policy.yaml 不存在"
 fi
@@ -47,10 +56,63 @@ if [[ -f "$ROOT_DIR/schemas/interruption_event.schema.json" ]]; then
 else
   log_err "schemas/interruption_event.schema.json 不存在"
 fi
+
+# 检查 human_review.yaml 包含中断触发规则
+if grep -q "interruption_trigger: true" "$ROOT_DIR/constraints/baseline/human_review.yaml" 2>/dev/null; then
+  log_ok "constraints/baseline/human_review.yaml 包含中断触发规则"
+else
+  log_warn "constraints/baseline/human_review.yaml 缺少中断触发规则"
+fi
 echo ""
 
-# ── 2. 检查工作流中断节点定义 ──
-echo "【2/5】工作流中断节点检查"
+# ── 2. 检查中断处理脚本 ──
+echo "【2/9】中断处理脚本检查"
+if [[ -f "$ROOT_DIR/scripts/interruption_handler.py" ]]; then
+  log_ok "scripts/interruption_handler.py 存在"
+  # 语法检查
+  if python3 -c "import ast; ast.parse(open('$ROOT_DIR/scripts/interruption_handler.py').read())" 2>/dev/null; then
+    log_ok "  Python 语法正确"
+  else
+    log_err "  Python 语法错误"
+  fi
+  # 检查关键函数
+  for func in "create_interruption" "process_resume_event" "validate_resume" "create_checkpoint" "update_snapshot_with_interruption" "extract_structured_patch"; do
+    if grep -q "def $func" "$ROOT_DIR/scripts/interruption_handler.py" 2>/dev/null; then
+      verbose "  ✓ 函数 $func 已定义"
+    else
+      log_warn "  函数 $func 未定义"
+    fi
+  done
+  # 检查 CLI 子命令
+  for cmd in "create-interruption" "process-resume" "validate-resume" "create-checkpoint" "update-snapshot"; do
+    if grep -q "\"$cmd\"" "$ROOT_DIR/scripts/interruption_handler.py" 2>/dev/null; then
+      verbose "  ✓ CLI 子命令 $cmd 已定义"
+    else
+      log_warn "  CLI 子命令 $cmd 未定义"
+    fi
+  done
+else
+  log_err "scripts/interruption_handler.py 不存在"
+fi
+echo ""
+
+# ── 3. 检查 workflow_runner.py 中断/恢复子命令 ──
+echo "【3/9】workflow_runner.py 中断/恢复子命令检查"
+if [[ -f "$ROOT_DIR/scripts/workflow_runner.py" ]]; then
+  for cmd in "interrupt" "resume" "checkpoint"; do
+    if grep -q "subparsers.add_parser(\"$cmd\"" "$ROOT_DIR/scripts/workflow_runner.py" 2>/dev/null; then
+      log_ok "  workflow_runner.py 包含 '$cmd' 子命令"
+    else
+      log_warn "  workflow_runner.py 缺少 '$cmd' 子命令"
+    fi
+  done
+else
+  log_err "scripts/workflow_runner.py 不存在"
+fi
+echo ""
+
+# ── 4. 检查工作流中断节点定义 ──
+echo "【4/9】工作流中断节点检查"
 WORKFLOW_COUNT=0
 WF_WITH_INTERRUPTIONS=0
 WF_MISSING_INTERRUPTIONS=0
@@ -75,15 +137,14 @@ else
 fi
 echo ""
 
-# ── 3. 检查中断节点字段完整性 ──
-echo "【3/5】中断节点字段完整性检查"
+# ── 5. 检查中断节点字段完整性 ──
+echo "【5/9】中断节点字段完整性检查"
 NODE_TOTAL=0
 NODE_MISSING=0
 
 while IFS= read -r wf; do
   wf_rel="${wf#$ROOT_DIR/}"
 
-  # 提取 interruptions 块并逐节点检查
   in_interruptions=false
   node_started=false
   has_pause_reason=false
@@ -98,14 +159,11 @@ while IFS= read -r wf; do
     fi
 
     if $in_interruptions; then
-      # 遇到下一个顶级键或文件结束
       if [[ "$line" =~ ^[a-z] ]] && ! [[ "$line" =~ ^[[:space:]]+- ]]; then
         break
       fi
 
-      # 检测新节点
       if [[ "$line" =~ ^[[:space:]]+-[[:space:]]node_id: ]]; then
-        # 保存上一个节点状态
         if $node_started; then
           NODE_TOTAL=$((NODE_TOTAL + 1))
           if ! $has_resume || ! $has_cancel; then
@@ -128,7 +186,6 @@ while IFS= read -r wf; do
     fi
   done < "$wf"
 
-  # 最后一个节点
   if $node_started; then
     NODE_TOTAL=$((NODE_TOTAL + 1))
     if ! $has_resume || ! $has_cancel; then
@@ -145,8 +202,8 @@ else
 fi
 echo ""
 
-# ── 4. 检查中断类型合法性 ──
-echo "【4/5】中断类型合法性检查"
+# ── 6. 检查中断类型合法性 ──
+echo "【6/9】中断类型合法性检查"
 VALID_TYPES="workflow_pause interrupted_by_user cancelled_by_user"
 
 while IFS= read -r wf; do
@@ -167,8 +224,8 @@ done < <(find "$ROOT_DIR/workflows" -name "*.yaml" 2>/dev/null || true)
 log_ok "中断类型检查完成"
 echo ""
 
-# ── 5. 检查运行时快照是否包含中断字段 ──
-echo "【5/5】运行时快照中断字段检查"
+# ── 7. 检查运行时快照是否包含中断字段 ──
+echo "【7/9】运行时快照中断字段检查"
 if [[ -f "$ROOT_DIR/schemas/run_snapshot.schema.json" ]]; then
   for field in "workflow_state" "interruptions" "resume_events"; do
     if grep -q "\"$field\"" "$ROOT_DIR/schemas/run_snapshot.schema.json" 2>/dev/null; then
@@ -181,8 +238,36 @@ if [[ -f "$ROOT_DIR/schemas/run_snapshot.schema.json" ]]; then
 else
   log_err "run_snapshot.schema.json 不存在"
 fi
-
 echo ""
+
+# ── 8. 检查 Checkpoint 和中断运行时目录 ──
+echo "【8/9】运行时目录检查"
+for dir in "runtime/checkpoints" "runtime/interruptions"; do
+  if [[ -d "$ROOT_DIR/$dir" ]]; then
+    log_ok "$dir 目录存在"
+  else
+    log_warn "$dir 目录不存在 (将在首次运行时自动创建)"
+  fi
+done
+echo ""
+
+# ── 9. 检查中断处理脚本 CLI 可用性 ──
+echo "【9/9】中断处理脚本 CLI 可用性检查"
+if python3 "$ROOT_DIR/scripts/interruption_handler.py" --help >/dev/null 2>&1; then
+  log_ok "interruption_handler.py CLI 可用"
+  # 检查子命令
+  for cmd in "create-interruption" "process-resume" "validate-resume" "create-checkpoint" "update-snapshot"; do
+    if python3 "$ROOT_DIR/scripts/interruption_handler.py" "$cmd" --help >/dev/null 2>&1; then
+      verbose "  ✓ 子命令 '$cmd' 可用"
+    else
+      log_warn "  子命令 '$cmd' 不可用"
+    fi
+  done
+else
+  log_err "interruption_handler.py CLI 不可用"
+fi
+echo ""
+
 echo "============================================"
 if [[ $EXIT_CODE -eq 0 ]]; then
   echo "  结果: ✅ 全部通过"

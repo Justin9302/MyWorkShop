@@ -1,0 +1,67 @@
+#=============================================================================
+# rollout-policy.yaml — Phase 7e 灰度发布策略配置
+#
+# 定义候选变更的灰度发布策略，包括：
+#   - 默认策略 (canary / full)
+#   - 金丝雀发布参数（流量比例、观察期、回滚条件）
+#   - 全量发布参数
+#   - 按团队/租户的灰度规则
+#
+# 使用:
+#   python scripts/rollout_manager.py start --change change_001 --strategy canary
+#   python scripts/rollout_manager.py status change_001
+#   python scripts/rollout_manager.py promote change_001
+#   python scripts/rollout_manager.py rollback change_001 --reason "score dropped"
+#=============================================================================
+
+rollout:
+  # ── 默认策略 ──
+  default_strategy: "canary"  # canary | full
+
+  # ── 金丝雀发布配置 ──
+  canary:
+    enabled: true
+    traffic_split: 0.1          # 10% 流量使用新版本
+    observation_period: "7d"    # 观察 7 天
+    rollback_conditions:
+      score_drop_threshold: 0.1           # 综合评分下降 > 0.1 → 回滚
+      risk_increase_threshold: "high"     # 出现 high 级以上新风险 → 回滚
+      human_modification_increase: 0.2    # 人工修改率上升 > 0.2 → 回滚
+      high_risk_miss_rate_increase: 0.15  # 高风险漏检率上升 > 0.15 → 回滚
+      critical_regression_count: 1        # 出现 1 个以上 critical regression → 回滚
+
+  # ── 全量发布配置 ──
+  full_rollout:
+    observation_period: "14d"
+    rollback_conditions:
+      score_drop_threshold: 0.05
+      risk_increase_threshold: "medium"
+      human_modification_increase: 0.15
+      high_risk_miss_rate_increase: 0.1
+      critical_regression_count: 0
+
+  # ── 按团队/租户灰度 ──
+  tenants:
+    pilot_teams: []       # 先行体验团队列表
+    excluded_teams: []    # 排除的团队列表
+
+  # ── 灰度状态枚举 ──
+  # 状态流转:
+  #   pending → canary → full → completed
+  #   pending → canary → rolled_back
+  #   pending → full → completed
+  #   pending → full → rolled_back
+  #   pending → rolled_back
+  statuses:
+    - pending       # 等待灰度
+    - canary        # 金丝雀发布中
+    - full          # 全量发布中
+    - completed     # 发布完成
+    - rolled_back   # 已回滚
+    - failed        # 发布失败
+
+  # ── 观察期单位 ──
+  observation_units:
+    - "h"   # 小时
+    - "d"   # 天
+    - "w"   # 周

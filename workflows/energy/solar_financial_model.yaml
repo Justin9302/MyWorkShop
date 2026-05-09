@@ -152,6 +152,36 @@ steps:
   rubric_checks:
   - output_completeness
   produces: 运行快照YAML + JSON结果文件
+interruptions:
+  confirm_intent:
+    type: workflow_pause
+    pause_reason: missing_required_input
+    node_id: confirm_intent
+    resume_condition: 用户确认了项目类型和核心技术参数
+    cancel_condition: 用户放弃本次测算
+    pending_questions:
+    - 请确认项目类型（纯光伏/纯储能/光储混合）
+    - 请提供核心技术参数（MWp/MW/MWh/时长/化学类型）
+    - 请确认商业模式（PPA%/市场化%/FCAS来源）
+  confirm_boundary_parameters:
+    type: workflow_pause
+    pause_reason: missing_required_input
+    node_id: confirm_boundary_parameters
+    resume_condition: 用户确认了边界参数
+    cancel_condition: 用户放弃本次测算
+    pending_questions:
+    - 请确认CAPEX预算范围
+    - 请确认融资结构假设
+  human_review_gate:
+    type: workflow_pause
+    pause_reason: requires_human_approval
+    node_id: human_review_gate
+    resume_condition: 用户审核通过
+    cancel_condition: 用户拒绝
+    pending_questions:
+    - 请审核财务模型输出结果
+    - 请确认是否继续执行
+
 evaluation:
   rubric: evaluators/rubrics/solar_financial_model.yaml
   pass_threshold: 0.7

@@ -1,0 +1,231 @@
+# =============================================================================
+# LatticeWork 晶格方案: 微服务架构设计
+# 领域: 软件设计 - 架构设计
+# 描述: 设计一个基于微服务架构的订单管理系统
+# =============================================================================
+
+lattice:
+  id: "lattice_sw_001"
+  name: "微服务订单管理系统"
+  domain: "software_design"
+  domain_type: "architecture_design"
+  version: "1.0.0"
+  description: >
+    设计一个基于微服务架构的订单管理系统。
+    包括订单服务、支付服务、库存服务、通知服务。
+    使用事件驱动架构，支持CQRS和Saga模式。
+  created_at: "2026-05-08T22:00:00+10:00"
+  updated_at: "2026-05-08T22:00:00+10:00"
+
+# ── 意图定义 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    设计一个基于微服务架构的订单管理系统。
+    支持订单创建、支付处理、库存扣减、通知发送的完整流程。
+    使用事件驱动架构确保最终一致性。
+    支持Saga模式处理分布式事务。
+
+  acceptance_criteria:
+    - "订单创建到完成的端到端延迟 < 500ms"
+    - "支持每秒1000+订单的吞吐量"
+    - "Saga失败时自动回滚"
+    - "所有服务有独立的数据库"
+    - "API文档自动生成"
+
+  non_goals:
+    - "不涉及前端UI实现"
+    - "不涉及部署和运维"
+    - "不涉及用户认证系统"
+
+  constraints:
+    - "使用Go语言开发"
+    - "使用gRPC进行服务间通信"
+    - "使用PostgreSQL作为数据库"
+    - "使用RabbitMQ作为消息队列"
+
+  risk_level: "medium"
+
+# ── 层级分解 ──────────────────────────────────────────────────────────────
+layers:
+  # Layer 3: 核心领域模型（最内层）
+  - layer: 3
+    name: "核心领域模型层"
+    description: "订单、支付、库存、通知的领域模型和核心逻辑"
+    tasks:
+      - task_id: "task_0001"
+        name: "订单聚合根"
+        description: "订单实体、值对象、领域事件定义"
+        depends_on: []
+        provides:
+          - "order_aggregate"
+          - "order_events"
+
+      - task_id: "task_0002"
+        name: "支付领域模型"
+        description: "支付实体、支付状态机、支付策略"
+        depends_on: []
+        provides:
+          - "payment_model"
+          - "payment_state_machine"
+
+      - task_id: "task_0003"
+        name: "库存领域模型"
+        description: "库存实体、库存预留、库存释放"
+        depends_on: []
+        provides:
+          - "inventory_model"
+          - "reservation_logic"
+
+      - task_id: "task_0004"
+        name: "通知领域模型"
+        description: "通知模板、通知渠道、通知策略"
+        depends_on: []
+        provides:
+          - "notification_model"
+          - "channel_strategy"
+
+    assembly_test:
+      name: "核心领域模型层组装测试"
+      description: "验证领域模型的完整性和一致性"
+      tests:
+        - "订单创建 → 领域事件发布"
+        - "支付状态机: 待支付 → 已支付 → 已退款"
+        - "库存预留 → 扣减 → 释放"
+
+  # Layer 2: 应用服务层
+  - layer: 2
+    name: "应用服务层"
+    description: "订单服务、支付服务、库存服务、通知服务的业务逻辑"
+    tasks:
+      - task_id: "task_0005"
+        name: "订单服务"
+        description: "订单创建、查询、取消的用例实现"
+        depends_on: ["task_0001"]
+        provides:
+          - "order_service"
+          - "order_usecases"
+
+      - task_id: "task_0006"
+        name: "支付服务"
+        description: "支付处理、退款、对账的用例实现"
+        depends_on: ["task_0002"]
+        provides:
+          - "payment_service"
+          - "payment_usecases"
+
+      - task_id: "task_0007"
+        name: "库存服务"
+        description: "库存查询、预留、扣减的用例实现"
+        depends_on: ["task_0003"]
+        provides:
+          - "inventory_service"
+          - "inventory_usecases"
+
+      - task_id: "task_0008"
+        name: "通知服务"
+        description: "邮件、短信、推送通知的用例实现"
+        depends_on: ["task_0004"]
+        provides:
+          - "notification_service"
+          - "notification_usecases"
+
+    assembly_test:
+      name: "应用服务层组装测试"
+      description: "验证服务层的业务逻辑完整性"
+      tests:
+        - "订单服务 → 支付服务 → 库存服务 → 通知服务"
+        - "Saga: 订单创建 → 支付处理 → 库存扣减 → 通知发送"
+
+  # Layer 1: 基础设施层
+  - layer: 1
+    name: "基础设施层"
+    description: "数据库访问、消息队列、gRPC通信、事件总线"
+    tasks:
+      - task_id: "task_0009"
+        name: "数据库访问层"
+        description: "PostgreSQL连接池、Repository实现、迁移脚本"
+        depends_on: []
+        provides:
+          - "db_repository"
+          - "migration_scripts"
+
+      - task_id: "task_0010"
+        name: "消息队列集成"
+        description: "RabbitMQ生产者/消费者、事件发布/订阅"
+        depends_on: []
+        provides:
+          - "message_bus"
+          - "event_publisher"
+
+      - task_id: "task_0011"
+        name: "gRPC通信层"
+        description: "Protobuf定义、gRPC服务端/客户端、拦截器"
+        depends_on: []
+        provides:
+          - "grpc_server"
+          - "grpc_client"
+
+      - task_id: "task_0012"
+        name: "Saga编排器"
+        description: "Saga定义、步骤执行、补偿逻辑"
+        depends_on: ["task_0010"]
+        provides:
+          - "saga_orchestrator"
+          - "compensation_handler"
+
+    assembly_test:
+      name: "基础设施层组装测试"
+      description: "验证基础设施组件的集成"
+      tests:
+        - "gRPC调用 → 数据库操作 → 事件发布"
+        - "Saga: 正常流程 → 失败流程 → 补偿回滚"
+
+  # Layer 0: 接口与配置层（最外层）
+  - layer: 0
+    name: "接口与配置层"
+    description: "REST API、配置管理、服务注册、API文档"
+    tasks:
+      - task_id: "task_0013"
+        name: "REST API层"
+        description: "HTTP路由、请求验证、响应格式化"
+        depends_on: ["task_0005", "task_0006", "task_0007", "task_0008"]
+        provides:
+          - "rest_api"
+          - "request_validator"
+
+      - task_id: "task_0014"
+        name: "配置管理"
+        description: "环境配置、服务配置、特性开关"
+        depends_on: []
+        provides:
+          - "config_manager"
+          - "feature_flags"
+
+      - task_id: "task_0015"
+        name: "API文档生成"
+        description: "Swagger/OpenAPI文档自动生成"
+        depends_on: ["task_0013"]
+        provides:
+          - "api_docs"
+          - "swagger_spec"
+
+    assembly_test:
+      name: "接口层组装测试"
+      description: "验证API接口的完整性和可用性"
+      tests:
+        - "REST API调用 → 服务处理 → 响应返回"
+        - "Swagger文档与API实现一致性"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 5
+  human_in_the_loop:
+    plan_review_required: true
+    check_review_required: false
+    blocker_escalation: true
+
+# ── 全局阻塞点 ────────────────────────────────────────────────────────────
+global_blockers:
+  known: []

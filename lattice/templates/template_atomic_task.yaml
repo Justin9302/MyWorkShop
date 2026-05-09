@@ -1,0 +1,93 @@
+# =============================================================================
+# LatticeWork 原子任务模板
+# 用途: 定义最小可执行单元。CLINE 可 100% 自主执行 PCDCA 循环。
+# 人类可读: 使用自然语言描述目标和验收标准
+# AI可执行: 使用结构化字段定义执行步骤、验证标准和状态追踪
+# =============================================================================
+
+task:
+  id: "task_<编号>"                     # 如 task_0001
+  name: "<任务名称>"
+  layer: <层级编号>                      # 所属层级
+  type: "<任务类型>"                     # core_algorithm | data_model | interface_definition
+                                       # | service_implementation | adapter | configuration
+                                       # | test_infrastructure | documentation | validation
+  appetite: "<时间预算>"                 # 如 "2h", "1d", "4h"
+
+# ── 任务意图 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    <该原子任务的具体目标>
+    例如: "实现三次样条插值算法，用于收益率曲线构建"
+
+  acceptance_criteria:
+    - "<验收标准1>"
+    - "<验收标准2>"
+    - "<验收标准3>"
+
+  non_goals:
+    - "<明确不做的事项>"
+
+# ── 依赖关系 ──────────────────────────────────────────────────────────────
+dependencies:
+  requires:                             # 依赖的其他 task_id 列表
+    - "task_<依赖的任务ID>"
+  layer: <层级编号>                      # 同层依赖检查用
+  provides:                             # 该任务产出的能力/接口/数据
+    - "<产出物1>"
+    - "<产出物2>"
+  contract:                             # 接口契约定义（用于跨层依赖检查）
+    input_schema: "<输入接口描述或引用>"
+    output_schema: "<输出接口描述或引用>"
+
+# ── 执行计划 ──────────────────────────────────────────────────────────────
+execution_plan:
+  steps:
+    - id: "step_01"
+      description: "<步骤描述>"
+      action: "write_to_file"           # write_to_file | read_file | execute_command
+                                       # | use_mcp_tool | ask_user
+      params: {}                        # 动作参数
+      files:                            # 涉及的文件列表
+        - "<文件路径>"
+
+    - id: "step_02"
+      description: "<步骤描述>"
+      action: "execute_command"
+      params:
+        command: "<命令>"
+      files: []
+
+  estimated_effort: "<预估工作量>"
+
+# ── 验证标准 ──────────────────────────────────────────────────────────────
+validation:
+  unit_tests:
+    - "<单元测试文件路径>"
+  integration_tests:
+    - "<集成测试文件路径>"
+  pcdca_checklist:                      # PCDCA循环检查点
+    - "<检查点1>"
+    - "<检查点2>"
+  manual_checks:                        # 需要人工检查的项
+    - "<人工检查项>"
+
+# ── 阻塞点注册 ────────────────────────────────────────────────────────────
+blockers:
+  known:                                # 已知阻塞（已知已知）
+    - id: "blocker_<编号>"
+      description: "<阻塞点描述>"
+      resolution: "<解决方案>"
+  discovered: []                        # 执行中发现的阻塞点（自动填充）
+
+# ── 执行状态 ──────────────────────────────────────────────────────────────
+# 状态由 CLINE 自动更新，无需手动修改
+state:
+  status: "pending"                     # pending | blocked | in_plan | plan_approved
+                                       # | in_progress | in_check | pass | fail | skipped
+  current_step: null                    # 当前执行到的步骤ID
+  pcdca_cycle_count: 0                  # PCDCA循环次数
+  last_check_result: null               # 上次Check阶段结果
+  last_check_detail: null               # 上次Check阶段的详细结果
+  started_at: null
+  completed_at: null

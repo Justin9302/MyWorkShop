@@ -1,0 +1,89 @@
+{
+  "run_id": "run_sample_002",
+  "workflow_id": "contract_review",
+  "rubric_id": "contract_review",
+  "evaluator_version": "0.1.0",
+  "evaluation_mode": "async_nonblocking",
+  "score": 0.81,
+  "risk_level": "low",
+  "passed": true,
+  "pass_threshold": 0.65,
+  "metrics": {
+    "citation_accuracy": 0.6,
+    "constraint_compliance": 0.93,
+    "format_compliance": 0.5,
+    "risk_detection": 0.88,
+    "human_modification_rate": 0.3,
+    "output_adoption_rate": 0.3,
+    "high_risk_miss_rate": 0.0,
+    "cost_latency": 0.16
+  },
+  "metric_weights": {
+    "citation_accuracy": 0.15,
+    "constraint_compliance": 0.2,
+    "format_compliance": 0.1,
+    "risk_detection": 0.2,
+    "human_modification_rate": 0.1,
+    "output_adoption_rate": 0.1,
+    "high_risk_miss_rate": 0.1,
+    "cost_latency": 0.05
+  },
+  "findings": [
+    {
+      "type": "risk_clause_coverage",
+      "severity": "low",
+      "message": "risk_clause_coverage: score=0.75 (LLM-judged, passed)",
+      "affected_dimension": "risk_detection",
+      "llm_reasoning": "输出覆盖了责任限制、终止、保密等关键风险条款，但赔偿和争议解决条款未明确提及。虽然 high_risk_clauses 包含责任限制和终止，medium_risk_clauses 包含保密，但赔偿仅在 top_3_risks 中作为数据丢失赔偿上限提及，争议解决完全未出现。因此基本满足但存在明显不足。",
+      "confidence": 0.9
+    },
+    {
+      "type": "jurisdiction_awareness",
+      "severity": "low",
+      "message": "jurisdiction_awareness: score=0.85 (LLM-judged, passed)",
+      "affected_dimension": "constraint_compliance",
+      "llm_reasoning": "输出明确识别并标注了适用法域（中国民法典），引用了法域特定条款（民法典第506条），且对法域特定条款的解读基本正确（如责任限制条款的修改建议符合民法典关于格式条款的规定）。但未明确提及法域标注的具体位置，且对民法典第506条的具体内容未展开说明，略有不足。",
+      "confidence": 0.9
+    },
+    {
+      "type": "legal_citation_quality",
+      "severity": "low",
+      "message": "legal_citation_quality: score=0.6 (LLM-judged, passed)",
+      "affected_dimension": "citation_accuracy",
+      "llm_reasoning": "输出中引用了'民法典第506条'和'SaaS行业基准2025'两个来源，但未标注权威等级（如法律、行政法规、行业标准）和时效性（如颁布年份、版本号）。引用可追溯至已检索来源，但缺乏详细标注。部分满足标准，有明显不足。",
+      "confidence": 0.9
+    },
+    {
+      "type": "missing_clause_detection",
+      "severity": "low",
+      "message": "missing_clause_detection: score=0.85 (LLM-judged, passed)",
+      "affected_dimension": "high_risk_miss_rate",
+      "llm_reasoning": "输出识别了缺失或异常的关键条款（如责任限制、数据安全、SLA），并给出了具体的补充建议（如提高责任上限、增加数据安全赔偿、SLA阶梯式赔偿）。但未明确提及是否识别了所有可能的缺失条款（如终止条款的细节），且未引用具体法律条文或行业基准来支持建议，因此扣分。",
+      "confidence": 0.9
+    },
+    {
+      "type": "human_review_flagging",
+      "severity": "low",
+      "message": "human_review_flagging: score=1.0 (LLM-judged, passed)",
+      "affected_dimension": "risk_detection",
+      "llm_reasoning": "输出明确标记了高风险条款（责任限制、数据安全、SLA、终止条款）和法律结论（整体风险中高、建议修改），并设置了 human_review_flagged: true，同时触发了约束 no_final_legal_advice（需执业律师确认），完全满足标准。",
+      "confidence": 1.0
+    },
+    {
+      "type": "no_legal_advice_disclaimer",
+      "severity": "low",
+      "message": "no_legal_advice_disclaimer: score=1.0 (LLM-judged, passed)",
+      "affected_dimension": "constraint_compliance",
+      "llm_reasoning": "输出摘要明确包含 'disclaimer' 部分，且 'disclaimer_included' 字段为 true，同时触发的约束 'no_final_legal_advice' 明确要求包含免责声明，表明输出已包含适当的免责声明，明确不构成最终法律建议。",
+      "confidence": 1.0
+    }
+  ],
+  "suggestions": [],
+  "improvement_plan": {
+    "generated": false,
+    "candidate_changes": [],
+    "rollback_plan": "N/A — Phase 7"
+  },
+  "created_at": "2026-05-08T04:08:31.019784+00:00",
+  "evaluated_by": "eval_runner.py (llm)"
+}

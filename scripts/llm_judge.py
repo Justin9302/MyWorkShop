@@ -135,7 +135,9 @@ def _call_llm(
     api_base = (
         config.get("llm_api_base")
         or os.environ.get("LLM_JUDGE_API_BASE")
+        or os.environ.get("LLM_JUDGE_BASE_URL")
         or os.environ.get("OPENAI_API_BASE")
+        or os.environ.get("OPENAI_BASE_URL")
         or "https://api.openai.com/v1"
     )
     api_key_env = config.get("llm_api_key_env", "LLM_JUDGE_API_KEY")

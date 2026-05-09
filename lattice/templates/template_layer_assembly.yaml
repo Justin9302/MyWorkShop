@@ -1,0 +1,69 @@
+# =============================================================================
+# LatticeWork 层组装模板
+# 用途: 当同一层级的所有原子任务都完成 PCDCA 循环后，执行层组装。
+# 组装包括：验证所有任务产出、运行组装测试、执行意图对齐检查。
+# =============================================================================
+
+layer: <层级编号>                        # 如 4
+lattice_id: "<晶格方案ID>"               # 如 lattice_quant_001
+name: "<层级名称>"                       # 如 "核心算法层"
+status: "pending"                       # pending | in_progress | completed | failed | blocked
+
+# ── 该层所有原子任务 ──────────────────────────────────────────────────────
+tasks:
+  - task_id: "task_0001"
+    name: "收益率曲线插值算法"
+    status: "pending"                   # pending | pass | fail | blocked | skipped
+    provides:
+      - "interpolated_curve"
+      - "curve_data_structures"
+
+  - task_id: "task_0002"
+    name: "基差计算引擎"
+    status: "pending"
+    provides:
+      - "basis_calculator"
+      - "spread_analysis"
+
+  - task_id: "task_0003"
+    name: "现金流折现模型"
+    status: "pending"
+    provides:
+      - "dcf_engine"
+      - "present_value"
+
+# ── 组装测试 ──────────────────────────────────────────────────────────────
+assembly_test:
+  name: "<组装测试名称>"
+  description: "<测试描述>"
+  tests:
+    - id: "assembly_test_01"
+      description: "<测试用例描述>"
+      result: "pending"                 # pending | pass | fail
+      detail: null
+    - id: "assembly_test_02"
+      description: "<测试用例描述>"
+      result: "pending"
+      detail: null
+  overall_result: "pending"             # pending | pass | fail
+
+# ── 意图对齐 ──────────────────────────────────────────────────────────────
+intent_alignment:
+  original_goal: >
+    <该层的原始目标>
+    例如: "构建固定收益定价引擎的核心算法层，包括收益率曲线构建、插值和基差计算"
+
+  verification:
+    - "<意图对齐验证项1>"
+    - "<意图对齐验证项2>"
+    - "<意图对齐验证项3>"
+
+  alignment_result: "pending"           # pending | aligned | misaligned
+  gap_analysis: []                      # 差距分析（如果misaligned）
+
+# ── 下一层 ────────────────────────────────────────────────────────────────
+next_layer: <下一层编号>                 # null 表示已到最外层
+
+# ── 时间戳 ────────────────────────────────────────────────────────────────
+started_at: null
+completed_at: null

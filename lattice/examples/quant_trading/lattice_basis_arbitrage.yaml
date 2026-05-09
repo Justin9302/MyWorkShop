@@ -1,0 +1,232 @@
+# =============================================================================
+# LatticeWork 晶格方案: 澳元利率基差套利策略
+# 领域: 量化交易 - 算法设计
+# 描述: 设计并验证一个澳元利率基差套利策略
+# =============================================================================
+
+lattice:
+  id: "lattice_quant_001"
+  name: "澳元利率基差套利策略"
+  domain: "quantitative_trading"
+  domain_type: "algorithm_design"
+  version: "1.0.0"
+  description: >
+    设计并验证一个澳元利率基差套利策略。
+    使用三次样条插值构建收益率曲线，检测不同期限/品种间的基差偏离，
+    生成交易信号并执行套利。
+  created_at: "2026-05-08T22:00:00+10:00"
+  updated_at: "2026-05-08T22:00:00+10:00"
+
+# ── 意图定义 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    设计并验证一个澳元利率基差套利策略。
+    核心算法使用三次样条插值构建收益率曲线，
+    通过基差均值回归检测生成交易信号，
+    使用Kelly Criterion计算最优头寸，
+    并在2018-2023年历史数据上验证策略的夏普比率 > 1.5。
+
+  acceptance_criteria:
+    - "收益率曲线插值精度: RMSE < 0.5bps"
+    - "基差检测准确率: 信号命中率 > 65%"
+    - "回测夏普比率 > 1.5"
+    - "最大回撤 < 15%"
+    - "代码通过所有单元测试和集成测试"
+
+  non_goals:
+    - "不涉及实时交易执行"
+    - "不涉及交易所API对接"
+    - "不涉及多资产类别（仅限利率产品）"
+
+  constraints:
+    - "使用Python 3.11+"
+    - "依赖库: numpy, scipy, pandas, matplotlib"
+    - "数据源: 本地CSV文件（非实时数据源）"
+
+  risk_level: "medium"
+
+# ── 层级分解 ──────────────────────────────────────────────────────────────
+layers:
+  # Layer 4: 核心算法层（最内层）
+  - layer: 4
+    name: "核心算法层"
+    description: "收益率曲线构建、插值、基差计算等核心算法"
+    tasks:
+      - task_id: "task_0001"
+        name: "收益率曲线插值算法"
+        description: "实现三次样条和Catmull-Rom插值"
+        depends_on: []
+        provides:
+          - "interpolated_curve"
+          - "curve_data_structures"
+
+      - task_id: "task_0002"
+        name: "基差计算引擎"
+        description: "计算不同期限/品种间的基差"
+        depends_on: ["task_0001"]
+        provides:
+          - "basis_calculator"
+          - "spread_analysis"
+
+      - task_id: "task_0003"
+        name: "现金流折现模型"
+        description: "DCF计算引擎"
+        depends_on: ["task_0001"]
+        provides:
+          - "dcf_engine"
+          - "present_value"
+
+    assembly_test:
+      name: "核心层组装测试"
+      description: "验证核心层所有组件能否协同工作"
+      tests:
+        - "收益率曲线构建 → 插值 → 基差计算 → 输出定价矩阵"
+        - "端点情况: 30年曲线上存在数据空隙"
+        - "性能: 批量1000次插值 < 100ms"
+
+  # Layer 3: 策略引擎层
+  - layer: 3
+    name: "策略引擎层"
+    description: "套利策略逻辑、信号生成、风险管理"
+    tasks:
+      - task_id: "task_0004"
+        name: "基差均值回归检测器"
+        description: "检测基差是否偏离均值并生成交易信号"
+        depends_on: ["task_0002"]
+        provides:
+          - "signal_generator"
+          - "z_score_analysis"
+
+      - task_id: "task_0005"
+        name: "头寸规模算法"
+        description: "基于Kelly Criterion计算最优头寸"
+        depends_on: []
+        provides:
+          - "position_sizing"
+          - "kelly_calculator"
+
+      - task_id: "task_0006"
+        name: "风险管理器"
+        description: "VaR计算、止损逻辑、风险限额管理"
+        depends_on: ["task_0003"]
+        provides:
+          - "risk_manager"
+          - "var_calculator"
+
+    assembly_test:
+      name: "策略引擎层组装测试"
+      description: "验证策略逻辑与核心层的集成"
+      tests:
+        - "信号生成 → 头寸计算 → 风险检查 → 交易决策"
+        - "回测: 2018-2023年历史数据上的夏普比率 > 1.5"
+
+  # Layer 2: 交易执行层
+  - layer: 2
+    name: "交易执行层"
+    description: "订单路由、执行逻辑、成本分析"
+    tasks:
+      - task_id: "task_0007"
+        name: "订单类型适配器"
+        description: "支持Market/Limit/Iceberg订单"
+        depends_on: []
+        provides:
+          - "order_adapter"
+          - "order_types"
+
+      - task_id: "task_0008"
+        name: "执行成本分析"
+        description: "滑点模型和交易成本估算"
+        depends_on: []
+        provides:
+          - "cost_analyzer"
+          - "slippage_model"
+
+    assembly_test:
+      name: "交易执行层组装测试"
+      description: "验证订单路由和执行逻辑"
+      tests:
+        - "订单生成 → 路由选择 → 执行报告"
+        - "滑点估算与市场冲击模型一致性"
+
+  # Layer 1: 回测验证层
+  - layer: 1
+    name: "回测验证层"
+    description: "历史数据回放、P&L归因、绩效指标"
+    tasks:
+      - task_id: "task_0009"
+        name: "历史数据回放器"
+        description: "按时间顺序回放历史市场数据"
+        depends_on: []
+        provides:
+          - "data_player"
+          - "market_replay"
+
+      - task_id: "task_0010"
+        name: "P&L归因分析"
+        description: "将盈亏分解到各个策略和风险因子"
+        depends_on: ["task_0006"]
+        provides:
+          - "pnl_attribution"
+          - "factor_decomposition"
+
+      - task_id: "task_0011"
+        name: "绩效指标计算"
+        description: "夏普/索提诺/卡玛比率计算"
+        depends_on: []
+        provides:
+          - "performance_metrics"
+          - "risk_adjusted_returns"
+
+    assembly_test:
+      name: "回测验证层组装测试"
+      description: "验证回测引擎的完整性和准确性"
+      tests:
+        - "回放 → 策略执行 → P&L计算 → 绩效报告"
+        - "与已知基准策略的对比验证"
+
+  # Layer 0: 界面与配置层（最外层）
+  - layer: 0
+    name: "界面与配置层"
+    description: "策略配置、可视化Dashboard、API接口"
+    tasks:
+      - task_id: "task_0012"
+        name: "策略配置Schema"
+        description: "YAML配置文件定义和验证"
+        depends_on: []
+        provides:
+          - "config_schema"
+          - "config_validator"
+
+      - task_id: "task_0013"
+        name: "实时Dashboard"
+        description: "策略状态和绩效可视化"
+        depends_on: ["task_0011"]
+        provides:
+          - "dashboard"
+          - "visualization"
+
+    assembly_test:
+      name: "界面层组装测试"
+      description: "验证用户交互和配置加载"
+      tests:
+        - "配置加载 → 策略初始化 → Dashboard显示"
+        - "配置错误检测和用户提示"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 5
+  human_in_the_loop:
+    plan_review_required: true
+    check_review_required: false
+    blocker_escalation: true
+
+# ── 全局阻塞点 ────────────────────────────────────────────────────────────
+global_blockers:
+  known:
+    - id: "blocker_known_001"
+      description: "需要Bloomberg API访问权限获取实时数据"
+      affected_tasks: ["task_0009"]
+      severity: "medium"
+      resolution: "使用本地缓存的历史数据替代"

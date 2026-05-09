@@ -1,0 +1,188 @@
+# =============================================================================
+# LatticeWork 晶格方案: 贪吃蛇游戏
+# 领域: 游戏开发 - 经典游戏
+# 描述: 使用HTML/CSS/JavaScript实现一个完整的贪吃蛇游戏
+# =============================================================================
+
+lattice:
+  id: "lattice_game_001"
+  name: "贪吃蛇游戏"
+  domain: "game_development"
+  domain_type: "classic_game"
+  version: "1.0.0"
+  description: >
+    使用纯前端技术（HTML/CSS/JavaScript）实现一个完整的贪吃蛇游戏。
+    包括游戏核心逻辑、渲染引擎、用户交互、计分系统。
+  created_at: "2026-05-08T23:30:00+10:00"
+  updated_at: "2026-05-08T23:30:00+10:00"
+
+# ── 意图定义 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    实现一个完整的贪吃蛇游戏，使用HTML/CSS/JavaScript。
+    游戏在浏览器中运行，支持键盘控制，有计分和游戏结束逻辑。
+
+  acceptance_criteria:
+    - "蛇可以上下左右移动"
+    - "吃到食物后蛇身增长，分数增加"
+    - "撞墙或撞自身时游戏结束"
+    - "显示当前分数"
+    - "游戏结束后可以重新开始"
+    - "界面美观，有良好的用户体验"
+
+  non_goals:
+    - "不涉及多人游戏"
+    - "不涉及后端服务"
+    - "不涉及移动端触控"
+
+  constraints:
+    - "使用纯前端技术（HTML/CSS/JavaScript）"
+    - "不依赖任何第三方库"
+    - "所有代码在单个HTML文件中完成"
+
+  risk_level: "low"
+
+# ── 层级分解 ──────────────────────────────────────────────────────────────
+layers:
+  # Layer 3: 核心游戏逻辑层（最内层）
+  - layer: 3
+    name: "核心游戏逻辑层"
+    description: "蛇的数据结构、移动逻辑、碰撞检测、食物生成"
+    tasks:
+      - task_id: "task_0001"
+        name: "蛇的数据结构与移动逻辑"
+        description: "定义蛇的坐标数组、方向状态、移动更新逻辑"
+        depends_on: []
+        provides:
+          - "snake_data"
+          - "move_logic"
+
+      - task_id: "task_0002"
+        name: "碰撞检测系统"
+        description: "检测蛇是否撞墙或撞自身"
+        depends_on: ["task_0001"]
+        provides:
+          - "collision_detector"
+          - "game_over_check"
+
+      - task_id: "task_0003"
+        name: "食物生成与得分系统"
+        description: "随机生成食物位置、计分逻辑"
+        depends_on: ["task_0001"]
+        provides:
+          - "food_generator"
+          - "score_system"
+
+    assembly_test:
+      name: "核心逻辑层组装测试"
+      description: "验证核心游戏逻辑的完整性"
+      tests:
+        - "蛇初始化 → 移动 → 吃到食物 → 增长"
+        - "蛇撞墙 → 游戏结束检测"
+        - "蛇撞自身 → 游戏结束检测"
+
+  # Layer 2: 游戏引擎层
+  - layer: 2
+    name: "游戏引擎层"
+    description: "游戏循环、状态管理、帧率控制"
+    tasks:
+      - task_id: "task_0004"
+        name: "游戏循环引擎"
+        description: "使用requestAnimationFrame实现游戏主循环"
+        depends_on: ["task_0001"]
+        provides:
+          - "game_loop"
+          - "frame_controller"
+
+      - task_id: "task_0005"
+        name: "游戏状态管理器"
+        description: "管理游戏状态（待开始/进行中/暂停/结束）"
+        depends_on: ["task_0002"]
+        provides:
+          - "state_manager"
+          - "state_transitions"
+
+      - task_id: "task_0006"
+        name: "键盘输入处理器"
+        description: "监听键盘事件，控制蛇的移动方向"
+        depends_on: []
+        provides:
+          - "input_handler"
+          - "direction_queue"
+
+    assembly_test:
+      name: "游戏引擎层组装测试"
+      description: "验证游戏引擎的完整性和响应性"
+      tests:
+        - "键盘输入 → 方向更新 → 蛇移动 → 状态检查"
+        - "游戏循环的帧率稳定性"
+
+  # Layer 1: 渲染引擎层
+  - layer: 1
+    name: "渲染引擎层"
+    description: "Canvas绘制、UI渲染、动画效果"
+    tasks:
+      - task_id: "task_0007"
+        name: "Canvas渲染器"
+        description: "使用Canvas绘制蛇、食物、网格"
+        depends_on: ["task_0001", "task_0003"]
+        provides:
+          - "canvas_renderer"
+          - "draw_functions"
+
+      - task_id: "task_0008"
+        name: "UI组件渲染"
+        description: "分数显示、游戏结束界面、重新开始按钮"
+        depends_on: ["task_0005"]
+        provides:
+          - "ui_components"
+          - "hud_renderer"
+
+    assembly_test:
+      name: "渲染引擎层组装测试"
+      description: "验证渲染的完整性和视觉一致性"
+      tests:
+        - "蛇移动 → Canvas重绘 → 视觉更新"
+        - "游戏结束 → UI显示 → 重新开始"
+
+  # Layer 0: 界面与配置层（最外层）
+  - layer: 0
+    name: "界面与配置层"
+    description: "HTML结构、CSS样式、游戏配置"
+    tasks:
+      - task_id: "task_0009"
+        name: "HTML结构与CSS样式"
+        description: "页面布局、游戏容器、样式美化"
+        depends_on: []
+        provides:
+          - "html_structure"
+          - "css_styles"
+
+      - task_id: "task_0010"
+        name: "游戏配置与初始化"
+        description: "游戏参数配置、初始化流程、入口函数"
+        depends_on: ["task_0004", "task_0007", "task_0008", "task_0009"]
+        provides:
+          - "game_config"
+          - "initialization"
+
+    assembly_test:
+      name: "界面层组装测试"
+      description: "验证完整游戏的可用性"
+      tests:
+        - "页面加载 → 游戏初始化 → 开始游戏 → 完整游戏流程"
+        - "重新开始功能"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 5
+  human_in_the_loop:
+    plan_review_required: true
+    check_review_required: false
+    blocker_escalation: true
+
+# ── 全局阻塞点 ────────────────────────────────────────────────────────────
+global_blockers:
+  known: []

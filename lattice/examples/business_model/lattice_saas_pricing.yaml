@@ -1,0 +1,211 @@
+# =============================================================================
+# LatticeWork 晶格方案: SaaS定价模型设计
+# 领域: 商业模式 - 定价策略
+# 描述: 设计并验证一个SaaS产品的定价模型
+# =============================================================================
+
+lattice:
+  id: "lattice_biz_001"
+  name: "SaaS定价模型设计"
+  domain: "business_model"
+  domain_type: "pricing_strategy"
+  version: "1.0.0"
+  description: >
+    设计并验证一个B2B SaaS产品的定价模型。
+    包括市场细分、价值定价、套餐设计、收入预测。
+    使用Monte Carlo模拟验证定价策略的稳健性。
+  created_at: "2026-05-08T22:00:00+10:00"
+  updated_at: "2026-05-08T22:00:00+10:00"
+
+# ── 意图定义 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    设计并验证一个B2B SaaS产品的定价模型。
+    目标市场为中小型企业（50-500人）。
+    产品为项目管理SaaS工具。
+    需要设计3个定价套餐，并预测12个月的收入。
+
+  acceptance_criteria:
+    - "定价模型包含至少3个套餐层级"
+    - "每个套餐有明确的客户细分和价值主张"
+    - "收入预测包含乐观/基准/悲观三种场景"
+    - "Monte Carlo模拟显示12个月收入中位数 > $500K"
+    - "定价策略文档完整，包含定价原则和调整机制"
+
+  non_goals:
+    - "不涉及实际产品开发"
+    - "不涉及市场推广策略"
+    - "不涉及客户获取成本计算"
+
+  constraints:
+    - "目标市场: 美国中小企业"
+    - "产品类型: 项目管理SaaS"
+    - "定价货币: USD"
+    - "分析周期: 12个月"
+
+  risk_level: "low"
+
+# ── 层级分解 ──────────────────────────────────────────────────────────────
+layers:
+  # Layer 3: 核心分析模型（最内层）
+  - layer: 3
+    name: "核心分析模型层"
+    description: "市场细分模型、价值定价模型、需求弹性模型"
+    tasks:
+      - task_id: "task_0001"
+        name: "市场细分模型"
+        description: "基于公司规模、行业、需求的客户细分"
+        depends_on: []
+        provides:
+          - "market_segments"
+          - "customer_personas"
+
+      - task_id: "task_0002"
+        name: "价值定价模型"
+        description: "基于客户感知价值的定价计算"
+        depends_on: []
+        provides:
+          - "value_pricing"
+          - "willingness_to_pay"
+
+      - task_id: "task_0003"
+        name: "需求弹性模型"
+        description: "价格敏感度和需求弹性分析"
+        depends_on: ["task_0001"]
+        provides:
+          - "demand_elasticity"
+          - "price_sensitivity"
+
+    assembly_test:
+      name: "核心分析模型层组装测试"
+      description: "验证分析模型的准确性和一致性"
+      tests:
+        - "市场细分 → 价值定价 → 需求弹性 → 价格建议"
+        - "细分市场间的价格敏感度差异分析"
+
+  # Layer 2: 定价策略层
+  - layer: 2
+    name: "定价策略层"
+    description: "套餐设计、定价优化、折扣策略"
+    tasks:
+      - task_id: "task_0004"
+        name: "套餐设计引擎"
+        description: "基于分析模型设计3个定价套餐"
+        depends_on: ["task_0002"]
+        provides:
+          - "tier_designer"
+          - "feature_bundling"
+
+      - task_id: "task_0005"
+        name: "定价优化器"
+        description: "使用Conjoint Analysis优化价格点"
+        depends_on: ["task_0003"]
+        provides:
+          - "price_optimizer"
+          - "conjoint_analysis"
+
+      - task_id: "task_0006"
+        name: "折扣策略模型"
+        description: "年付折扣、早鸟优惠、批量折扣"
+        depends_on: []
+        provides:
+          - "discount_strategy"
+          - "promotion_calculator"
+
+    assembly_test:
+      name: "定价策略层组装测试"
+      description: "验证定价策略的完整性和竞争力"
+      tests:
+        - "套餐设计 → 价格优化 → 折扣计算 → 最终定价"
+        - "与竞品定价的对比分析"
+
+  # Layer 1: 收入预测层
+  - layer: 1
+    name: "收入预测层"
+    description: "收入模型、Monte Carlo模拟、敏感性分析"
+    tasks:
+      - task_id: "task_0007"
+        name: "收入模型"
+        description: "基于客户获取和留存率的收入预测"
+        depends_on: ["task_0004"]
+        provides:
+          - "revenue_model"
+          - "forecast_engine"
+
+      - task_id: "task_0008"
+        name: "Monte Carlo模拟器"
+        description: "使用随机模拟评估收入的不确定性"
+        depends_on: ["task_0007"]
+        provides:
+          - "monte_carlo"
+          - "scenario_analysis"
+
+      - task_id: "task_0009"
+        name: "敏感性分析"
+        description: "关键驱动因素的敏感性分析"
+        depends_on: ["task_0008"]
+        provides:
+          - "sensitivity_analysis"
+          - "tornado_chart"
+
+    assembly_test:
+      name: "收入预测层组装测试"
+      description: "验证收入预测的准确性和稳健性"
+      tests:
+        - "收入模型 → Monte Carlo模拟 → 敏感性分析"
+        - "乐观/基准/悲观三种场景的一致性"
+
+  # Layer 0: 报告与展示层（最外层）
+  - layer: 0
+    name: "报告与展示层"
+    description: "定价报告、可视化Dashboard、执行摘要"
+    tasks:
+      - task_id: "task_0010"
+        name: "定价报告生成器"
+        description: "生成完整的定价策略文档"
+        depends_on: ["task_0005", "task_0006"]
+        provides:
+          - "pricing_report"
+          - "strategy_document"
+
+      - task_id: "task_0011"
+        name: "收入可视化Dashboard"
+        description: "收入预测、场景对比、关键指标可视化"
+        depends_on: ["task_0009"]
+        provides:
+          - "revenue_dashboard"
+          - "kpi_charts"
+
+      - task_id: "task_0012"
+        name: "执行摘要"
+        description: "面向管理层的定价建议摘要"
+        depends_on: ["task_0010"]
+        provides:
+          - "executive_summary"
+          - "recommendations"
+
+    assembly_test:
+      name: "报告层组装测试"
+      description: "验证报告和可视化的完整性和可用性"
+      tests:
+        - "定价报告 → Dashboard → 执行摘要"
+        - "所有图表数据与模型输出一致"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 5
+  human_in_the_loop:
+    plan_review_required: true
+    check_review_required: false
+    blocker_escalation: true
+
+# ── 全局阻塞点 ────────────────────────────────────────────────────────────
+global_blockers:
+  known:
+    - id: "blocker_known_001"
+      description: "需要行业基准数据用于Conjoint Analysis"
+      affected_tasks: ["task_0005"]
+      severity: "low"
+      resolution: "使用公开可用的SaaS基准数据"

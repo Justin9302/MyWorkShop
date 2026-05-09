@@ -1,15 +1,15 @@
 active_release:
-  id: release_2026_05_05_001
-  git_commit: be034d142f122510ea0702aa039b9e247cee9c15
-  git_tag: release_2026_05_05_001
-  stage: stage_7_dynamic_evolution
-  workflow_version: 0.2.0
+  id: release_2026_05_09_001
+  git_commit: HEAD
+  git_tag: release_2026_05_09_001
+  stage: stage_9_interruption_recovery
+  workflow_version: 0.3.0
   constraint_pack_version: 0.4.0
-  prompt_version: 0.1.0
+  prompt_version: 0.2.0
   evaluator_version: 0.2.0
   judge_version: 0.1.0
   knowledge_base_version: kb_0.3.0
-  status: published
+  status: draft
   lifecycle:
     current_phase: published
     transitions:
@@ -83,6 +83,7 @@ active_release:
     - workflows/operations/sop_generation.yaml
     - workflows/operations/meeting_summary.yaml
     - workflows/operations/project_retrospective.yaml
+    - workflows/general/ideation_convergence.yaml
     constraints:
     - constraints/baseline/privacy.yaml
     - constraints/baseline/citation.yaml
@@ -114,6 +115,7 @@ active_release:
     - prompts/operations/meeting_summary.system.md
     - prompts/operations/project_retrospective.system.md
     - prompts/evaluation/llm_judge.system.md
+    - prompts/general/ideation_convergence.system.md
     judge_config: evaluators/rubrics/shared_judge_config.yaml
     judge_models:
     - deepseek-chat
@@ -151,6 +153,7 @@ active_release:
     - evaluators/rubrics/due_diligence.yaml
     - evaluators/rubrics/sop_generation.yaml
     - evaluators/rubrics/solar_financial_model.yaml
+    - evaluators/rubrics/ideation_convergence.yaml
     schemas:
     - schemas/workflow.schema.json
     - schemas/run_snapshot.schema.json
@@ -193,6 +196,14 @@ active_release:
         critical_delta: -0.10
         warning_delta: -0.05
         overall_critical_delta: -0.08
+    dashboard:
+      script: scripts/dashboard.py
+      config: config/dashboard-config.yaml
+      test_dir: tests/phase7f/
+      output_dir: outputs/dashboard/
+      default_trend_window_days: 30
+      auto_rollback_enabled: true
+      dry_run_default: true
     mcp_tools:
     - filesystem_read
     - filesystem_write
@@ -204,6 +215,8 @@ active_release:
     - workflows/business/
     - workflows/finance/
     - workflows/operations/
+    - workflows/energy/
+    - workflows/general/
     constraints:
     - constraints/baseline/
     - constraints/industries/
@@ -213,6 +226,8 @@ active_release:
     - prompts/business/
     - prompts/finance/
     - prompts/operations/
+    - prompts/energy/
+    - prompts/general/
     agents:
     - .github/agents/
     evaluators:
@@ -226,6 +241,10 @@ active_release:
     - tests/eval_cases/
     - tests/regression/
     - tests/phase7d/
+    - tests/phase7e/
+    - tests/phase7f/
+    - tests/phase8/
+    - tests/phase9/
   git_boundary:
     include:
     - README.md

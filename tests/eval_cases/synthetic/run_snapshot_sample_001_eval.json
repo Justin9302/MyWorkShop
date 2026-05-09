@@ -1,0 +1,95 @@
+{
+  "run_id": "run_sample_001",
+  "workflow_id": "business_model_validation",
+  "rubric_id": "business_model_validation",
+  "evaluator_version": "0.1.0",
+  "evaluation_mode": "async_nonblocking",
+  "score": 0.66,
+  "risk_level": "medium",
+  "passed": true,
+  "pass_threshold": 0.6,
+  "metrics": {
+    "citation_accuracy": 0.75,
+    "constraint_compliance": 0.5,
+    "format_compliance": 0.45,
+    "risk_detection": 1.0,
+    "human_modification_rate": 0.3,
+    "output_adoption_rate": 0.3,
+    "high_risk_miss_rate": 0.2,
+    "cost_latency": 0.16
+  },
+  "metric_weights": {
+    "citation_accuracy": 0.15,
+    "constraint_compliance": 0.2,
+    "format_compliance": 0.1,
+    "risk_detection": 0.2,
+    "human_modification_rate": 0.1,
+    "output_adoption_rate": 0.1,
+    "high_risk_miss_rate": 0.1,
+    "cost_latency": 0.05
+  },
+  "findings": [
+    {
+      "type": "validation_plan_quality",
+      "severity": "high",
+      "message": "validation_plan_quality: score=0.3 — Experiments include success metrics, failure thresholds, and next decision gates.",
+      "affected_dimension": "format_compliance",
+      "remediation": "检查实验是否包含成功指标、失败阈值和下一步决策门禁。",
+      "llm_reasoning": "The output summary mentions sections like 'recommended_experiments' and 'decision_gate', which could contain success metrics, failure thresholds, and next decision gates, but no specific details are provided. The summary only lists section names and counts, without any evidence that the experiments actually include these required elements. Therefore, the criterion is mostly unmet.",
+      "confidence": 0.8
+    },
+    {
+      "type": "fact_assumption_separation",
+      "severity": "low",
+      "message": "fact_assumption_separation: score=0.75 (LLM-judged, passed)",
+      "affected_dimension": "citation_accuracy",
+      "llm_reasoning": "The output summary explicitly counts facts (12), assumptions (8), inferences (5), and unknowns (3), indicating a clear separation of these categories. However, the actual output content is not provided, so I cannot verify that the separation is consistently applied across sections. The presence of risk flags and human review flag suggests some assumptions and unknowns are identified, but without full text, confidence is moderate.",
+      "confidence": 0.7
+    },
+    {
+      "type": "evidence_quality",
+      "severity": "low",
+      "message": "evidence_quality: score=0.75 (LLM-judged, passed)",
+      "affected_dimension": "citation_accuracy",
+      "llm_reasoning": "输出包含明确的证据级别分类（fact_count, assumption_count, inference_count, unknown_count），以及风险标记（risk_flags）和来源引用（已检索来源），但未在每个关键主张中显式标注证据级别或来源元数据，且未明确标注未验证的主张。部分满足标准，有改进空间。",
+      "confidence": 0.85
+    },
+    {
+      "type": "unit_economics_consistency",
+      "severity": "low",
+      "message": "unit_economics_consistency: score=0.6 (LLM-judged, passed)",
+      "affected_dimension": "format_compliance",
+      "llm_reasoning": "The output summary indicates risk flags for 'CAC payback optimistic vs benchmark' and 'churn unvalidated', which suggest potential inconsistencies between assumptions and benchmarks. The presence of 8 assumptions, 5 inferences, and 3 unknowns further implies that not all assumptions are fully validated or consistent. The human_review_flagged and the high-priority constraint 'no_investment_advice' also signal that the output may lack internal consistency for fundraising use. However, without the full output text, evidence is limited to these flags, leading to a moderate score.",
+      "confidence": 0.7
+    },
+    {
+      "type": "human_review_flagging",
+      "severity": "low",
+      "message": "human_review_flagging: score=1.0 (LLM-judged, passed)",
+      "affected_dimension": "risk_detection",
+      "llm_reasoning": "The output explicitly includes 'human_review_flagged': true, and the triggered constraint 'no_investment_advice' states the output is used for fundraising and requires finance review, fully meeting the criterion.",
+      "confidence": 1.0
+    }
+  ],
+  "suggestions": [
+    {
+      "target": "output_templates",
+      "recommendation": "Improve validation_plan_quality (score=0.3): Experiments include success metrics, failure thresholds, and next decision gates.",
+      "priority": "medium",
+      "requires_human_approval": true,
+      "expected_impact": {
+        "affected_metrics": [
+          "format_compliance"
+        ],
+        "estimated_improvement": 0.3
+      }
+    }
+  ],
+  "improvement_plan": {
+    "generated": false,
+    "candidate_changes": [],
+    "rollback_plan": "N/A — Phase 7"
+  },
+  "created_at": "2026-05-08T04:05:19.527105+00:00",
+  "evaluated_by": "eval_runner.py (llm)"
+}

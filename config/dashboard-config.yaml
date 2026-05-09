@@ -1,0 +1,212 @@
+# config/dashboard-config.yaml — Phase 7f: 质量仪表盘配置和告警规则
+#
+# 本配置文件定义质量仪表盘的数据聚合参数、自动告警规则和回滚触发条件。
+# 与 scripts/dashboard.py 配套使用。
+#
+# 核心功能:
+#   1. 趋势数据聚合（按时间序列聚合多日评估指标）
+#   2. 自动告警检查（触发预设条件时发出告警）
+#   3. 自动回滚触发（满足条件时自动执行回滚）
+#
+# 用法:
+#   python scripts/dashboard.py aggregate --report-dir outputs/eval_reports/ --output outputs/dashboard/_trend_data.json
+#   python scripts/dashboard.py check-alerts --trend outputs/dashboard/_trend_data.json
+#   python scripts/dashboard.py generate-html --trend outputs/dashboard/_trend_data.json --output outputs/dashboard/index.html
+
+dashboard:
+  # 数据聚合配置
+  aggregation:
+    # 趋势窗口（天数）
+    trend_window_days: 30
+    # 最小数据点数（少于该数量不生成趋势）
+    min_data_points: 3
+    # 聚合粒度（daily / hourly）
+    granularity: "daily"
+    # 输出路径
+    output_path: "outputs/dashboard/"
+
+  # 评估维度列表（与 regression_test.py 和 rollout_manager.py 保持一致）
+  metrics:
+    - id: "citation_accuracy"
+      name: "引用准确率"
+      description: "输出中引用的准确性和相关性"
+      higher_is_better: true
+      weight: 1.0
+    - id: "constraint_compliance"
+      name: "约束合规率"
+      description: "输出满足所有触发约束的比例"
+      higher_is_better: true
+      weight: 1.0
+    - id: "format_compliance"
+      name: "格式合规率"
+      description: "输出符合预期格式的比例"
+      higher_is_better: true
+      weight: 0.8
+    - id: "risk_detection"
+      name: "风险检测率"
+      description: "正确识别和标记风险的比例"
+      higher_is_better: true
+      weight: 1.2
+    - id: "human_modification_rate"
+      name: "人工修改率"
+      description: "输出被人工修改的比例（越低越好）"
+      higher_is_better: false
+      weight: 1.0
+    - id: "output_adoption_rate"
+      name: "输出采纳率"
+      description: "输出被直接采纳的比例"
+      higher_is_better: true
+      weight: 0.8
+    - id: "high_risk_miss_rate"
+      name: "高风险漏检率"
+      description: "高风险被遗漏的比例（越低越好）"
+      higher_is_better: false
+      weight: 1.5
+    - id: "cost_latency"
+      name: "成本与延迟"
+      description: "评估运行的成本和延迟效率"
+      higher_is_better: true
+      weight: 0.5
+
+  # 质量评分计算
+  scoring:
+    # 综合评分计算方法: weighted_average / min / geometric_mean
+    method: "weighted_average"
+    # 评分等级阈值
+    tiers:
+      excellent: 0.90
+      good: 0.80
+      fair: 0.70
+      poor: 0.50
+      critical: 0.0
+
+alerts:
+  # 自动回滚触发条件
+  auto_rollback_triggers:
+    # 综合评分大幅下降
+    - id: "score_drop"
+      name: "综合评分下降"
+      metric: "average_score"
+      operator: "drop_by"
+      threshold: 0.1
+      window: "24h"
+      min_data_points: 2
+      action: "rollback_canary"
+      severity: "critical"
+      description: "24 小时内综合评分下降超过 0.1，自动回滚金丝雀发布"
+
+    # 高风险漏检率上升
+    - id: "high_risk_miss_rate_increase"
+      name: "高风险漏检率上升"
+      metric: "high_risk_miss_rate"
+      operator: "increase_by"
+      threshold: 0.2
+      window: "24h"
+      min_data_points: 2
+      action: "rollback_canary"
+      severity: "critical"
+      description: "24 小时内高风险漏检率上升超过 0.2，自动回滚金丝雀发布"
+
+    # 人工修改率大幅上升
+    - id: "human_modification_increase"
+      name: "人工修改率上升"
+      metric: "human_modification_rate"
+      operator: "increase_by"
+      threshold: 0.3
+      window: "24h"
+      min_data_points: 2
+      action: "notify_only"
+      severity: "warning"
+      description: "24 小时内人工修改率上升超过 0.3，仅通知不自动回滚"
+
+    # 引用准确率下降
+    - id: "citation_accuracy_drop"
+      name: "引用准确率下降"
+      metric: "citation_accuracy"
+      operator: "drop_by"
+      threshold: 0.15
+      window: "48h"
+      min_data_points: 3
+      action: "notify_only"
+      severity: "warning"
+      description: "48 小时内引用准确率下降超过 0.15，仅通知"
+
+    # 风险检测率下降
+    - id: "risk_detection_drop"
+      name: "风险检测率下降"
+      metric: "risk_detection"
+      operator: "drop_by"
+      threshold: 0.15
+      window: "24h"
+      min_data_points: 2
+      action: "rollback_canary"
+      severity: "critical"
+      description: "24 小时内风险检测率下降超过 0.15，自动回滚金丝雀发布"
+
+    # 连续低分告警
+    - id: "consecutive_low_score"
+      name: "连续低分"
+      metric: "average_score"
+      operator: "below"
+      threshold: 0.6
+      window: "72h"
+      min_data_points: 3
+      consecutive: true
+      action: "notify_only"
+      severity: "warning"
+      description: "连续 3 次评估综合评分低于 0.6，仅通知"
+
+  # 通知配置
+  notification:
+    # Slack Webhook URL（Phase 7 不强制实现）
+    slack_webhook: ""
+    # 控制台输出（第一版输出到终端）
+    console_output: true
+    # 告警记录文件
+    alerts_output_path: "outputs/dashboard/_alerts.json"
+    # 告警去重时间窗口（相同类型的告警在此时间内不重复触发）
+    dedup_window: "1h"
+
+  # 仪表盘输出配置
+  dashboard:
+    # 输出路径
+    output_path: "outputs/dashboard/"
+    # 是否生成 HTML（Phase 7 第一版只输出 JSON）
+    generate_html: false
+    # HTML 模板路径（后续版本）
+    html_template: ""
+    # 趋势数据文件
+    trend_data_path: "outputs/dashboard/_trend_data.json"
+    # 批量汇总文件
+    batch_summary_path: "outputs/eval_reports/_batch_summary.json"
+
+# 工作流分组配置
+workflow_groups:
+  - id: "legal"
+    name: "法律合规"
+    workflows:
+      - "contract_review"
+      - "policy_qa"
+  - id: "business"
+    name: "商业分析"
+    workflows:
+      - "business_model_design"
+      - "business_model_validation"
+      - "go_to_market_review"
+      - "unit_economics_check"
+  - id: "energy"
+    name: "能源"
+    workflows:
+      - "solar_financial_model"
+  - id: "finance"
+    name: "金融"
+    workflows:
+      - "due_diligence"
+      - "investment_research"
+      - "risk_summary"
+  - id: "operations"
+    name: "运营"
+    workflows:
+      - "sop_generation"
+      - "meeting_summary"
+      - "project_retrospective"

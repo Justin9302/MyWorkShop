@@ -169,6 +169,6 @@ retention:
 | 自动改进建议 | 脚本启发式评分                               | LLM-as-Judge 精细评估              | ✅ 7a 完成 — `llm_judge.py`          |
 | 动态评估集   | 手动合成快照 (`tests/eval_cases/synthetic/`) | 从真实运行自动沉淀                 | ✅ 7b 完成 — `eval_set_manager.py`   |
 | 改进审核队列 | 无                                           | `suggestions/promote` + 人审工作流 | ✅ 7c 完成 — `promote_suggestion.py` |
-| 回归测试     | 手动运行 `eval_runner.py`                    | CI 集成 + 自动回归                 | ⏳ 7d 待实施                         |
-| 灰度发布     | 无                                           | A/B 测试 + 分团队灰度              | ⏳ 7e 待实施                         |
-| 质量仪表盘   | 无                                           | 实时指标 + 趋势图表                | ⏳ 7f 待实施                         |
+| 回归测试     | 手动运行 `eval_runner.py`                    | CI 集成 + 自动回归                 | ✅ 7d 完成 — `regression_test.py`    |
+| 灰度发布     | 无                                           | A/B 测试 + 分团队灰度              | ✅ 7e 完成 — `rollout_manager.py`    |
+| 质量仪表盘   | 无                                           | 实时指标 + 趋势图表                | ✅ 7f 完成 — `dashboard.py`          |

@@ -226,11 +226,13 @@ When a user presents a **task-level goal** (not a simple Q&A), follow this three
 **Rule 6 — 审核 Agent 上下文隔离**：调用 `task-reviewer` Agent 时，只传递任务简报 + 工作成果。不得传递执行过程中的中间产物、工具调用记录或系统提示。
 
 **Rule 7 — 计划文件持久化**：Task Planner Agent 输出任务简报后，必须立即将其写入工作区文件 `runtime/plans/task_plan_{yyyyMMdd_HHmmss}.md`。该文件是任务执行期间的人机共享视图，包含：
+
 - 以 `- [ ]` checkbox 格式列出的子任务清单
 - 全局验收标准（同样以 checkbox 列出）
 - 文件顶部状态标记：`🔄 执行中` / `⏸️ 已中断` / `✅ 已完成` / `❌ 已打回`
 
 **Rule 8 — 进度实时同步**：执行阶段中，每完成或开始一个子任务，必须立即更新计划文件中对应条目的状态：
+
 - 开始执行：在子任务行追加 `🔄 执行中 (HH:mm)`
 - 完成：将 `- [ ]` 改为 `- [x]`，在子任务下方追加 `  - ✅ 完成 (HH:mm): {关键产出摘要}`
 - 中断：文件顶部状态改为 `⏸️ 已中断`，在中止处追加 `⏸️ 中断点: {原因 + 恢复条件}`
@@ -350,3 +352,300 @@ When asked to modify platform assets (workflows, constraints, prompts, schemas, 
 - File paths in backticks: `workflows/legal/contract_review.yaml`
 - Code blocks with language identifiers
 - Structured data in JSON or YAML blocks
+
+---
+
+# Nature-Style Academic Skills (from nature-skills)
+
+This section adds Nature-journal-standard academic writing, figure, citation, data, and presentation skills.
+All rules are derived from primary sources — published Nature papers, journal author guidelines, and structured writing curricula.
+
+## Intent-to-Skill Auto-Matching
+
+When the user's request relates to academic writing or publication, match from this table:
+
+| 用户意图关键词                                                      | 匹配技能           | 说明                         |
+| ------------------------------------------------------------------- | ------------------ | ---------------------------- |
+| 润色、polish、学术写作、academic writing、Nature风格、英文学术      | `nature-polishing` | 学术散文润色至Nature风格     |
+| 科学图表、Nature figure、publication plot、scientific figure、SCI图 | `nature-figure`    | 生成符合Nature标准的科学图表 |
+| 引用、citation、参考文献、EndNote、RIS、Zotero、支撑文献            | `nature-citation`  | Nature/CNS家族引用检索与导出 |
+| 数据可用性、Data Availability、FAIR、数据存储库、数据声明           | `nature-data`      | 数据可用性声明与FAIR检查     |
+| 论文PPT、paper PPT、文献汇报、journal club、论文做成PPT             | `nature-paper2ppt` | 从科学论文生成中文PPTX       |
+
+---
+
+## nature-polishing — Nature-Style Academic Prose Polishing
+
+Use this skill when the user asks to polish a manuscript paragraph, abstract, introduction, results, discussion, conclusion, title, methods section, or Chinese academic draft for publication-quality English.
+
+### Core Architecture
+
+1. **Identify the paper type first**: Research paper / Methods paper / Hypothesis-based work / Algorithmic or device work. Do not use one narrative logic for all paper types.
+2. **Write for the reader**: relevance → novelty → trust → reuse → meaning.
+3. **Use the hourglass structure**: Introduction opens broadly then narrows; Discussion/Conclusion widens again.
+4. **Use the correct writing order**: Results → Introduction & Conclusion → Title → Discussion → Methods → Abstract.
+5. **Protect the core argument**: AI may help polish but should not invent or author the core argument.
+6. **Diagnose the failure mode before editing**: paper type → section job → paragraph logic → claim/evidence/boundary → sentence polish.
+
+### Section Responsibilities
+
+| Section          | Key Rules                                                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Introduction** | Tell why it matters, what gap it fills, what is known, what remains unresolved, what question the paper asks. Do NOT summarize Results or Conclusion.                   |
+| **Results**      | Past tense. Report what was observed with quantitative support. Answer "what happened", not "what it means".                                                            |
+| **Discussion**   | Answer how the work fits the field, what was added, whether findings support/complicate earlier results, when interpretation may fail.                                  |
+| **Conclusion**   | Three-part close: restate contribution → summarize key evidence → state implication with boundary. No new data. Always run overclaim check.                             |
+| **Title**        | Tell reader what to expect, avoid unnecessary technical language, be easy to search, substantiated by data. Use "curiosity with credibility".                           |
+| **Methods**      | Specific, complete, transparent, reproducible. Never leave vague phrases like "under standard conditions", "using routine methods", "data were analyzed statistically". |
+| **Abstract**     | Mini-paper: context/problem → gap/objective → approach → key results → implication.                                                                                     |
+
+### Sentence & Paragraph Control
+
+- Every sentence ≤ 30 words. If > 20 words, check for multiple propositions.
+- Prefer one core subject-verb proposition per sentence.
+- No em dashes in polished output (use commas, parentheses, or full stops).
+- Each paragraph has one controlling idea followed by support.
+- Use thematic linking, not repetitive "This suggests..." openings.
+
+### Results vs Discussion Sentence Types
+
+| Results (past tense, report)                       | Discussion (hedging, interpret)                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------------------- |
+| was detected, increased, showed, enabled, achieved | may reflect, suggests that, could indicate, is likely due to, may facilitate |
+
+### Chinese-to-English Mode
+
+When source is Chinese: extract core propositions first → do not translate clause-by-clause → reconstruct explicit logical links (contrast, cause, implication, limitation) → verify terminology, causality, hedging → keep key technical terms stable.
+
+### Citation & Ethics
+
+- Cite the source you actually read and verified.
+- Position attribution clearly: who was responsible for the earlier idea/method/data.
+- Do not minimize others' contributions to make present work seem more original.
+- AI traffic-light: Green (grammar/clarity/outline/translation) → Yellow (methods/results wording with human control) → Red (drafting core argument, fabricating references/data, uploading unpublished manuscripts).
+
+### Output Format
+
+1. Polished text as plain prose (not code block).
+2. `Revision notes:` with 3-5 short bullets on major structural and stylistic changes.
+3. If side-by-side: Original | Polished | Why changed.
+
+---
+
+## nature-figure — Publication-Quality Scientific Figures
+
+Use this skill when the user asks to create, revise, audit, or polish manuscript figures, multi-panel scientific plots, or journal-ready SVG/PDF/TIFF outputs for Nature-family or other high-impact journals.
+
+### First Move: Figure Contract Before Plotting
+
+Before generating or editing code, establish:
+
+1. **Core conclusion**: one-sentence claim the figure must defend.
+2. **Evidence chain**: map each planned panel to the claim; drop panels that do not carry unique evidence.
+3. **Archetype**: classify as `quantitative grid`, `schematic-led composite`, `image plate + quant`, or `asymmetric mixed-modality figure`.
+4. **Backend**: Python (matplotlib/seaborn) or R (ggplot2/patchwork/ComplexHeatmap).
+5. **Journal/export contract**: set final dimensions, editable text, source data, statistics, export formats.
+
+### Python Quick-Start Template
+
+```python
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+mpl.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
+    "svg.fonttype": "none",       # editable text in SVG
+    "pdf.fonttype": 42,           # editable TrueType text in PDF
+    "font.size": 7,               # use 15-24 for large slide-sized panels
+    "axes.spines.right": False,
+    "axes.spines.top": False,
+    "axes.linewidth": 0.8,
+    "legend.frameon": False,
+})
+
+def save_pub_py(fig, filename, dpi=600):
+    fig.savefig(f"{filename}.svg", bbox_inches="tight")
+    fig.savefig(f"{filename}.pdf", bbox_inches="tight")
+    fig.savefig(f"{filename}.tiff", dpi=dpi, bbox_inches="tight")
+```
+
+### R Quick-Start Template
+
+```r
+library(ggplot2)
+library(patchwork)
+
+theme_set(
+  theme_classic(base_size = 6.5, base_family = "Arial") +
+    theme(
+      axis.line = element_line(linewidth = 0.35, colour = "black"),
+      axis.ticks = element_line(linewidth = 0.35, colour = "black"),
+      legend.title = element_text(size = 6.2),
+      legend.text = element_text(size = 5.8),
+      strip.text = element_text(size = 6.2, face = "bold"),
+      plot.title = element_text(size = 7, face = "bold"),
+      panel.grid = element_blank()
+    )
+)
+
+save_pub_r <- function(plot, filename, width_mm = 183, height_mm = 120, dpi = 600) {
+  w <- width_mm / 25.4; h <- height_mm / 25.4
+  svglite::svglite(paste0(filename, ".svg"), width = w, height = h)
+  print(plot); dev.off()
+  grDevices::cairo_pdf(paste0(filename, ".pdf"), width = w, height = h, family = "Arial")
+  print(plot); dev.off()
+  ragg::agg_tiff(paste0(filename, ".tiff"), width = w, height = h, units = "in", res = dpi)
+  print(plot); dev.off()
+}
+```
+
+### Color Palette (Semantic)
+
+```python
+PALETTE = {
+    "blue_main":      "#0F4D92",   # hero method
+    "blue_secondary": "#3775BA",   # second author method
+    "green_1": "#DDF3DE", "green_2": "#AADCA9", "green_3": "#8BCF8B",  # positive
+    "red_1": "#F6CFCB", "red_2": "#E9A6A1", "red_strong": "#B64342",   # baseline
+    "neutral_light": "#CFCECE", "neutral_mid": "#767676", "neutral_dark": "#4D4D4D",
+    "gold": "#FFD700", "teal": "#42949E", "violet": "#9A4D8E",
+}
+```
+
+For NMI-style pastel pages (unified family):
+
+```python
+PALETTE_NMI_PASTEL = {
+    "baseline_dark": "#484878", "baseline_mid": "#7884B4", "baseline_soft": "#B4C0E4",
+    "ours_tiny": "#E4E4F0", "ours_base": "#E4CCD8", "ours_large": "#F0C0CC",
+    "delta_up": "#2E9E44", "delta_down": "#E53935",
+}
+```
+
+### Key Design Rules
+
+- **Typography**: Arial/Helvetica, SVG editable text (`svg.fonttype='none'`), font size 7-9 for journal-final dense panels.
+- **Axes**: Only left + bottom spines. No grid lines. Frameless legends.
+- **Layout**: Prefer one hero panel + subordinate evidence panels. Width ≈ 3-4× height for comparison bars.
+- **Multi-panel information architecture**: Three-level progression — Overview (stacked bar/composition) → Deviation (z-score heatmap) → Relationship (scatter/bubble). No two panels may answer the same scientific question.
+- **Export**: SVG is the required primary format. PNG at 300-600 dpi as secondary raster preview.
+- **Bar charts**: In-bar value annotations, hatch encoding for print-safe grayscale, error bars with capsize.
+- **Heatmaps**: Diverging colormap (RdBu_r for z-scores), per-column normalization, masked NaN as white.
+- **Line plots**: Line width 2-3pt, marker size 8-12pt, fill_between for uncertainty bands (alpha 0.1-0.2).
+
+### Supported Chart Types
+
+Stacked bar, grouped bar, horizontal ablation bar, trend/line, sequential heatmap, diverging z-score heatmap, bubble scatter, radar/polar, 3D sphere illustration, fill-between area, log-scale bar, GridSpec multi-panel.
+
+---
+
+## nature-citation — Nature/CNS Citation Retrieval & Export
+
+Use this skill when the user asks to add citations to manuscript text, search Nature-series or CNS support for statements, or export EndNote/RIS/Zotero RDF.
+
+### Workflow
+
+1. **Segment the text**: Split long text into citable segments (paragraph boundaries first, then sentence boundaries). Keep stable segment IDs (S001, S002...).
+2. **Parse each segment**: Extract core claim, identify claim type (mechanism/association/method/clinical/background), convert to 2-4 English search queries.
+3. **Search candidate papers**: Use Crossref API and PubMed E-utilities. Filter by journal family (Nature Portfolio / AAAS Science / Cell Press).
+4. **Evaluate support level**: `strong support` / `partial support` / `background support` / `contradictory/limiting` / `metadata-only candidate`.
+5. **Export**: One reference-manager file in ENW, RIS, or Zotero RDF format. Always generate HTML review artifacts for browsing/filtering.
+
+### Scope Filtering
+
+| User says                     | Search scope                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| "Nature系列"                  | Nature Portfolio (Nature, Nature [field], Nature Comms, Comms [field], Sci Rep, npj) |
+| "CNS"                         | Cell, Nature, Science + major sister journals                                        |
+| "CNS及其子刊"                 | Nature Portfolio + AAAS Science family + Cell Press                                  |
+| "只要Nature/Science/Cell正刊" | Flagship only: Nature, Science, Cell                                                 |
+
+### Search Quality Rules
+
+- Prefer precision over volume (3-8 candidates, not 50 loosely related papers).
+- Check journal identity — many journals contain "nature" in name but are not Nature Portfolio.
+- Capture retractions, corrections, and expressions of concern.
+- Do not fabricate DOI, pages, volume, issue, or journal metadata.
+
+---
+
+## nature-data — Data Availability & FAIR Metadata
+
+Use this skill when the user asks about Nature data availability, research data sharing, repository selection, accession numbers, or FAIR metadata.
+
+### Workflow
+
+1. Identify target journal and article type.
+2. Inventory every dataset supporting main and supplementary results.
+3. Classify each dataset into access route: `public repository` / `controlled access` / `within paper or supplement` / `reused public source` / `third-party restricted` / `available on justified request`.
+4. Choose repository and identifier strategy (prefer DOI, accession number, Handle, ARK).
+5. Draft Data Availability statement with explicit dataset-to-location mapping.
+6. Add formal dataset citations for public data.
+7. Run FAIR metadata audit.
+
+### Chinese-to-English Alignment
+
+| Chinese phrase   | Nature-style English                                             |
+| ---------------- | ---------------------------------------------------------------- |
+| 数据可用性声明   | Data Availability                                                |
+| 原始数据         | raw data                                                         |
+| 处理后数据       | processed data                                                   |
+| 源数据           | source data                                                      |
+| 补充材料         | Supplementary Information                                        |
+| 受限数据         | restricted data                                                  |
+| 合理请求         | reasonable request (only with reason and review route)           |
+| 可向通讯作者索取 | Too vague — specify restriction reason, controller, review route |
+
+### Key Rules
+
+- Do not invent DOIs, accession numbers, repository names, or licences.
+- Prefer public, discipline-specific repositories over generalist ones.
+- Flag "available upon request" as weak unless there is a specific legal/ethical/commercial restriction.
+- Separate data, code, materials, and protocols unless the journal asks for combined section.
+
+---
+
+## nature-paper2ppt — Paper-to-Presentation PPTX
+
+Use this skill when the user asks to make slides/PPT/PPTX for journal club, group meeting, paper sharing, thesis seminar, or lab meeting from a scientific paper.
+
+### Core Principle
+
+Use the paper's scientific argument as the presentation spine, not the manuscript section order.
+
+### Default Structure (12-16 slides for 15-20 min)
+
+1. 标题页
+2. 研究背景：为什么这个问题重要
+3. 知识缺口 / 技术瓶颈
+4. 论文核心问题与主张
+5. 研究设计 / 技术路线 / 分析框架
+6. 关键证据 1
+7. 关键证据 2
+8. 关键证据 3
+9. 验证、对照或稳健性证据
+10. 机制模型 / 方法优势 / 综合框架
+11. 创新点与可复用价值
+12. 局限性与未解决问题
+13. 总结与讨论
+
+### Paper-Type Guidance
+
+| Paper Type                  | Presentation Logic         |
+| --------------------------- | -------------------------- |
+| Discovery/mechanism         | question-to-evidence arc   |
+| Methods/AI/Tool             | problem-to-solution arc    |
+| Resource/Dataset/Omics      | workflow-to-validation arc |
+| Clinical/Population         | design-to-inference arc    |
+| Materials/Chemistry/Physics | property-to-mechanism arc  |
+| Reviews/Perspectives        | evidence-map arc           |
+
+### Style Rules
+
+- Clean white background, dark readable text, one or two muted accent colors.
+- Figure-first result slides: one dominant visual per slide, asymmetric layouts.
+- Use conclusion-style titles (e.g., "PathAgent 主动识别信息不足并补充证据" not "Figure 3").
+- Chinese suitable for oral academic reporting: avoid rigid translation, avoid long paragraphs.
+- Preserve technical terms in English where Chinese translation would reduce precision.
+- Build real `.pptx` as primary deliverable (python-pptx), not markdown outline.

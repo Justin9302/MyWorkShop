@@ -1,0 +1,96 @@
+# =============================================================================
+# LatticeWork 工作流定义
+# 用途: 定义 LatticeWork 的完整执行工作流
+# 兼容: workflows/ 目录下的现有 workflow 格式
+# =============================================================================
+
+workflow:
+  id: "lattice_workflow_v1"
+  name: "LatticeWork 晶格执行工作流"
+  description: "从晶格方案解析到逐层执行的完整工作流"
+  version: "1.0.0"
+
+# ── 工作流步骤 ────────────────────────────────────────────────────────────
+steps:
+  # Step 1: 验证晶格方案
+  - id: "validate_lattice"
+    name: "验证晶格方案"
+    description: "验证晶格方案的完整性和正确性"
+    type: "validation"
+    command: "python lattice/scripts/lattice_core.py validate --lattice {lattice_path}"
+    inputs:
+      lattice_path: "{lattice_path}"
+    outputs:
+      validation_result: "validation_result"
+    on_failure: "stop"
+
+  # Step 2: 生成执行顺序
+  - id: "generate_execution_order"
+    name: "生成执行顺序"
+    description: "生成逆向执行顺序（从核心层到外层）"
+    type: "analysis"
+    command: "python lattice/scripts/lattice_core.py execution-order --lattice {lattice_path} -o {output_dir}/execution_order.json"
+    depends_on: ["validate_lattice"]
+    inputs:
+      lattice_path: "{lattice_path}"
+      output_dir: "{output_dir}"
+    outputs:
+      execution_order: "{output_dir}/execution_order.json"
+
+  # Step 3: 逐层执行
+  - id: "execute_layers"
+    name: "逐层执行"
+    description: "从核心层到外层逐层执行所有原子任务"
+    type: "execution"
+    command: "python lattice/scripts/lattice_runner.py run --lattice {lattice_path} -o {output_dir}/run_result.json"
+    depends_on: ["generate_execution_order"]
+    inputs:
+      lattice_path: "{lattice_path}"
+      output_dir: "{output_dir}"
+    outputs:
+      run_result: "{output_dir}/run_result.json"
+    on_failure: "notify"
+
+  # Step 4: 生成执行报告
+  - id: "generate_report"
+    name: "生成执行报告"
+    description: "生成完整的执行报告，包括层组装结果和意图对齐检查"
+    type: "report"
+    command: "python lattice/scripts/lattice_runner.py status --lattice {lattice_path}"
+    depends_on: ["execute_layers"]
+    inputs:
+      lattice_path: "{lattice_path}"
+    outputs:
+      status_report: "console"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution:
+  mode: "sequential"                    # sequential | parallel
+  max_retries: 3
+  retry_delay: 5                        # 秒
+  timeout: 3600                         # 秒 (1小时)
+  notification:
+    on_start: false
+    on_complete: true
+    on_failure: true
+
+# ── 输入输出 ──────────────────────────────────────────────────────────────
+inputs:
+  lattice_path:
+    description: "晶格方案 YAML 文件路径"
+    type: "string"
+    required: true
+  output_dir:
+    description: "输出目录"
+    type: "string"
+    default: "lattice/lattice_runtime"
+
+outputs:
+  validation_result:
+    description: "验证结果"
+  execution_order:
+    description: "执行顺序"
+  run_result:
+    description: "执行结果"
+  status_report:
+    description: "状态报告"

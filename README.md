@@ -53,14 +53,14 @@ Completed stages:
 
 Completed Phase 7 sub-stages:
 
-| Sub-stage | Description                                        | Status      |
-| --------- | -------------------------------------------------- | ----------- |
-| Phase 7a  | LLM-as-Judge evaluation engine upgrade             | ✅ Complete |
-| Phase 7b  | Dynamic eval set precipitation & classification    | ✅ Complete |
-| Phase 7c  | Improvement suggestion → candidate change pipeline | ✅ Complete |
-| Phase 7d  | Sandbox regression testing                         | ⏳ Pending  |
-| Phase 7e  | Canary release mechanism                           | ⏳ Pending  |
-| Phase 7f  | Quality dashboard & auto-rollback                  | ⏳ Pending  |
+| Sub-stage | Description                                        | Status         |
+| --------- | -------------------------------------------------- | -------------- |
+| Phase 7a  | LLM-as-Judge evaluation engine upgrade             | ✅ Complete    |
+| Phase 7b  | Dynamic eval set precipitation & classification    | ✅ Complete    |
+| Phase 7c  | Improvement suggestion → candidate change pipeline | ✅ Complete    |
+| Phase 7d  | Sandbox regression testing                         | ✅ Complete    |
+| Phase 7e  | Canary release mechanism                           | 🚧 In Progress |
+| Phase 7f  | Quality dashboard & auto-rollback                  | 🚧 In Progress |
 
 Active component versions:
 

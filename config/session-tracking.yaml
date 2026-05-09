@@ -1,0 +1,61 @@
+# 会话跟踪配置 (Session Tracking)
+# 用于记录跨对话的会话历史、关键决策和项目进展
+# 每次重要会话结束后，AI 助手应更新此文件
+
+session_tracking:
+  version: "0.1.0"
+  status: "active"
+
+  # 会话记录
+  sessions:
+    - id: "session_20260508_001"
+      date: "2026-05-08"
+      title: "建立跨对话记忆系统"
+      summary: >
+        创建了用户配置文件 (docs/user_profile.md) 和会话跟踪系统 (config/session-tracking.yaml)，
+        用于在跨对话中保持对用户工作习惯和项目上下文的一致理解。
+      key_decisions:
+        - "采用用户配置 + 会话跟踪的双重记录系统"
+        - "用户配置文件记录静态偏好和习惯"
+        - "会话跟踪文件记录动态会话历史和决策"
+      files_modified:
+        - "docs/user_profile.md (新建)"
+        - "config/session-tracking.yaml (新建)"
+      status: "completed"
+
+  # 活跃上下文
+  active_context:
+    current_focus: ""
+    last_session: "session_20260508_001"
+    pending_items: []
+    notes: ""
+
+  # 关键决策记录
+  decision_log:
+    - id: "decision_20260508_001"
+      date: "2026-05-08"
+      title: "建立跨对话记忆系统"
+      decision: "创建用户配置文件和会话跟踪系统，实现跨对话的记忆能力"
+      rationale: "用户希望 AI 助手能在不同对话之间记住其工作内容和习惯"
+      alternatives_considered:
+        - "仅使用用户配置文件"
+        - "仅使用会话跟踪文件"
+        - "两者结合（选定方案）"
+      status: "implemented"
+
+  # 项目里程碑
+  milestones:
+    - date: "2026-05-08"
+      title: "跨对话记忆系统上线"
+      description: "建立了用户配置和会话跟踪的双重记录系统"
+      status: "completed"
+
+  # 已知问题与待办
+  known_issues: []
+  todo:
+    - description: "根据实际使用情况完善用户配置文件中的偏好设置"
+      priority: "low"
+      status: "pending"
+    - description: "建立会话跟踪的自动化更新流程"
+      priority: "low"
+      status: "pending"

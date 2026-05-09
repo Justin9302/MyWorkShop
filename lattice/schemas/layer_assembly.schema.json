@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/layer_assembly.schema.json",
+  "title": "Layer Assembly — 层组装定义",
+  "description": "当同一层级的所有原子任务都完成 PCDCA 循环后，执行层组装。组装包括：验证所有任务产出、运行组装测试、执行意图对齐检查。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "layer",
+    "lattice_id",
+    "status",
+    "tasks",
+    "assembly_test",
+    "intent_alignment"
+  ],
+  "properties": {
+    "layer": {
+      "type": "integer",
+      "description": "层级编号"
+    },
+    "lattice_id": {
+      "type": "string",
+      "description": "所属晶格方案ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "层级名称"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "in_progress", "completed", "failed", "blocked"],
+      "description": "层组装状态"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id", "name", "status"],
+        "properties": {
+          "task_id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "pass", "fail", "blocked", "skipped"]
+          },
+          "provides": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "该任务提供的接口/能力"
+          }
+        }
+      },
+      "description": "该层所有原子任务及其状态"
+    },
+    "assembly_test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "tests"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "result": {
+                "type": "string",
+                "enum": ["pending", "pass", "fail"]
+              },
+              "detail": { "type": "string" }
+            }
+          }
+        },
+        "overall_result": {
+          "type": "string",
+          "enum": ["pending", "pass", "fail"]
+        }
+      }
+    },
+    "intent_alignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["original_goal", "verification"],
+      "properties": {
+        "original_goal": {
+          "type": "string",
+          "description": "该层的原始目标"
+        },
+        "verification": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "意图对齐验证项"
+        },
+        "alignment_result": {
+          "type": "string",
+          "enum": ["pending", "aligned", "misaligned"],
+          "description": "对齐结果"
+        },
+        "gap_analysis": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "差距分析（如果misaligned）"
+        }
+      }
+    },
+    "next_layer": {
+      "type": ["integer", "null"],
+      "description": "下一层编号（null表示已到最外层）"
+    },
+    "started_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}

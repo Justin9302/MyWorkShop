@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/lattice.schema.json",
+  "title": "Lattice — 晶格化方案顶层定义",
+  "description": "LatticeWork 框架的顶层晶格方案文件。定义意图、层级分解、依赖关系和执行策略。人类可读、AI可执行。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lattice", "intent", "layers", "execution_strategy"],
+  "properties": {
+    "lattice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "domain", "domain_type", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "晶格方案唯一标识，如 'lattice_quant_001'"
+        },
+        "name": {
+          "type": "string",
+          "description": "方案名称，如 '澳元利率基差套利策略'"
+        },
+        "domain": {
+          "type": "string",
+          "description": "所属领域，如 'quantitative_trading', 'software_design', 'business_model'"
+        },
+        "domain_type": {
+          "type": "string",
+          "description": "领域类型，如 'algorithm_design_and_validation', 'architecture_design', 'business_model_validation'"
+        },
+        "version": {
+          "type": "string",
+          "description": "方案版本号"
+        },
+        "description": {
+          "type": "string",
+          "description": "方案描述"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "创建时间"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "最后更新时间"
+        }
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_goal", "acceptance_criteria"],
+      "properties": {
+        "user_goal": {
+          "type": "string",
+          "description": "用户原始目标描述"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "验收标准列表"
+        },
+        "non_goals": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "明确不做的事项列表"
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "约束条件列表"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "风险等级"
+        }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["layer", "name", "description", "tasks"],
+        "properties": {
+          "layer": {
+            "type": "integer",
+            "description": "层级编号。0=最外层(界面/管道)，N=最内层(核心领域模型)。构建顺序从N到0。"
+          },
+          "name": {
+            "type": "string",
+            "description": "层级名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "层级职责描述"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["task_id", "name", "description"],
+              "properties": {
+                "task_id": {
+                  "type": "string",
+                  "description": "原子任务ID，引用 atomic_task 定义"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "任务名称"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "任务描述"
+                },
+                "depends_on": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "依赖的其他 task_id 列表"
+                }
+              }
+            }
+          },
+          "assembly_test": {
+            "type": "object",
+            "description": "该层组装测试定义",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "tests": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "execution_strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction", "pcdca_required"],
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": ["bottom_up"],
+          "description": "执行方向。固定为 bottom_up（从最内层核心到最外层界面）"
+        },
+        "pcdca_required": {
+          "type": "boolean",
+          "const": true,
+          "description": "是否强制PCDCA循环。固定为 true"
+        },
+        "max_pcdca_cycles_per_task": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5,
+          "description": "每个原子任务的最大PCDCA循环次数"
+        },
+        "human_in_the_loop": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plan_review_required": {
+              "type": "boolean",
+              "default": true,
+              "description": "Plan阶段是否需要人工审核"
+            },
+            "check_review_required": {
+              "type": "boolean",
+              "default": false,
+              "description": "Check阶段是否需要人工审核（仅高风险任务需要）"
+            },
+            "blocker_escalation": {
+              "type": "boolean",
+              "default": true,
+              "description": "阻塞点是否升级到人工处理"
+            }
+          }
+        }
+      }
+    },
+    "global_blockers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "known": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "affected_tasks": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "resolution": { "type": "string" }
+            }
+          },
+          "description": "已知全局阻塞点"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,109 @@
+workflow:
+  id: "ideation_convergence"
+  name: "头脑风暴与观点收敛"
+  industry: "general"
+  description: "通用发散-收敛工作流：围绕主题进行多角度头脑风暴，关联相关知识、案例和数据，帮助用户拓展思维边界，最终收敛为结构化观点集和行动建议。"
+  role: "ideation_facilitator"
+  risk_default: "low"
+  model_routing: "standard_analysis"
+context_intent_gate:
+  required: true
+  required_reads: ["config/active-release.yaml", "config/context-loading.yaml"]
+  confirmation_outputs: ["头脑风暴主题", "目标产出类型", "发散维度偏好", "收敛标准"]
+  block_conditions: ["主题缺失或过于模糊", "用户要求确定性结论但无证据支撑"]
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"]
+inputs:
+  - name: "topic"
+    required: true
+    description: "头脑风暴的核心主题（如：新产品功能、文章选题、解决方案设计等）"
+  - name: "goal_type"
+    required: false
+    description: "目标产出类型：文章大纲 / 产品方案 / 商业策略 / 问题解法 / 创意点子"
+  - name: "divergence_dimensions"
+    required: false
+    description: "希望从哪些维度发散（如：技术、市场、用户、风险、趋势等）"
+  - name: "convergence_criteria"
+    required: false
+    description: "收敛标准（如：可行性、创新性、成本、时间、资源匹配度等）"
+  - name: "reference_materials"
+    required: false
+    description: "用户提供的参考资料或背景信息"
+retrieval:
+  scope: ["approved_market_notes", "internal_strategy_notes", "public_citable_sources", "industry_reports", "case_studies"]
+  source_filters: ["evidence_level_recorded", "confidentiality_allowed"]
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+steps:
+  - id: "confirm_intent"
+    name: "确认主题与目标"
+    action: "明确头脑风暴主题、目标产出类型、发散偏好和收敛标准，与用户达成共识"
+    interaction_mode: "user_confirm"
+    output_style: "concise_question"
+  - id: "context_expansion"
+    name: "知识关联与背景扩展"
+    action: "围绕主题检索相关知识、行业趋势、竞品案例、数据报告，为用户提供发散所需的素材弹药"
+    interaction_mode: "present_then_pause"
+    output_style: "key_facts_only"
+    pause_for_user: true
+  - id: "divergent_brainstorming"
+    name: "多角度发散思考"
+    action: "从多个维度（技术、市场、用户、风险、趋势、竞品等）生成丰富的想法、观点和可能性，每个维度提供具体内容"
+    interaction_mode: "incremental_by_dimension"
+    output_style: "one_dimension_at_a_time"
+    pause_for_user: true
+    sub_steps:
+      - "每次输出1个维度的3-5个观点"
+      - "按重要程度从高到低呈现维度"
+      - "每轮后暂停，收集用户反馈和深入方向"
+  - id: "clustering_and_synthesis"
+    name: "聚类与综合"
+    action: "将发散产生的观点按主题、维度或关联性进行聚类，识别模式、冲突点和空白区域"
+    interaction_mode: "user_guided"
+    output_style: "emergent_patterns"
+    pause_for_user: true
+  - id: "convergent_evaluation"
+    name: "收敛评估与排序"
+    action: "基于用户指定的收敛标准对聚类后的观点进行评分、排序和筛选"
+    interaction_mode: "user_driven"
+    output_style: "ranked_shortlist"
+    pause_for_user: true
+  - id: "structured_output"
+    name: "结构化输出与行动建议"
+    action: "输出收敛后的观点集、决策依据、推荐方案和下一步行动建议"
+    interaction_mode: "final_delivery"
+    output_style: "complete_document"
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "user supplies topic or goal type"
+    cancel_condition: "user abandons brainstorming"
+    audit_fields: ["topic", "goal_type", "divergence_dimensions", "checkpoint_id"]
+  - node_id: "divergent_brainstorming"
+    pause_reason: "needs_more_dimensions"
+    resume_condition: "user specifies additional dimensions to explore"
+    cancel_condition: "user cancels brainstorming"
+    audit_fields: ["explored_dimensions", "generated_ideas_count", "checkpoint_id"]
+  - node_id: "convergent_evaluation"
+    pause_reason: "needs_criteria_clarification"
+    resume_condition: "user provides or adjusts convergence criteria"
+    cancel_condition: "user declines to converge"
+    audit_fields: ["criteria_used", "ranked_ideas", "checkpoint_id"]
+outputs:
+  template: "prompts/general/ideation_convergence.system.md"
+  format: "markdown"
+  required_sections:
+    - "topic_and_goal"
+    - "context_and_references"
+    - "divergent_ideas_matrix"
+    - "clusters_and_patterns"
+    - "evaluation_and_ranking"
+    - "converged_conclusions"
+    - "action_recommendations"
+human_review:
+  required_when: ["输出将用于重大决策", "输出涉及敏感领域", "用户明确要求人工审核"]
+  reviewer_role: "domain_expert_or_stakeholder"
+version: "0.2.0"

@@ -7,7 +7,7 @@
 
 ---
 
-## [Unreleased]
+## [release_2026_05_10_001] - 2026-05-10
 
 ### Added
 
@@ -16,7 +16,7 @@
   - `lattice/templates/` — 模板文件（lattice、atomic_task、layer_assembly）
   - `lattice/scripts/` — 核心引擎（lattice_core.py、lattice_blocker.py、lattice_pcdca.py、lattice_runner.py）
   - `lattice/workflows/` — 工作流定义（lattice、pcdca、blocker）
-  - `lattice/examples/` — 示例（量化交易、软件设计、商业模式、贪吃蛇游戏）
+  - `lattice/examples/` — 示例（量化交易、软件设计、商业模式、贪吃蛇游戏、VPP 综合方案）
   - `lattice/README.md` — 框架文档
 - Phase 7e: 灰度发布管理
   - `scripts/rollout_manager.py` — 灰度发布管理器
@@ -26,12 +26,12 @@
   - `scripts/dashboard.py` — 仪表盘脚本
   - `config/dashboard-config.yaml` — 仪表盘配置
   - `tests/phase7f/test_dashboard.py` — 测试套件
-- Phase 8: 工作流编排引擎（补充）
+- Phase 8: 工作流编排引擎
   - `scripts/workflow_runner.py` — 工作流编排引擎
   - `scripts/workflow_status_indicator.py` — 状态指示器
   - `config/session-tracking.yaml` — 会话追踪配置
   - `tests/phase8/test_workflow_runner.py` — 测试套件（42 项）
-- Phase 9: 中断处理（补充）
+- Phase 9: 中断处理与恢复
   - `scripts/interruption_handler.py` — 中断处理核心脚本
   - `tests/phase9/test_interruption_handler.py` — 测试套件（63 项）
 - 通用工作流与提示词
@@ -48,17 +48,26 @@
 ### Changed
 
 - `.github/copilot-instructions.md` — 大幅更新 Copilot 指令
-- `config/active-release.yaml` — 更新组件注册（workflow_runner、interruption_handler、rollout_manager、dashboard 等）
+- `config/active-release.yaml` — 更新组件注册（workflow_runner、interruption_handler、rollout_manager、dashboard、lattice）
 - `config/interruption-policy.yaml` — 从 draft 升级为正式版 v0.2.0
 - `constraints/baseline/human_review.yaml` — 添加中断触发规则
 - `scripts/llm_judge.py` — 小幅优化
 - `scripts/validate_interruption_flow.sh` — 扩展验证覆盖
 - `docs/evaluation_sidecar.md` — 文档微调
 - `README.md` — 更新项目说明
+- `docs/model_context.md` — 更新至 Stage 9 状态
+- `tests/phase7f/test_dashboard.py` — 修复 dry_run 测试断言
 
 ### Fixed
 
 - `.gitignore` — 排除 `lattice/lattice_runtime/` 运行态数据
+
+### Notes
+
+- 全局进化流程：同步 Phase 7e-9 + Lattice 框架至正式 Release
+- 组件版本: workflow 0.3.0 / constraint 0.4.0 / prompt 0.2.0 / evaluator 0.2.0 / judge 0.1.0 / kb_0.3.0 / lattice 1.0.0
+- 测试结果: 433 项自动化测试全部通过（Phase 7a-7d: 166 + Phase 7e-7f: 267）
+- Lattice 框架验证通过（VPP 综合方案示例: 3 层级, 6 任务）
 
 - Phase 6: 版本治理体系
   - `schemas/release_manifest.schema.json` — 发布 Manifest Schema

@@ -1,0 +1,192 @@
+release_id: release_2026_05_10_001
+git_commit: b24778a50812bc7b9c49ff72c793858b7949991e
+git_tag: release_2026_05_10_001
+previous_release: release_2026_05_05_001
+stage: stage_9_interruption_recovery
+status: review
+lifecycle:
+  current_phase: review
+  transitions:
+    - from: null
+      to: draft
+      timestamp: '2026-05-10T11:40:00+10:00'
+      actor: system
+      reason: 全局进化流程 — 同步 Phase 7e-9 + Lattice 框架至正式 Release
+    - from: draft
+      to: review
+      timestamp: "2026-05-10T01:44:45Z"
+      actor: feng
+      reason: 晋升 via release_promote.sh
+created_at: '2026-05-10T11:40:00+10:00'
+updated_at: '2026-05-10T01:44:45Z'
+components:
+  workflow_version: 0.3.0
+  constraint_pack_version: 0.4.0
+  prompt_version: 0.2.0
+  evaluator_version: 0.2.0
+  judge_version: 0.1.0
+  knowledge_base_version: kb_0.3.0
+  lattice_version: 1.0.0
+component_compatibility:
+  min_workflow_for_constraint: 0.1.0
+  min_prompt_for_workflow: 0.1.0
+  notes:
+    - 约束包 0.4.0 兼容所有 0.1.x-0.3.x 工作流
+    - Prompt 0.2.0 新增 ideation_convergence 通用工作流支持
+    - Lattice 框架 1.0.0 为独立组件，不依赖其他组件版本
+changes:
+  - type: added
+    component: lattice/
+    description: LatticeWork 结构化任务分解与执行框架 — schemas, scripts, workflows, templates, examples
+  - type: added
+    component: scripts/rollout_manager.py
+    description: 'Phase 7e: 灰度发布管理器'
+  - type: added
+    component: config/rollout-policy.yaml
+    description: 'Phase 7e: 灰度发布策略配置'
+  - type: added
+    component: tests/phase7e/
+    description: 'Phase 7e: 灰度发布测试套件'
+  - type: added
+    component: scripts/dashboard.py
+    description: 'Phase 7f: 质量仪表盘脚本'
+  - type: added
+    component: config/dashboard-config.yaml
+    description: 'Phase 7f: 仪表盘配置'
+  - type: added
+    component: tests/phase7f/
+    description: 'Phase 7f: 仪表盘测试套件'
+  - type: added
+    component: scripts/workflow_runner.py
+    description: 'Phase 8: 工作流编排引擎'
+  - type: added
+    component: scripts/workflow_status_indicator.py
+    description: 'Phase 8: 工作流状态指示器'
+  - type: added
+    component: config/session-tracking.yaml
+    description: 'Phase 8: 会话追踪配置'
+  - type: added
+    component: tests/phase8/
+    description: 'Phase 8: 工作流编排引擎测试套件 (42 项)'
+  - type: added
+    component: scripts/interruption_handler.py
+    description: 'Phase 9: 中断处理核心脚本'
+  - type: added
+    component: tests/phase9/
+    description: 'Phase 9: 中断处理测试套件 (63 项)'
+  - type: added
+    component: workflows/general/ideation_convergence.yaml
+    description: 通用创意收敛工作流
+  - type: added
+    component: prompts/general/ideation_convergence.system.md
+    description: 创意收敛 system prompt
+  - type: added
+    component: evaluators/rubrics/ideation_convergence.yaml
+    description: 创意收敛评估量规
+  - type: added
+    component: docs/user_profile.md
+    description: 用户画像文档
+  - type: added
+    component: docs/workspace_usage_guide.md
+    description: 工作空间使用指南
+  - type: added
+    component: tests/eval_cases/synthetic/run_snapshot_sample_001_eval.json
+    description: 评估样本补充
+  - type: added
+    component: tests/eval_cases/synthetic/run_snapshot_sample_002_eval.json
+    description: 评估样本补充
+  - type: changed
+    component: config/active-release.yaml
+    description: 更新组件注册 — workflow_runner, interruption_handler, rollout_manager, dashboard, lattice
+  - type: changed
+    component: config/interruption-policy.yaml
+    description: 从 draft 升级为正式版 v0.2.0
+  - type: changed
+    component: constraints/baseline/human_review.yaml
+    description: 添加中断触发规则
+  - type: changed
+    component: .github/copilot-instructions.md
+    description: 大幅更新 Copilot 指令
+  - type: changed
+    component: scripts/llm_judge.py
+    description: 小幅优化
+  - type: changed
+    component: scripts/validate_interruption_flow.sh
+    description: 扩展验证覆盖
+  - type: changed
+    component: docs/evaluation_sidecar.md
+    description: 文档微调
+  - type: fixed
+    component: .gitignore
+    description: 排除 lattice/lattice_runtime/ 运行态数据
+governance_refs:
+  context_loading: config/context-loading.yaml
+  model_routing: config/model-routing.yaml
+  permissions: config/permissions.yaml
+  feature_flags: config/feature-flags.yaml
+  mcp_tools: config/mcp-tools.yaml
+  interruption_policy: config/interruption-policy.yaml
+  workflow_schema: schemas/workflow.schema.json
+  run_snapshot_schema: schemas/run_snapshot.schema.json
+  release_manifest_schema: schemas/release_manifest.schema.json
+workflow_list:
+  - workflows/legal/contract_review.yaml
+  - workflows/legal/policy_qa.yaml
+  - workflows/business/business_model_design.yaml
+  - workflows/business/business_model_validation.yaml
+  - workflows/business/go_to_market_review.yaml
+  - workflows/business/unit_economics_check.yaml
+  - workflows/energy/solar_financial_model.yaml
+  - workflows/finance/investment_research.yaml
+  - workflows/finance/risk_summary.yaml
+  - workflows/finance/due_diligence.yaml
+  - workflows/operations/sop_generation.yaml
+  - workflows/operations/meeting_summary.yaml
+  - workflows/operations/project_retrospective.yaml
+  - workflows/general/ideation_convergence.yaml
+constraint_list:
+  - constraints/baseline/privacy.yaml
+  - constraints/baseline/citation.yaml
+  - constraints/baseline/human_review.yaml
+  - constraints/baseline/tool_permissions.yaml
+  - constraints/baseline/safety.yaml
+  - constraints/baseline/context_intent_gate.yaml
+  - constraints/industries/legal.yaml
+  - constraints/industries/energy.yaml
+  - constraints/industries/business.yaml
+  - constraints/industries/finance.yaml
+  - constraints/industries/operations.yaml
+  - constraints/jurisdictions/us.yaml
+  - constraints/jurisdictions/eu.yaml
+  - constraints/jurisdictions/cn.yaml
+  - constraints/jurisdictions/au.yaml
+prompt_list:
+  - prompts/legal/contract_review.system.md
+  - prompts/legal/policy_qa.system.md
+  - prompts/business/business_model_design.system.md
+  - prompts/business/business_model_validation.system.md
+  - prompts/business/go_to_market_review.system.md
+  - prompts/business/unit_economics_check.system.md
+  - prompts/energy/solar_financial_model.system.md
+  - prompts/finance/research_summary.system.md
+  - prompts/finance/risk_summary.system.md
+  - prompts/finance/due_diligence.system.md
+  - prompts/operations/sop_generation.system.md
+  - prompts/operations/meeting_summary.system.md
+  - prompts/operations/project_retrospective.system.md
+  - prompts/evaluation/llm_judge.system.md
+  - prompts/general/ideation_convergence.system.md
+evaluator_list:
+  - evaluators/rules/citation_check.yaml
+  - evaluators/rules/risk_check.yaml
+  - evaluators/rules/schema_check.yaml
+  - evaluators/rubrics/business_model_validation.yaml
+  - evaluators/rubrics/contract_review.yaml
+  - evaluators/rubrics/due_diligence.yaml
+  - evaluators/rubrics/sop_generation.yaml
+  - evaluators/rubrics/solar_financial_model.yaml
+  - evaluators/rubrics/ideation_convergence.yaml
+rollback:
+  previous_release: release_2026_05_05_001
+  rollback_script: scripts/rollback.sh
+  notes: 回滚至 release_2026_05_05_001 将移除 Phase 7e-9 及 Lattice 框架的所有变更

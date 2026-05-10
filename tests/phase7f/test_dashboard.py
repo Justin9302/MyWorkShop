@@ -867,8 +867,9 @@ class TestAutoRollback:
             dry_run=True,
         )
         assert result["dry_run"] is True
-        # 没有 change_id 关联，所以不会执行回滚
-        assert result["rollbacks_executed"] == 0
+        # 模拟模式下，回滚被记录但标记为 dry_run
+        assert len(result["rollbacks"]) > 0
+        assert result["rollbacks"][0]["dry_run"] is True
 
     def test_auto_rollback_with_rollout_record(self, sample_trend_data, temp_dir):
         """测试有灰度发布记录时的自动回滚。"""

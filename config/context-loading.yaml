@@ -27,6 +27,17 @@ context_loading:
       - "Do not load unrelated industry packages, jurisdictions, prompts, or tools."
       - "Summarize or run a second retrieval pass when context exceeds the task budget."
       - "Before executing regulated tasks (legal, finance, compliance), check the active knowledge_base_version and knowledge_bases list. If empty or marked draft, flag data freshness risk and offer online update."
+      - "Every key finding in the output MUST be traceable to a specific source document, interview, or data record. Include source reference (document name, section, date) alongside each finding."
+      - "Classify each finding with an evidence level: fact (directly from source), assumption (inferred but unverified), inference (logical deduction), or unknown (no supporting data)."
+      - "When citing sources, include metadata: {source_doc, section, page_or_timestamp, retrieval_date} to enable audit trail."
+      - "If a finding cannot be traced to a loaded source, flag it as 'insufficient_evidence' and include the reasoning in the output."
+  context_window:
+    max_tokens: 128000
+    warning_threshold: 0.85
+    critical_threshold: 0.95
+    auto_summarize: true
+    summarization_strategy: "remove_oldest_conversation_history"
+    preserve_last_n_messages: 10
   audit_expectations:
     record_loaded_files: true
     record_skipped_relevant_files: true

@@ -1,7 +1,7 @@
 active_release:
-  id: release_2026_05_09_001
-  git_commit: 778032e
-  git_tag: release_2026_05_09_001
+  id: release_2026_05_10_001
+  git_commit: b24778a50812bc7b9c49ff72c793858b7949991e
+  git_tag: release_2026_05_10_001
   stage: stage_9_interruption_recovery
   workflow_version: 0.3.0
   constraint_pack_version: 0.4.0
@@ -9,20 +9,16 @@ active_release:
   evaluator_version: 0.2.0
   judge_version: 0.1.0
   knowledge_base_version: kb_0.3.0
-  status: draft
+  lattice_version: 1.0.0
+  status: review
   lifecycle:
-    current_phase: published
+    current_phase: draft
     transitions:
-    - from: null
-      to: draft
-      timestamp: '2026-05-05T00:00:00Z'
-      actor: system
-      reason: Phase 6 接管 — 发布治理初始化
-    - from: draft
-      to: published
-      timestamp: '2026-05-05T09:00:00Z'
-      actor: feng
-      reason: Phase 6 complete — 发布治理体系上线
+      - from: null
+        to: draft
+        timestamp: '2026-05-10T11:40:00+10:00'
+        actor: system
+        reason: 全局进化流程 — 同步 Phase 7e-9 + Lattice 框架至正式 Release
   governance:
     context_loading: config/context-loading.yaml
     model_routing: config/model-routing.yaml
@@ -30,32 +26,32 @@ active_release:
     feature_flags: config/feature-flags.yaml
     mcp_tools: config/mcp-tools.yaml
     knowledge_bases:
-    - id: aemo_market_data
-      name: AEMO NEM 电力市场数据
-      source: https://aemo.com.au/energy-systems/electricity
-      last_fetched: '2026-05-06'
-      documents:
-      - AEMO Connections Scorecard Q1 2026
-      - ElectraNet TAPR 2026
-      - Intium Grid Connection Survey Nov 2025
-      data_ref: "data/market_reference_au.yaml"
-      notes: "澳洲 NEM 区域参考数据 V0.3（CAPEX/PPA/MLF/并网接入/AI数据中心需求），数据文件每 90 天建议更新"
-    - id: cer_lgc_market
-      name: CER LGC 市场报告
-      source: https://cer.gov.au/markets/reports
-      last_fetched: null
-      documents: []
-      data_ref: "data/market_reference_au.yaml"
-      notes: "LGC 价格和供应数据"
-    - id: sichuan_energy_policy
-      name: 四川省电力市场政策文件 2025-2026
-      source: https://scb.nea.gov.cn/
-      last_fetched: '2026-05-05'
-      data_ref: "data/market_reference_cn.yaml"
-      documents:
-      - 四川省电力辅助服务管理实施细则（2026版）
-      - 川发改能源〔2025〕255号 需求侧市场化响应
-      - 川发改价格〔2025〕185号 分时电价机制
+      - id: aemo_market_data
+        name: AEMO NEM 电力市场数据
+        source: https://aemo.com.au/energy-systems/electricity
+        last_fetched: '2026-05-06'
+        documents:
+          - AEMO Connections Scorecard Q1 2026
+          - ElectraNet TAPR 2026
+          - Intium Grid Connection Survey Nov 2025
+        data_ref: "data/market_reference_au.yaml"
+        notes: "澳洲 NEM 区域参考数据 V0.3（CAPEX/PPA/MLF/并网接入/AI数据中心需求），数据文件每 90 天建议更新"
+      - id: cer_lgc_market
+        name: CER LGC 市场报告
+        source: https://cer.gov.au/markets/reports
+        last_fetched: null
+        documents: []
+        data_ref: "data/market_reference_au.yaml"
+        notes: "LGC 价格和供应数据"
+      - id: sichuan_energy_policy
+        name: 四川省电力市场政策文件 2025-2026
+        source: https://scb.nea.gov.cn/
+        last_fetched: '2026-05-05'
+        data_ref: "data/market_reference_cn.yaml"
+        documents:
+          - 四川省电力辅助服务管理实施细则（2026版）
+          - 川发改能源〔2025〕255号 需求侧市场化响应
+          - 川发改价格〔2025〕185号 分时电价机制
     interruption_policy: config/interruption-policy.yaml
     required_entrypoint: docs/model_context.md
     copilot_entrypoint: .github/copilot-instructions.md
@@ -70,67 +66,67 @@ active_release:
     eval_set_schema: schemas/eval_set.schema.json
   active_components:
     workflows:
-    - workflows/legal/contract_review.yaml
-    - workflows/legal/policy_qa.yaml
-    - workflows/business/business_model_design.yaml
-    - workflows/business/business_model_validation.yaml
-    - workflows/business/go_to_market_review.yaml
-    - workflows/business/unit_economics_check.yaml
-    - workflows/energy/solar_financial_model.yaml
-    - workflows/finance/investment_research.yaml
-    - workflows/finance/risk_summary.yaml
-    - workflows/finance/due_diligence.yaml
-    - workflows/operations/sop_generation.yaml
-    - workflows/operations/meeting_summary.yaml
-    - workflows/operations/project_retrospective.yaml
-    - workflows/general/ideation_convergence.yaml
+      - workflows/legal/contract_review.yaml
+      - workflows/legal/policy_qa.yaml
+      - workflows/business/business_model_design.yaml
+      - workflows/business/business_model_validation.yaml
+      - workflows/business/go_to_market_review.yaml
+      - workflows/business/unit_economics_check.yaml
+      - workflows/energy/solar_financial_model.yaml
+      - workflows/finance/investment_research.yaml
+      - workflows/finance/risk_summary.yaml
+      - workflows/finance/due_diligence.yaml
+      - workflows/operations/sop_generation.yaml
+      - workflows/operations/meeting_summary.yaml
+      - workflows/operations/project_retrospective.yaml
+      - workflows/general/ideation_convergence.yaml
     constraints:
-    - constraints/baseline/privacy.yaml
-    - constraints/baseline/citation.yaml
-    - constraints/baseline/human_review.yaml
-    - constraints/baseline/tool_permissions.yaml
-    - constraints/baseline/safety.yaml
-    - constraints/baseline/context_intent_gate.yaml
-    - constraints/industries/legal.yaml
-    - constraints/industries/energy.yaml
-    - constraints/industries/business.yaml
-    - constraints/industries/finance.yaml
-    - constraints/industries/operations.yaml
-    - constraints/jurisdictions/us.yaml
-    - constraints/jurisdictions/eu.yaml
-    - constraints/jurisdictions/cn.yaml
-    - constraints/jurisdictions/au.yaml
+      - constraints/baseline/privacy.yaml
+      - constraints/baseline/citation.yaml
+      - constraints/baseline/human_review.yaml
+      - constraints/baseline/tool_permissions.yaml
+      - constraints/baseline/safety.yaml
+      - constraints/baseline/context_intent_gate.yaml
+      - constraints/industries/legal.yaml
+      - constraints/industries/energy.yaml
+      - constraints/industries/business.yaml
+      - constraints/industries/finance.yaml
+      - constraints/industries/operations.yaml
+      - constraints/jurisdictions/us.yaml
+      - constraints/jurisdictions/eu.yaml
+      - constraints/jurisdictions/cn.yaml
+      - constraints/jurisdictions/au.yaml
     prompts:
-    - prompts/legal/contract_review.system.md
-    - prompts/legal/policy_qa.system.md
-    - prompts/business/business_model_design.system.md
-    - prompts/business/business_model_validation.system.md
-    - prompts/business/go_to_market_review.system.md
-    - prompts/business/unit_economics_check.system.md
-    - prompts/energy/solar_financial_model.system.md
-    - prompts/finance/research_summary.system.md
-    - prompts/finance/risk_summary.system.md
-    - prompts/finance/due_diligence.system.md
-    - prompts/operations/sop_generation.system.md
-    - prompts/operations/meeting_summary.system.md
-    - prompts/operations/project_retrospective.system.md
-    - prompts/evaluation/llm_judge.system.md
-    - prompts/general/ideation_convergence.system.md
+      - prompts/legal/contract_review.system.md
+      - prompts/legal/policy_qa.system.md
+      - prompts/business/business_model_design.system.md
+      - prompts/business/business_model_validation.system.md
+      - prompts/business/go_to_market_review.system.md
+      - prompts/business/unit_economics_check.system.md
+      - prompts/energy/solar_financial_model.system.md
+      - prompts/finance/research_summary.system.md
+      - prompts/finance/risk_summary.system.md
+      - prompts/finance/due_diligence.system.md
+      - prompts/operations/sop_generation.system.md
+      - prompts/operations/meeting_summary.system.md
+      - prompts/operations/project_retrospective.system.md
+      - prompts/evaluation/llm_judge.system.md
+      - prompts/general/ideation_convergence.system.md
     judge_config: evaluators/rubrics/shared_judge_config.yaml
     judge_models:
-    - deepseek-chat
-    - gpt-4o
-    - claude-3-opus
+      - deepseek-chat
+      - gpt-4o
+      - claude-3-opus
     agents:
-    - .github/agents/task-planner.agent.md
-    - .github/agents/task-reviewer.agent.md
+      - .github/agents/task-planner.agent.md
+      - .github/agents/task-reviewer.agent.md
     evaluators:
-    - evaluators/rules/citation_check.yaml
-    - evaluators/rules/risk_check.yaml
-    - evaluators/rules/schema_check.yaml
-    - evaluators/rubrics/shared_judge_config.yaml
+      - evaluators/rules/citation_check.yaml
+      - evaluators/rules/risk_check.yaml
+      - evaluators/rules/schema_check.yaml
+      - evaluators/rubrics/shared_judge_config.yaml
     judge_scripts:
-    - scripts/llm_judge.py
+      - scripts/llm_judge.py
     promote_suggestion: scripts/promote_suggestion.py
     eval_set_manager: scripts/eval_set_manager.py
     eval_set_schema: schemas/eval_set.schema.json
@@ -143,33 +139,33 @@ active_release:
     regression_test_dir: tests/phase7d/
     regression_output_dir: outputs/eval_reports/regression/
     eval_set_directories:
-    - tests/eval_cases/golden/
-    - tests/eval_cases/regression/failures/
-    - tests/eval_cases/regression/human_corrected/
-    - tests/eval_cases/regression/risk_samples/
-    - tests/eval_cases/baseline/
-    - evaluators/rubrics/business_model_validation.yaml
-    - evaluators/rubrics/contract_review.yaml
-    - evaluators/rubrics/due_diligence.yaml
-    - evaluators/rubrics/sop_generation.yaml
-    - evaluators/rubrics/solar_financial_model.yaml
-    - evaluators/rubrics/ideation_convergence.yaml
+      - tests/eval_cases/golden/
+      - tests/eval_cases/regression/failures/
+      - tests/eval_cases/regression/human_corrected/
+      - tests/eval_cases/regression/risk_samples/
+      - tests/eval_cases/baseline/
+      - evaluators/rubrics/business_model_validation.yaml
+      - evaluators/rubrics/contract_review.yaml
+      - evaluators/rubrics/due_diligence.yaml
+      - evaluators/rubrics/sop_generation.yaml
+      - evaluators/rubrics/solar_financial_model.yaml
+      - evaluators/rubrics/ideation_convergence.yaml
     schemas:
-    - schemas/workflow.schema.json
-    - schemas/run_snapshot.schema.json
-    - schemas/solar_financial_run_snapshot.schema.json
-    - schemas/eval_report.schema.json
-    - schemas/context_load_plan.schema.json
-    - schemas/interruption_event.schema.json
-    - schemas/citation.schema.json
-    - schemas/evaluation-api.openapi.yaml
-    - schemas/release_manifest.schema.json
-    - schemas/candidate_change.schema.json
-    - schemas/regression_report.schema.json
+      - schemas/workflow.schema.json
+      - schemas/run_snapshot.schema.json
+      - schemas/solar_financial_run_snapshot.schema.json
+      - schemas/eval_report.schema.json
+      - schemas/context_load_plan.schema.json
+      - schemas/interruption_event.schema.json
+      - schemas/citation.schema.json
+      - schemas/evaluation-api.openapi.yaml
+      - schemas/release_manifest.schema.json
+      - schemas/candidate_change.schema.json
+      - schemas/regression_report.schema.json
     release_governance:
       manifest_schema: schemas/release_manifest.schema.json
       manifest_dir: config/releases/
-      active_manifest: config/releases/release_2026_05_05_001.yaml
+      active_manifest: config/releases/release_2026_05_10_001.yaml
       promote_script: scripts/release_promote.sh
       rollback_script: scripts/rollback.sh
       governance_doc: docs/release_governance.md
@@ -180,12 +176,12 @@ active_release:
       architecture_doc: docs/evaluation_sidecar.md
       evolution_plan_doc: docs/evaluation_evolution_plan.md
       test_snapshots:
-      - tests/eval_cases/synthetic/run_snapshot_sample_001.json
-      - tests/eval_cases/synthetic/run_snapshot_sample_002.json
-      - tests/eval_cases/synthetic/run_snapshot_sample_003.json
+        - tests/eval_cases/synthetic/run_snapshot_sample_001.json
+        - tests/eval_cases/synthetic/run_snapshot_sample_002.json
+        - tests/eval_cases/synthetic/run_snapshot_sample_003.json
       regression_tests:
-      - tests/regression/workflows/business_model_validation_vpp.yaml
-      - tests/regression/workflows/unit_economics_check_charging.yaml
+        - tests/regression/workflows/business_model_validation_vpp.yaml
+        - tests/regression/workflows/unit_economics_check_charging.yaml
     regression:
       runner: scripts/regression_test.py
       schema: schemas/regression_report.schema.json
@@ -204,105 +200,143 @@ active_release:
       default_trend_window_days: 30
       auto_rollback_enabled: true
       dry_run_default: true
+    rollout:
+      manager: scripts/rollout_manager.py
+      policy: config/rollout-policy.yaml
+      test_dir: tests/phase7e/
+    workflow_runner:
+      script: scripts/workflow_runner.py
+      status_indicator: scripts/workflow_status_indicator.py
+      session_tracking: config/session-tracking.yaml
+      test_dir: tests/phase8/
+    interruption_handler:
+      script: scripts/interruption_handler.py
+      test_dir: tests/phase9/
+    lattice:
+      framework_dir: lattice/
+      schemas:
+        - lattice/schemas/lattice.schema.json
+        - lattice/schemas/atomic_task.schema.json
+        - lattice/schemas/pcdca_cycle.schema.json
+        - lattice/schemas/layer_assembly.schema.json
+        - lattice/schemas/blocker.schema.json
+        - lattice/schemas/checkpoint.schema.json
+      scripts:
+        - lattice/scripts/lattice_core.py
+        - lattice/scripts/lattice_blocker.py
+        - lattice/scripts/lattice_pcdca.py
+        - lattice/scripts/lattice_checkpoint.py
+        - lattice/scripts/lattice_runner.py
+      workflows:
+        - lattice/workflows/lattice_workflow.yaml
+        - lattice/workflows/pcdca_workflow.yaml
+        - lattice/workflows/blocker_workflow.yaml
+      templates:
+        - lattice/templates/template_lattice.yaml
+        - lattice/templates/template_atomic_task.yaml
+        - lattice/templates/template_layer_assembly.yaml
+      examples:
+        - lattice/examples/quant_trading/
+        - lattice/examples/software_design/
+        - lattice/examples/business_model/
+        - lattice/examples/energy/
+        - lattice/examples/game/
+        - lattice/examples/vpp_comprehensive/
     mcp_tools:
-    - filesystem_read
-    - filesystem_write
-    - git_status
-    - fetch_official_sources
+      - filesystem_read
+      - filesystem_write
+      - git_status
+      - fetch_official_sources
   available_asset_roots:
     workflows:
-    - workflows/legal/
-    - workflows/business/
-    - workflows/finance/
-    - workflows/operations/
-    - workflows/energy/
-    - workflows/general/
+      - workflows/legal/
+      - workflows/business/
+      - workflows/finance/
+      - workflows/operations/
+      - workflows/energy/
+      - workflows/general/
     constraints:
-    - constraints/baseline/
-    - constraints/industries/
-    - constraints/jurisdictions/
+      - constraints/baseline/
+      - constraints/industries/
+      - constraints/jurisdictions/
     prompts:
-    - prompts/legal/
-    - prompts/business/
-    - prompts/finance/
-    - prompts/operations/
-    - prompts/energy/
-    - prompts/general/
+      - prompts/legal/
+      - prompts/business/
+      - prompts/finance/
+      - prompts/operations/
+      - prompts/energy/
+      - prompts/general/
     agents:
-    - .github/agents/
+      - .github/agents/
     evaluators:
-    - evaluators/rules/
-    - evaluators/rubrics/
+      - evaluators/rules/
+      - evaluators/rubrics/
     data:
-    - data/
+      - data/
     releases:
-    - config/releases/
+      - config/releases/
     tests:
-    - tests/eval_cases/
-    - tests/regression/
-    - tests/phase7d/
-    - tests/phase7e/
-    - tests/phase7f/
-    - tests/phase8/
-    - tests/phase9/
+      - tests/eval_cases/
+      - tests/regression/
+      - tests/phase7a/
+      - tests/phase7b/
+      - tests/phase7c/
+      - tests/phase7d/
+      - tests/phase7e/
+      - tests/phase7f/
+      - tests/phase8/
+      - tests/phase9/
+    lattice:
+      - lattice/schemas/
+      - lattice/scripts/
+      - lattice/workflows/
+      - lattice/templates/
+      - lattice/examples/
   git_boundary:
     include:
-    - README.md
-    - .github/
-    - .vscode/settings.json
-    - .vscode/tasks.json
-    - .vscode/extensions.json
-    - .vscode/mcp.json
-    - docs/
-    - config/
-    - schemas/
-    - workflows/
-    - constraints/
-    - prompts/
-    - evaluators/
-    - scripts/
-    - tests/
-    - examples/
-    - .env.example
-    - .gitignore
-    - CHANGELOG.md
+      - README.md
+      - .github/
+      - .vscode/settings.json
+      - .vscode/tasks.json
+      - .vscode/extensions.json
+      - .vscode/mcp.json
+      - docs/
+      - config/
+      - schemas/
+      - workflows/
+      - constraints/
+      - prompts/
+      - evaluators/
+      - scripts/
+      - tests/
+      - examples/
+      - lattice/
+      - .env.example
+      - .gitignore
+      - CHANGELOG.md
     exclude:
-    - .env
-    - runtime/
-    - outputs/
-    - logs/
-    - data/
-    - uploads/
-    - customer_docs/
-    - client_files/
-    - vector_store/
-    - indexes/
-    - embeddings/
-    - feedback/raw/
-    - traces/
+      - .env
+      - runtime/
+      - outputs/
+      - logs/
+      - data/
+      - uploads/
+      - customer_docs/
+      - client_files/
+      - vector_store/
+      - indexes/
+      - embeddings/
+      - feedback/raw/
+      - traces/
+      - lattice/lattice_runtime/
   notes:
-  - Stage 2 core configuration and first workflow set added.
-  - git_commit points to the initial skeleton baseline commit.
-  - All active components remain draft contracts until validated by the workflow runner
-    and evaluator sidecar.
-  - '2026-05-05 Phase 1: VS Code infrastructure (.vscode/, .github/copilot-instructions.md,
-    .gitignore update).'
-  - '2026-05-05 Phase 2: Config adaptation (mcp-tools.yaml v0.2.0 with VS Code mappings,
-    active-release.yaml governance).'
-  - 'Environment: VS Code + GitHub Copilot Agent (migrated from Codex).'
-  - '2026-05-05 Phase 3: Workflow validation complete — 12/12 PASS. Report: docs/phase3_validation_report.md.'
-  - '2026-05-05 Phase 4: Evaluator integration complete. Script: scripts/eval_runner.py.
-    Tasks: .vscode/tasks.json.'
-  - '2026-05-05 Enhancement: Added Intent-to-Workflow Auto-Matching to .github/copilot-instructions.md.'
-  - '2026-05-05 Enhancement: Added model_routing field to workflow.schema.json + all
-    12 workflows. Updated model-routing.yaml v0.2.0 with explicit workflow_id routes.'
-  - '2026-05-05 Enhancement: Added Source Freshness & Constraint Update Check to workflow
-    execution rules (copilot-instructions.md, context-loading.yaml, feature-flags.yaml).'
-  - 'Migration from Codex to VS Code: ALL PHASES COMPLETE.'
-  - '2026-05-05 Stage 3: Constraints completed — baseline/safety.yaml + 4 jurisdiction
-    packs (us/eu/cn/au).'
-  - '2026-05-05 Stage 4: Audit logging complete — evaluators/rules/ (citation/risk/schema
-    check) added.'
-  - '2026-05-05 Stage advancement: stage_2 → stage_4_audit_logging, constraint_pack_version
-    0.1.0 → 0.2.0.'
-  updated_at: '2026-05-05T08:55:06Z'
+    - '2026-05-05: Stage 1-6 完成 — 骨架 → 工作流 → 约束 → 审计 → 评估 → 版本治理'
+    - '2026-05-05: Phase 7a-7d 完成 — LLM-as-Judge → 动态评估集 → 候选变更管线 → 沙箱回归测试'
+    - '2026-05-09: Phase 7e-7f 完成 — 灰度发布管理 + 质量仪表盘'
+    - '2026-05-09: Phase 8 完成 — 工作流编排引擎 (workflow_runner)'
+    - '2026-05-09: Phase 9 完成 — 中断处理与恢复 (interruption_handler)'
+    - '2026-05-09: Lattice 框架 v1.0.0 集成 — 结构化任务分解与执行引擎'
+    - '2026-05-09: 通用工作流 ideation_convergence 添加'
+    - '2026-05-10: 全局进化流程 — 同步所有组件至正式 Release release_2026_05_10_001'
+    - 'Environment: VS Code + GitHub Copilot Agent (migrated from Codex).'
+  updated_at: '2026-05-10T11:40:00+10:00'

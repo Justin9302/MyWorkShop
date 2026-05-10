@@ -219,6 +219,18 @@ python lattice/scripts/lattice_runner.py run \
 | `action`     | 记录Action阶段     |
 | `status`     | 查看循环状态       |
 
+### lattice_checkpoint.py
+
+| 命令            | 描述                       |
+| --------------- | -------------------------- |
+| `create`        | 创建执行检查点（断点续传） |
+| `list`          | 列出所有检查点             |
+| `latest`        | 获取最新检查点             |
+| `get`           | 获取指定检查点             |
+| `update`        | 更新检查点                 |
+| `resume-prompt` | 生成恢复上下文提示词       |
+| `resume`        | 从检查点恢复执行           |
+
 ### lattice_runner.py
 
 | 命令                 | 描述              |
@@ -228,6 +240,8 @@ python lattice/scripts/lattice_runner.py run \
 | `run-task`           | 仅执行指定任务    |
 | `status`             | 查看执行状态      |
 | `cline-instructions` | 生成CLINE执行指令 |
+| `resume`             | 从检查点恢复执行  |
+| `checkpoint`         | 管理检查点        |
 
 ## 适用领域
 
@@ -240,6 +254,63 @@ LatticeWork 适用于需要**分层构建**和**逐步验证**的复杂工作：
 | **商业模式** | 定价策略、市场分析、收入预测       |
 | **法律合规** | 合同审查、尽职调查、政策分析       |
 | **能源金融** | 太阳能财务模型、储能市场分析       |
+
+## 断点续传（Checkpoint & Resume）
+
+LatticeWork 支持在长时间执行过程中创建检查点，以便在中断后无缝恢复。
+
+### 创建检查点
+
+在编写文档或执行任务过程中，随时可以创建检查点：
+
+```bash
+python lattice/scripts/lattice_runner.py checkpoint create \
+    --lattice "vpp_ems_standard_v2.0" \
+    --section "6.5 设备注册与身份声明" \
+    --next-section "6.5.2 身份声明机制" \
+    --file "output/VPP_EMS_能量路由器综合标准规范_v2.0.md" \
+    --lines 650 \
+    --completed "1.1" "1.2" "2.1" \
+    --memento "已完成物理约束校验层(第5章)和通信协议层(第6章)的前5节"
+```
+
+### 查看检查点
+
+```bash
+# 列出所有检查点
+python lattice/scripts/lattice_runner.py checkpoint list
+
+# 获取最新检查点
+python lattice/scripts/lattice_runner.py checkpoint latest
+```
+
+### 从检查点恢复
+
+```bash
+# 生成恢复提示词（复制到新对话中使用）
+python lattice/scripts/lattice_runner.py resume --prompt-only
+
+# 完整恢复（显示提示词 + 文件末尾内容）
+python lattice/scripts/lattice_runner.py resume
+```
+
+### 更新检查点
+
+```bash
+python lattice/scripts/lattice_runner.py checkpoint update \
+    --checkpoint-id vpp_ems_standard_v2.0_20260509_081436 \
+    --section "6.5.2 身份声明机制" \
+    --next-section "6.6 数据模型" \
+    --lines 720 \
+    --memento "已完成6.5节设备注册与身份声明"
+```
+
+### 恢复流程
+
+1. 在新对话中运行 `resume` 命令
+2. 将生成的恢复提示词复制到新对话
+3. CLINE 读取提示词后自动从断点处继续执行
+4. 执行完成后更新检查点
 
 ## 设计原则
 

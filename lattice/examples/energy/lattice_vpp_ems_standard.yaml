@@ -1,0 +1,445 @@
+# =============================================================================
+# LatticeWork 晶格方案: VPP_EMS 行业标准草案
+# 领域: 能源 - 行业标准制定
+# 描述: 基于"能源交换机"架构理念，制定VPP 2.0本地EMS行业标准
+# 涵盖: 三层架构、协议规范、调度算法、安全约束、互操作标准
+# =============================================================================
+
+lattice:
+  id: "lattice_energy_vpp_ems_001"
+  name: "VPP_EMS 能量路由器行业标准草案"
+  domain: "energy"
+  domain_type: "industry_standard"
+  version: "1.0.0"
+  description: >
+    基于OpenEMS三层架构和"能源交换机"设计理念，
+    制定面向VPP 2.0的本地EMS行业标准。
+    涵盖架构分层、通信协议、调度算法、物理约束、安全合规五大领域。
+  created_at: "2026-05-09T17:00:00+10:00"
+  updated_at: "2026-05-09T17:00:00+10:00"
+
+# ── 意图定义 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    基于两份附件中关于VPP_EMS的深度技术讨论，
+    制定一份完整的VPP_EMS行业标准草案。
+    标准需涵盖：架构设计、通信协议、调度算法、物理约束、安全合规。
+    采用"能源交换机"（Energy Switch）作为核心设计范式，
+    将EMS节点抽象为电力网络的智能交换节点。
+
+  acceptance_criteria:
+    - "标准草案包含完整的架构分层定义（Edge/Backend/UI三层）"
+    - "标准定义通信协议规范（JSON-RPC、头部识别码、分级标签）"
+    - "标准定义调度算法要求（预测、优化、曲线跟踪、交易回撤）"
+    - "标准定义物理约束模型（热容量、电压质量、三相平衡）"
+    - "标准定义安全合规要求（加密、认证、SOE审计）"
+    - "标准包含互操作性和扩展性规范"
+    - "标准文档格式规范、层次清晰、可读性强"
+
+  non_goals:
+    - "不涉及具体硬件选型"
+    - "不涉及商业定价模型"
+    - "不涉及特定厂商实现细节"
+
+  constraints:
+    - "基于OpenEMS架构理念"
+    - "遵循电力行业IEC 61850/104规约兼容性"
+    - "支持分布式能源（DER）接入"
+    - "满足VPP 2.0功能要求"
+
+  risk_level: "medium"
+
+# ── 层级分解 ──────────────────────────────────────────────────────────────
+# Layer 4 (核心层): 核心领域模型与架构范式
+# Layer 3: 通信协议与数据模型
+# Layer 2: 调度算法与优化引擎
+# Layer 1: 物理约束与安全模型
+# Layer 0 (最外层): 互操作标准与合规规范
+layers:
+  # ── Layer 4: 核心领域模型与架构范式（最内层） ──────────────────────────
+  - layer: 4
+    name: "核心架构范式层"
+    description: >
+      定义VPP_EMS的核心架构范式——"能源交换机"模型。
+      包括三层架构定义、节点角色模型、数据流与控制流分离原则。
+    tasks:
+      - task_id: "task_0001"
+        name: "能源交换机架构范式"
+        description: >
+          定义"能源交换机"（Energy Switch）作为VPP_EMS的核心架构范式。
+          EMS节点抽象为电力网络的智能交换节点，具备端口管理、带宽分配、路由决策能力。
+          类比网络交换机：端口=设备接口，背板带宽=台区额定功率，QoS=优先级调度。
+        depends_on: []
+        provides:
+          - "energy_switch_paradigm"
+          - "port_model"
+          - "bandwidth_model"
+
+      - task_id: "task_0002"
+        name: "三层架构定义"
+        description: >
+          定义Edge（现场控制层）、Backend（云端服务层）、UI（应用展现层）的职责边界。
+          Edge: 毫秒级本地控制、硬件驱动、离线自治
+          Backend: 数据聚合、元数据管理、多租户
+          UI: 可视化监控、配置管理、调试工具
+        depends_on: []
+        provides:
+          - "three_layer_architecture"
+          - "layer_responsibility_matrix"
+
+      - task_id: "task_0003"
+        name: "数据流与控制流分离原则"
+        description: >
+          定义数据平面（Data Plane）与控制平面（Control Plane）的分离原则。
+          数据流：设备状态采集、时序数据上报、历史数据存储
+          控制流：调度指令下发、策略配置、紧急减载
+          确保控制流具有最高优先级和确定性延迟。
+        depends_on: ["task_0002"]
+        provides:
+          - "data_control_separation"
+          - "priority_channel_model"
+
+      - task_id: "task_0004"
+        name: "节点角色与拓扑模型"
+        description: >
+          定义EMS节点的角色分类和拓扑发现机制。
+          角色：根节点（Root）、中继节点（Relay）、叶子节点（Leaf）
+          拓扑发现：基于电压相关性分析、NILM事件对账、电力载波RSSI
+          路由表维护：本地发现+云端同步的混合机制
+        depends_on: ["task_0001"]
+        provides:
+          - "node_role_model"
+          - "topology_discovery_protocol"
+          - "routing_table_spec"
+
+    assembly_test:
+      name: "核心架构范式层组装测试"
+      description: "验证架构范式的完整性和一致性"
+      tests:
+        - "能源交换机模型与三层架构的映射关系验证"
+        - "数据流与控制流分离原则的可实现性验证"
+        - "节点角色模型与拓扑发现机制的闭环验证"
+
+  # ── Layer 3: 通信协议与数据模型 ────────────────────────────────────────
+  - layer: 3
+    name: "通信协议与数据模型层"
+    description: >
+      定义VPP_EMS的通信协议规范和数据模型。
+      包括JSON-RPC协议、头部识别码、分级标签、自定义数据块。
+    tasks:
+      - task_id: "task_0005"
+        name: "JSON-RPC通信协议规范"
+        description: >
+          定义基于JSON-RPC 2.0的通信协议规范。
+          包括请求/响应/通知三种消息格式。
+          定义标准方法集：设备注册、数据上报、指令下发、配置同步。
+          支持WebSocket长连接和HTTP短连接两种传输方式。
+        depends_on: ["task_0002"]
+        provides:
+          - "json_rpc_spec"
+          - "method_catalog"
+          - "message_format"
+
+      - task_id: "task_0006"
+        name: "头部识别码与寻址规范"
+        description: >
+          定义消息头部识别码（Addressing Header）的结构和寻址规则。
+          头部结构：[台区ID(4B)][支路ID(2B)][设备类别(1B)][保留字节(1B)]
+          保留字节用于未来扩展：碳足迹标签、辅助服务标识、V2G属性
+          支持单播、组播、广播三种寻址模式。
+        depends_on: ["task_0005"]
+        provides:
+          - "addressing_header_spec"
+          - "addressing_mode"
+          - "reserved_byte_definition"
+
+      - task_id: "task_0007"
+        name: "设备分级标签规范"
+        description: >
+          定义设备分级标签（Priority Tagging）的等级划分和调度策略。
+          L1（关键级）：居民生活、医疗监控、公共安防 — 永不减载
+          L2（保障级）：关键办公、冷链物流 — 按比例限流
+          L3（可延时级）：电动车充电、储能充电 — 优先减载
+          L4（随机级）：景观灯光、非紧急负荷 — 首选切断
+          支持动态标签调整机制（基于信用评分和NILM验证）。
+        depends_on: ["task_0005"]
+        provides:
+          - "priority_tagging_spec"
+          - "dynamic_tag_adjustment"
+          - "qos_policy"
+
+      - task_id: "task_0008"
+        name: "自定义数据块与设备指纹规范"
+        description: >
+          定义设备自定义数据块（Custom Data Block）的结构和注册机制。
+          数据块包含：设备身份凭证、物理指纹特征、柔性响应曲线参数。
+          设备指纹：V-I轨迹图、瞬态启动斜率、高阶谐波分布。
+          支持即插即用（PnP）自动注册和NILM物理身份对账。
+        depends_on: ["task_0006", "task_0007"]
+        provides:
+          - "custom_data_block_spec"
+          - "device_fingerprint_spec"
+          - "plug_and_play_protocol"
+
+    assembly_test:
+      name: "通信协议层组装测试"
+      description: "验证通信协议和数据模型的完整性和互操作性"
+      tests:
+        - "JSON-RPC消息格式与头部识别码的兼容性验证"
+        - "分级标签与调度策略的映射关系验证"
+        - "自定义数据块注册与设备指纹对账的闭环验证"
+
+  # ── Layer 2: 调度算法与优化引擎 ────────────────────────────────────────
+  - layer: 2
+    name: "调度算法与优化引擎层"
+    description: >
+      定义VPP_EMS的调度算法要求和优化引擎规范。
+      包括预测模型、多时步优化、曲线跟踪、交易回撤、协同减载。
+    tasks:
+      - task_id: "task_0009"
+        name: "预测模型规范"
+        description: >
+          定义预测模型的功能要求和接口规范。
+          预测类型：光伏出力预测、负荷预测、电价预测、灵活性预测
+          预测周期：超短期（5min）、短期（24h）、中期（7天）
+          精度要求：光伏预测MAE<10%，负荷预测MAPE<15%
+          基线计算：基于30天历史数据的滚动基线算法
+        depends_on: ["task_0003"]
+        provides:
+          - "prediction_model_spec"
+          - "baseline_algorithm"
+          - "forecast_interface"
+
+      - task_id: "task_0010"
+        name: "多时步前瞻优化引擎规范"
+        description: >
+          定义基于MILP或启发式算法的多时步优化引擎规范。
+          输入：电价曲线、负荷预测、光伏预测、设备约束
+          输出：最优充放电计划、调节计划、带宽分配方案
+          优化目标：最小化用电成本、最大化光伏消纳、最小化碳排放
+          约束处理：功率平衡、SOC限制、爬坡率限制、变压器容量
+        depends_on: ["task_0009"]
+        provides:
+          - "look_ahead_optimizer_spec"
+          - "optimization_objective"
+          - "constraint_model"
+
+      - task_id: "task_0011"
+        name: "曲线跟踪与轨迹控制规范"
+        description: >
+          定义功率曲线跟踪（Trajectory Following）的控制算法规范。
+          支持P(t)功率目标轨迹的实时跟踪。
+          实时偏差校正：每秒比对实际功率与目标曲线偏差。
+          斜率滤波器：设定最大功率变化率（Ramp Rate），防止电压冲击。
+          多节点协调：随机延迟（Jitter）机制防止同步动作。
+        depends_on: ["task_0010"]
+        provides:
+          - "trajectory_follower_spec"
+          - "ramp_rate_control"
+          - "jitter_coordination"
+
+      - task_id: "task_0012"
+        name: "交易回撤与灵活性再对账规范"
+        description: >
+          定义交易回撤响应和灵活性再对账的状态机规范。
+          状态：已成交（Committed）、执行中（Executing）、撤回（Rollback）、违约（Default）
+          回撤响应：计算恢复成本、定位故障支路、上报违约容量
+          灵活性追溯：通过头部识别码快速定位故障设备
+          补偿机制：基于信用评分的带宽预借和补偿逻辑
+        depends_on: ["task_0011"]
+        provides:
+          - "rollback_state_machine"
+          - "flexibility_reconciliation"
+          - "credit_compensation"
+
+      - task_id: "task_0013"
+        name: "协同减载与带宽分配规范"
+        description: >
+          定义多节点协同减载的协议和算法规范。
+          减载触发：本地热约束触发、电网广播触发、NILM异常触发
+          协调确认：节点间毫秒级资源对账和共识机制
+          减载次序：L4→L3→L2的分批次减载，每批次带斜率控制
+          带宽分配：基于信用额度的动态配额管理
+        depends_on: ["task_0011", "task_0007"]
+        provides:
+          - "coordinated_shedding_spec"
+          - "bandwidth_allocation"
+          - "consensus_protocol"
+
+    assembly_test:
+      name: "调度算法层组装测试"
+      description: "验证调度算法的完整性和协同工作能力"
+      tests:
+        - "预测→优化→曲线跟踪→交易回撤的完整闭环验证"
+        - "协同减载协议在多节点场景下的收敛性验证"
+        - "带宽分配算法在极端场景下的安全性验证"
+
+  # ── Layer 1: 物理约束与安全模型 ────────────────────────────────────────
+  - layer: 1
+    name: "物理约束与安全模型层"
+    description: >
+      定义VPP_EMS的物理约束模型和安全保护机制。
+      包括热容量模型、电压质量约束、三相平衡管理、资产寿命管理。
+    tasks:
+      - task_id: "task_0014"
+        name: "热容量与季节性带宽模型"
+        description: >
+          定义变压器和线缆的热容量动态模型。
+          静态边界：额定功率、额定电流、环境温度修正系数
+          动态约束：I²t热累积计算、暂态过载允许时间
+          季节性调整：夏季降额系数、冬季增额系数
+          热累积预警：达到阈值85%时触发预收缩
+        depends_on: ["task_0001"]
+        provides:
+          - "thermal_capacity_model"
+          - "seasonal_derating"
+          - "i2t_protection"
+
+      - task_id: "task_0015"
+        name: "电压质量与谐波约束规范"
+        description: >
+          定义电压质量和谐波畸变的监测与控制规范。
+          电压约束：±5%额定电压偏差、电压跌落检测
+          谐波约束：THD<5%、各次谐波限值
+          控制手段：基于电压偏差的虚拟阻抗调节
+          电能质量事件记录：电压暂降、暂升、中断的SOE记录
+        depends_on: ["task_0014"]
+        provides:
+          - "voltage_quality_spec"
+          - "harmonic_constraint"
+          - "virtual_impedance_model"
+
+      - task_id: "task_0016"
+        name: "三相平衡管理规范"
+        description: >
+          定义三相不平衡的监测、上报和有限处理规范。
+          监测：分相电流、电压、功率的实时监测
+          识别：NILM识别负载所在相位
+          处理：过载相带宽锁定、支持相位切换的负载迁移
+          上报：不平衡度超限时生成运维建议报告
+        depends_on: ["task_0015"]
+        provides:
+          - "phase_balance_spec"
+          - "phase_identification"
+          - "load_migration"
+
+      - task_id: "task_0017"
+        name: "资产寿命与折旧跟踪规范"
+        description: >
+          定义设备资产寿命的跟踪和折旧计算规范。
+          跟踪指标：充放电循环次数、I²t累积、过载次数
+          折旧模型：基于运行工况的加速折旧算法
+          调度约束：当指令导致寿命极速衰减时，EMS有权否决
+          报告输出：资产健康度报告、剩余寿命预测
+        depends_on: ["task_0014"]
+        provides:
+          - "asset_lifecycle_spec"
+          - "degradation_model"
+          - "life_optimization"
+
+    assembly_test:
+      name: "物理约束层组装测试"
+      description: "验证物理约束模型的完整性和保护有效性"
+      tests:
+        - "热容量模型在季节性变化下的边界验证"
+        - "电压质量约束与调度算法的协同验证"
+        - "三相平衡管理在极端不平衡场景下的有效性验证"
+
+  # ── Layer 0: 互操作标准与合规规范（最外层） ────────────────────────────
+  - layer: 0
+    name: "互操作标准与合规规范层"
+    description: >
+      定义VPP_EMS的互操作性标准、安全合规要求和测试认证规范。
+      包括协议兼容性、安全加密、SOE审计、标准化认证。
+    tasks:
+      - task_id: "task_0018"
+        name: "协议兼容性与互操作规范"
+        description: >
+          定义与现有电力系统协议的兼容性要求。
+          协议网关：IEC 60870-5-104、IEC 61850的转换适配
+          Modbus TCP/RTU：标准寄存器映射表
+          MQTT：主题命名规范和负载格式
+          OCPP：充电桩通信协议兼容
+          协议转换网关的物理隔离和安全过滤要求
+        depends_on: ["task_0005"]
+        provides:
+          - "protocol_compatibility_spec"
+          - "gateway_requirements"
+          - "register_mapping"
+
+      - task_id: "task_0019"
+        name: "安全加密与认证规范"
+        description: >
+          定义通信安全、身份认证和访问控制规范。
+          传输加密：TLS 1.3/WSS强制加密
+          设备认证：Apikey/证书双向认证
+          用户认证：OAuth2.0标准协议
+          访问控制：基于角色的权限管理（RBAC）
+          安全隔离：主动外连机制、防火墙友好设计
+        depends_on: ["task_0018"]
+        provides:
+          - "security_spec"
+          - "authentication_protocol"
+          - "access_control_model"
+
+      - task_id: "task_0020"
+        name: "SOE顺序事件记录与审计规范"
+        description: >
+          定义顺序事件记录（Sequence of Events）的规范和审计要求。
+          记录内容：事件时间戳（毫秒级）、事件类型、设备ID、动作描述
+          记录层级：驱动层原始记录、状态机日志、后端事件聚合
+          存储要求：本地缓存+云端持久化、日志轮转策略
+          审计追溯：事件链还原、故障原因分析、责任界定
+        depends_on: ["task_0019"]
+        provides:
+          - "soe_spec"
+          - "audit_trail"
+          - "log_management"
+
+      - task_id: "task_0021"
+        name: "标准化测试与认证规范"
+        description: >
+          定义VPP_EMS设备的标准化测试和认证流程。
+          测试类型：一致性测试、互操作测试、性能测试、安全测试
+          测试场景：正常调度、边界条件、故障注入、网络中断
+          认证等级：Level 1（基础通信）、Level 2（调度能力）、Level 3（高级协同）
+          认证标识：设备分级标签与认证等级的对应关系
+        depends_on: ["task_0020"]
+        provides:
+          - "test_spec"
+          - "certification_levels"
+          - "compliance_checklist"
+
+    assembly_test:
+      name: "互操作标准层组装测试"
+      description: "验证标准的完整性和可实施性"
+      tests:
+        - "协议兼容性在混合设备场景下的互操作验证"
+        - "安全加密与认证机制在极端网络条件下的有效性验证"
+        - "SOE审计在故障追溯场景下的完整链路验证"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 5
+  human_in_the_loop:
+    plan_review_required: true
+    check_review_required: false
+    blocker_escalation: true
+
+# ── 全局阻塞点 ────────────────────────────────────────────────────────────
+global_blockers:
+  known:
+    - id: "blocker_001"
+      description: "标准草案需要与IEC 61850/104等现有标准对齐"
+      affected_tasks: ["task_0018"]
+      resolution: "采用协议网关适配方案，不修改现有标准"
+    - id: "blocker_002"
+      description: "NILM算法精度在复杂工业环境下可能下降"
+      affected_tasks: ["task_0008"]
+      resolution: "采用双轨制：快速轨（硬阈值保护）+慢速轨（NILM语义识别）"
+    - id: "blocker_003"
+      description: "多节点协同减载的共识机制在网络分区时可能失效"
+      affected_tasks: ["task_0013"]
+      resolution: "设定协调超时（100ms），超时后退化为本地紧急减载模式"

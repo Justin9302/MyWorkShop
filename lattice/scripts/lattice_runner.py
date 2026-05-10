@@ -68,6 +68,10 @@ from scripts.lattice_pcdca import (
     start_cycle, record_plan, record_plan_check, record_do_step,
     record_check, record_action, get_cycle_status, get_task_cycles,
 )
+from scripts.lattice_checkpoint import (
+    create_checkpoint, get_latest_checkpoint, generate_resume_prompt,
+    resume_from_checkpoint, list_checkpoints,
+)
 
 # ═══════════════════════════════════════════════════════════════
 # Constants
@@ -567,6 +571,26 @@ def main():
     ci_parser.add_argument("-l", "--lattice", required=True, help="晶格方案 YAML 路径")
     ci_parser.add_argument("-o", "--output", default="", help="输出路径")
 
+    # resume (断点续传)
+    resume_parser = subparsers.add_parser("resume", help="从检查点恢复执行")
+    resume_parser.add_argument("--checkpoint-id", help="检查点ID（默认使用最新）")
+    resume_parser.add_argument("-p", "--prompt-only", action="store_true", help="仅生成恢复提示词，不执行")
+
+    # checkpoint
+    cp_parser = subparsers.add_parser("checkpoint", help="管理检查点")
+    cp_parser.add_argument("action", choices=["create", "list", "latest", "update"],
+                          help="检查点操作")
+    cp_parser.add_argument("-n", "--lattice", help="晶格方案名称（create时必需）")
+    cp_parser.add_argument("-s", "--section", help="最后完成的章节（create时必需）")
+    cp_parser.add_argument("--next-section", help="下一个要执行的章节（create时必需）")
+    cp_parser.add_argument("--completed", nargs="*", default=[], help="已完成的章节列表")
+    cp_parser.add_argument("-f", "--file", help="目标输出文件路径")
+    cp_parser.add_argument("--lines", type=int, help="已写入的总行数")
+    cp_parser.add_argument("--last-line", default="", help="最后写入行的内容")
+    cp_parser.add_argument("--total", type=int, default=0, help="总章节数")
+    cp_parser.add_argument("-m", "--memento", default="", help="上下文记忆摘要")
+    cp_parser.add_argument("--checkpoint-id", help="检查点ID（update时必需）")
+
     args = parser.parse_args()
 
     if args.command == "run":
@@ -669,13 +693,102 @@ def main():
         print()
         print("📋 PCDCA协议:")
         for phase in instructions["pcdca_protocol"]["phases"]:
-            print(f"   {phase['phase']}: {phase['description']}")
-            print(f"      CLINE动作: {phase['cline_action']}")
+            print(f"   {phase['phase']}: {phase['cline_action']}")
+            print(f"      命令: {phase['command']}")
         print()
         print("📋 层执行顺序:")
         for layer in instructions["layer_execution"]:
             print(f"   Phase {layer['phase']}: Layer {layer['layer']} ({layer['name']})")
             print(f"      任务: {len(layer['tasks'])} 个")
+
+    elif args.command == "resume":
+        if args.prompt_only:
+            prompt = generate_resume_prompt(args.checkpoint_id)
+            print(prompt)
+        else:
+            result = resume_from_checkpoint(args.checkpoint_id)
+            if result["status"] == "error":
+                print(f"❌ {result['message']}")
+            else:
+                print(f"✅ 恢复就绪")
+                print(f"   下一步: {result['next_section']}")
+                print(f"   最后完成: {result['last_completed']}")
+                print()
+                print("=" * 60)
+                print("📋 恢复提示词（复制到新对话中使用）:")
+                print("=" * 60)
+                print(result["resume_prompt"])
+                print("=" * 60)
+                if result.get("file_tail"):
+                    print()
+                    print("📄 目标文件末尾内容:")
+                    print(result["file_tail"])
+
+    elif args.command == "checkpoint":
+        if args.action == "create":
+            if not all([args.lattice, args.section, args.next_section, args.file]):
+                print("❌ create 需要 --lattice, --section, --next-section, --file 参数")
+                sys.exit(1)
+            cp = create_checkpoint(
+                lattice_name=args.lattice,
+                last_completed_section=args.section,
+                next_section=args.next_section,
+                completed_sections=args.completed,
+                target_file=args.file,
+                total_lines_written=args.lines or 0,
+                last_line_content=args.last_line,
+                context_memento=args.memento,
+                total_sections=args.total,
+            )
+            print(f"✅ 检查点已创建: {cp['checkpoint_id']}")
+            print(f"   最后完成: {cp['last_completed_section']}")
+            print(f"   下一步: {cp['next_section']}")
+            print(f"   文件: {cp['file_status']['target_file']} ({cp['file_status']['total_lines_written']} 行)")
+
+        elif args.action == "list":
+            checkpoints = list_checkpoints()
+            if not checkpoints:
+                print("📭 没有找到检查点")
+            else:
+                print(f"📋 检查点列表 ({len(checkpoints)} 个):")
+                for cp in checkpoints:
+                    print(f"   [{cp['status']}] {cp['checkpoint_id']}")
+                    print(f"       晶格: {cp['lattice_name']}")
+                    print(f"       进度: {cp['last_completed_section']} → {cp['next_section']}")
+                    print(f"       文件: {cp['file']} ({cp['lines']} 行)")
+                    print()
+
+        elif args.action == "latest":
+            cp = get_latest_checkpoint()
+            if cp:
+                print(f"📌 最新检查点: {cp['checkpoint_id']}")
+                print(f"   晶格: {cp['lattice_name']}")
+                print(f"   时间: {cp['timestamp']}")
+                print(f"   进度: {cp['last_completed_section']} → {cp['next_section']}")
+                print(f"   文件: {cp['file_status']['target_file']} ({cp['file_status']['total_lines_written']} 行)")
+                print(f"   记忆: {cp.get('context_memento', '无')[:100]}...")
+            else:
+                print("📭 没有找到检查点")
+
+        elif args.action == "update":
+            if not args.checkpoint_id:
+                print("❌ update 需要 --checkpoint-id 参数")
+                sys.exit(1)
+            updates = {}
+            if args.section:
+                updates["last_completed_section"] = args.section
+            if args.next_section:
+                updates["next_section"] = args.next_section
+            if args.lines is not None:
+                updates["file_status"] = {"total_lines_written": args.lines}
+            if args.memento:
+                updates["context_memento"] = args.memento
+            from scripts.lattice_checkpoint import update_checkpoint as _update_cp
+            result = _update_cp(args.checkpoint_id, updates)
+            if result:
+                print(f"✅ 检查点已更新: {args.checkpoint_id}")
+            else:
+                print(f"❌ 检查点不存在: {args.checkpoint_id}")
 
     else:
         parser.print_help()

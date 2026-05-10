@@ -15,19 +15,61 @@ Core operating idea:
 
 ## Current Stage
 
-Current release: `release_2026_05_05_001`, status: **published**.
+Current release: `release_2026_05_10_001`, status: **draft** (pending promotion).
 
-The workspace is at **Stage 6: Version Governance**.
+The workspace is at **Stage 9: Interruption Recovery**.
 
-Already present:
+### Completed Stages
 
-- All 6 stages complete (skeleton → workflows → constraints → audit → eval sidecar → version governance).
-- 10 active workflows across 4 industries (legal, business, finance, energy).
-- System prompts, constraint packs (baseline + industry + jurisdiction), evaluator rules + rubric.
-- Schema contracts (workflow, run_snapshot, eval_report, citation, context_load_plan, interruption_event, release_manifest).
-- Three-agent orchestration (task-planner + task-reviewer).
-- Knowledge bases: AEMO NEM market data, CER LGC, Sichuan energy policy 2025-2026.
-- Release governance: promote/rollback scripts, CHANGELOG, release manifests.
+| Stage   | Description                                                                      | Status      |
+| ------- | -------------------------------------------------------------------------------- | ----------- |
+| Stage 1 | Workspace skeleton & Git boundary                                                | ✅ Complete |
+| Stage 2 | Core platform config + 14 industry workflows                                     | ✅ Complete |
+| Stage 3 | Constraints & reference metadata (baseline, industry, jurisdiction)              | ✅ Complete |
+| Stage 4 | Audit logging, run snapshots, evaluator rules                                    | ✅ Complete |
+| Stage 5 | Evaluation sidecar service (eval_runner + API + synthetic snapshots)             | ✅ Complete |
+| Stage 6 | Version governance (release manifest, promote/rollback, CHANGELOG)               | ✅ Complete |
+| Stage 7 | Dynamic evolution — LLM-as-Judge, eval set management, candidate change pipeline | ✅ Complete |
+| Stage 8 | Workflow orchestration engine                                                    | ✅ Complete |
+| Stage 9 | Interruption handling & recovery                                                 | ✅ Complete |
+
+### Completed Phases
+
+| Phase    | Description                                        | Status      |
+| -------- | -------------------------------------------------- | ----------- |
+| Phase 7a | LLM-as-Judge evaluation engine upgrade             | ✅ Complete |
+| Phase 7b | Dynamic eval set precipitation & classification    | ✅ Complete |
+| Phase 7c | Improvement suggestion → candidate change pipeline | ✅ Complete |
+| Phase 7d | Sandbox regression testing                         | ✅ Complete |
+| Phase 7e | Canary release mechanism                           | ✅ Complete |
+| Phase 7f | Quality dashboard & auto-rollback                  | ✅ Complete |
+| Phase 8  | Workflow orchestration engine                      | ✅ Complete |
+| Phase 9  | Interruption handling & recovery                   | ✅ Complete |
+
+### Active Component Versions
+
+| Component            | Version  |
+| -------------------- | -------- |
+| Workflow             | 0.3.0    |
+| Constraint           | 0.4.0    |
+| Prompt               | 0.2.0    |
+| Evaluator            | 0.2.0    |
+| Judge (LLM-as-Judge) | 0.1.0    |
+| Knowledge Base       | kb_0.3.0 |
+| Lattice Framework    | 1.0.0    |
+
+### Key Assets
+
+- `docs/` for planning and architecture documents
+- `config/` for versioned platform configuration
+- `schemas/` for shared data contracts (workflow, run_snapshot, eval_report, citation, context_load_plan, interruption_event, release_manifest, eval_set, candidate_change, regression_report)
+- `workflows/` — 14 workflows across 5 domains (legal, business, finance, operations, energy, general)
+- `constraints/` — baseline (6), industry (5), jurisdiction (4) constraint packs
+- `prompts/` — system prompts per workflow + evaluation judge prompts
+- `evaluators/` — 3 rule packs + 6 rubrics + shared judge config
+- `scripts/` — eval_runner.py, llm_judge.py, eval_set_manager.py, promote_suggestion.py, release_promote.sh, rollback.sh, rollout_manager.py, dashboard.py, workflow_runner.py, interruption_handler.py
+- `lattice/` — LatticeWork structured task decomposition & execution framework (schemas, scripts, workflows, templates, examples)
+- `runtime/`, `outputs/`, and `logs/` for local-only run data
 
 ## Required Startup Reading
 
@@ -44,6 +86,7 @@ Then load only as needed:
 - Evaluation and evolution design: `docs/eval.md`
 - Runtime record contract: `schemas/run_snapshot.schema.json`
 - Evaluation report contract: `schemas/eval_report.schema.json`
+- Lattice framework: `lattice/README.md`
 
 ## Working Rules For Models
 
@@ -101,11 +144,20 @@ Core platform (all active):
 - RAG and auditable reference library (knowledge bases in `active-release.yaml`).
 - Tool system, including MCP-style tools/resources/prompts (`config/mcp-tools.yaml`).
 - Permission controls (`config/permissions.yaml`).
-- Workflow runner with 10 workflows across 4 industries.
+- Workflow runner with 14 workflows across 5 domains.
 - Audit logs and run snapshots (`schemas/run_snapshot.schema.json`).
 - Human approval nodes (`config/interruption-policy.yaml`).
 - Evaluation sidecar service (`scripts/eval_runner.py`).
 - Version governance (release manifest, promote/rollback, CHANGELOG).
+- LLM-as-Judge evaluation engine (`scripts/llm_judge.py`).
+- Dynamic eval set management (`scripts/eval_set_manager.py`).
+- Candidate change pipeline (`scripts/promote_suggestion.py`).
+- Sandbox regression testing (`scripts/regression_test.py`).
+- Canary release mechanism (`scripts/rollout_manager.py`).
+- Quality dashboard & auto-rollback (`scripts/dashboard.py`).
+- Workflow orchestration engine (`scripts/workflow_runner.py`).
+- Interruption handling & recovery (`scripts/interruption_handler.py`).
+- LatticeWork structured task decomposition framework (`lattice/`).
 
 Active industry workflow packages:
 
@@ -113,6 +165,8 @@ Active industry workflow packages:
 - Business: business model design & validation, go-to-market review, unit economics check.
 - Finance: investment research, risk summary, due diligence.
 - Energy: solar financial model.
+- Operations: SOP generation, meeting summary, project retrospective.
+- General: ideation convergence.
 
 Three-Agent Orchestration: task-planner → execution → task-reviewer (with auto-retry and human escalation).
 
@@ -125,29 +179,25 @@ Governance and evaluation:
 - Dynamic evaluation set.
 - Human-approved evolution.
 - Grey release and rollback.
+- Interruption handling with checkpoint/resume.
 
 ## MCP And Tool Awareness
 
-This repository plans a versioned MCP/tool manifest at `config/mcp-tools.yaml`, but that file is not present yet.
+This repository maintains a versioned MCP/tool manifest at `config/mcp-tools.yaml`.
 
-Until such a file exists, distinguish between:
+Distinguish between:
 
-- Tools available in the current Codex runtime.
+- Tools available in the current runtime.
 - Tools approved as part of this platform's versioned design.
 
 Runtime availability does not automatically mean project approval.
 
 ## Immediate Next Build Priorities
 
-Recommended next assets:
+The platform has completed all 9 planned stages. Future evolution priorities:
 
-1. `config/context-loading.yaml`
-2. `config/mcp-tools.yaml`
-3. `config/permissions.yaml`
-4. `config/model-routing.yaml`
-5. `config/interruption-policy.yaml`
-6. `schemas/workflow.schema.json`
-7. `schemas/context_load_plan.schema.json`
-8. `schemas/interruption_event.schema.json`
-9. First draft workflow YAML files for legal, finance, and operations.
-10. Baseline constraint packs for privacy, safety, citation, and human review.
+1. Cross-release regression trend analysis & quality gates
+2. Automated test case generation from production failures
+3. Multi-agent orchestration with Lattice framework integration
+4. Real-time monitoring & alerting for evaluation metrics
+5. Knowledge base auto-refresh pipeline

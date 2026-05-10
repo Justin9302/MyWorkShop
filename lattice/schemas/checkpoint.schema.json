@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lattice.work/schemas/checkpoint.schema.json",
+  "title": "Checkpoint",
+  "description": "晶格工作流执行检查点，用于断点续传和上下文恢复",
+  "type": "object",
+  "required": [
+    "checkpoint_id",
+    "lattice_name",
+    "timestamp",
+    "status",
+    "last_completed_section",
+    "next_section",
+    "completed_sections",
+    "file_status",
+    "context_memento"
+  ],
+  "properties": {
+    "checkpoint_id": {
+      "type": "string",
+      "description": "检查点唯一标识，格式：{lattice_name}_{timestamp}"
+    },
+    "lattice_name": {
+      "type": "string",
+      "description": "对应的晶格方案名称"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "检查点创建时间（ISO 8601）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["in_progress", "paused", "completed", "blocked"],
+      "description": "执行状态"
+    },
+    "last_completed_section": {
+      "type": "string",
+      "description": "最后完成的章节/任务标识"
+    },
+    "next_section": {
+      "type": "string",
+      "description": "下一个要执行的章节/任务标识"
+    },
+    "total_sections": {
+      "type": "integer",
+      "description": "总章节/任务数"
+    },
+    "completed_sections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "已完成的章节/任务列表"
+    },
+    "file_status": {
+      "type": "object",
+      "required": ["target_file", "total_lines_written", "file_complete"],
+      "properties": {
+        "target_file": {
+          "type": "string",
+          "description": "目标输出文件路径"
+        },
+        "total_lines_written": {
+          "type": "integer",
+          "description": "已写入的总行数"
+        },
+        "last_line_content": {
+          "type": "string",
+          "description": "最后写入行的内容摘要，用于确认位置"
+        },
+        "file_complete": {
+          "type": "boolean",
+          "description": "文件是否已完成"
+        }
+      }
+    },
+    "pcdca_cycles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task", "status", "plan"],
+        "properties": {
+          "task": { "type": "string", "description": "任务标识" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "blocked",
+              "skipped"
+            ]
+          },
+          "plan": { "type": "string", "description": "执行计划摘要" },
+          "completed_steps": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "description": "PCDCA循环状态列表"
+    },
+    "context_memento": {
+      "type": "string",
+      "description": "上下文记忆摘要，用于恢复AI对任务的理解"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "resolved", "escalated"]
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string", "description": "执行时使用的AI模型" },
+        "context_usage_pct": {
+          "type": "number",
+          "description": "创建检查点时的上下文使用率"
+        },
+        "version": { "type": "string", "description": "检查点格式版本" }
+      }
+    }
+  }
+}

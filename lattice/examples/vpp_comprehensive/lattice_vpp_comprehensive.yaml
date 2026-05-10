@@ -1,0 +1,112 @@
+# =============================================================================
+# LatticeWork 晶格方案: VPP+电力零售+智能台区+充电桩+合同能源+电力交易
+# 用途: 定义VPP综合技术方案的剩余章节编写任务
+# =============================================================================
+lattice:
+  id: "lattice_vpp_comprehensive_001"
+  name: "VPP综合技术方案剩余章节编写"
+  domain: "energy"
+  domain_type: "technical_documentation"
+  version: "1.0.0"
+  description: "完成VPP综合技术方案的第05-07章、附录及最终整合"
+  created_at: "2026-05-10T11:25:00+10:00"
+  updated_at: "2026-05-10T11:25:00+10:00"
+
+intent:
+  user_goal: >
+    完成VPP+电力零售+智能台区管理+充电桩管理+合同能源管理+电力交易（价格预测）综合技术方案
+    的剩余章节编写，包括第05章电力交易与报价引擎（完全重写，加深四川特性）、
+    第06章智能结算与偏差管理、第07章系统安全合规与部署、附录及最终整合。
+
+  acceptance_criteria:
+    - "第05章：电力交易与报价引擎完整，包含epftoolbox预测、Pyomo优化、省间交易、四川丰枯水建模"
+    - "第06章：智能结算与偏差管理完整，包含多层级结算、自动对账、碳资产结算"
+    - "第07章：系统安全合规与部署完整，包含等保三级、电网安全、部署架构"
+    - "附录完整，包含技术选型、关键代码、测试用例、团队配置、目录交叉引用"
+    - "所有文件大小可控，无截断问题"
+
+  non_goals:
+    - "不修改已完成的第01-04章"
+    - "不涉及硬件设计细节（已在HEMS方案中覆盖）"
+
+  constraints:
+    - "每个文件独立写入，大小控制在合理范围内"
+    - "保持与第01-04章一致的文档风格和格式"
+    - "加深四川特性（丰枯水期、陇电入川、尖峰时段动态调整）"
+
+  risk_level: "medium"
+
+layers:
+  - layer: 2
+    name: "核心算法层"
+    description: "电力交易算法、报价引擎、结算引擎等核心算法"
+    tasks:
+      - task_id: "task_001"
+        name: "第05章：电力交易与报价引擎"
+        description: "完全重写，包含现货电价预测、省间交易优化、报价引擎、回测系统"
+        depends_on: []
+      - task_id: "task_002"
+        name: "第06章：智能结算与偏差管理"
+        description: "新建，包含多层级结算、偏差考核、自动对账、碳资产结算"
+        depends_on: ["task_001"]
+      - task_id: "task_003"
+        name: "第07章：系统安全合规与部署"
+        description: "新建，包含等保三级、电网安全、部署架构、运维监控"
+        depends_on: ["task_002"]
+
+    assembly_test:
+      name: "核心算法层组装测试"
+      description: "验证三章内容完整性和一致性"
+      tests:
+        - "第05章→第06章：交易结果能否正确进入结算流程"
+        - "第06章→第07章：结算数据的安全合规要求是否覆盖"
+        - "所有章节的术语和引用是否一致"
+
+  - layer: 1
+    name: "附录与补充层"
+    description: "附录内容，补充技术细节"
+    tasks:
+      - task_id: "task_004"
+        name: "附录A-C：技术选型、关键代码、测试用例"
+        description: "汇总技术栈选型、关键代码片段、性能指标与测试用例"
+        depends_on: ["task_003"]
+      - task_id: "task_005"
+        name: "附录D-E：团队配置、完整目录与交叉引用"
+        description: "团队配置建议、完整文档目录、交叉引用索引"
+        depends_on: ["task_004"]
+
+    assembly_test:
+      name: "附录层组装测试"
+      description: "验证附录与正文的引用一致性"
+      tests:
+        - "附录中引用的章节编号与正文一致"
+        - "技术选型覆盖所有章节提到的技术"
+
+  - layer: 0
+    name: "最终整合层"
+    description: "全局验证和最终输出"
+    tasks:
+      - task_id: "task_006"
+        name: "最终完整性检查与README生成"
+        description: "检查所有文件完整性，生成方案README"
+        depends_on: ["task_005"]
+
+    assembly_test:
+      name: "最终整合测试"
+      description: "验证整个方案的完整性和一致性"
+      tests:
+        - "所有7章+附录文件存在且完整"
+        - "目录结构清晰，交叉引用正确"
+        - "文档风格一致"
+
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 3
+  human_in_the_loop:
+    plan_review_required: false
+    check_review_required: false
+    blocker_escalation: true
+
+global_blockers:
+  known: []

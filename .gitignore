@@ -25,6 +25,9 @@ outputs/eval_reports/regression/
 # Lattice 框架运行态数据（不走 Git）
 lattice/lattice_runtime/
 
+# 新建项目（不走 Git）
+company-management/
+
 # Customer or business content
 customer_docs/
 client_files/

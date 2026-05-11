@@ -14,6 +14,11 @@
       "command": "npx",
       "args": ["-y", "@anthropic/mcp-git", "."],
       "description": "Git status and version control operations"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-github"],
+      "description": "GitHub API operations: create PRs, manage issues, review changes"
     }
   }
 }

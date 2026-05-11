@@ -1,4 +1,10 @@
-# Workspace_1 使用指南
+# Workspace_1 使用指南（User Guide）
+
+> **Cline 工作标准请参见：** `config/workspace_usage_guide.md`
+> **上下文加载策略请参见：** `config/context-loading.yaml`
+> **强制前置门禁请参见：** `constraints/baseline/context_intent_gate.yaml`
+
+---
 
 ## 概述
 

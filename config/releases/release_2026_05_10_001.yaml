@@ -1,11 +1,11 @@
 release_id: release_2026_05_10_001
-git_commit: b24778a50812bc7b9c49ff72c793858b7949991e
+git_commit: 39cf3e40822c4db692678643d93789a985196791
 git_tag: release_2026_05_10_001
 previous_release: release_2026_05_05_001
 stage: stage_9_interruption_recovery
-status: review
+status: published
 lifecycle:
-  current_phase: review
+  current_phase: published
   transitions:
     - from: null
       to: draft
@@ -17,8 +17,13 @@ lifecycle:
       timestamp: "2026-05-10T01:44:45Z"
       actor: feng
       reason: 晋升 via release_promote.sh
+    - from: review
+      to: published
+      timestamp: "2026-05-10T01:45:06Z"
+      actor: feng
+      reason: 晋升 via release_promote.sh
 created_at: '2026-05-10T11:40:00+10:00'
-updated_at: '2026-05-10T01:44:45Z'
+updated_at: '2026-05-10T01:45:06Z'
 components:
   workflow_version: 0.3.0
   constraint_pack_version: 0.4.0

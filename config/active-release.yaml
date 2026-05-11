@@ -1,3 +1,17 @@
+#=============================================================================
+# active-release.yaml — 当前发布版本与活跃组件清单
+#
+# 功能：定义当前生效的 release 版本、所有活跃组件（workflow/constraint/prompt/
+#       evaluator/schema/script）及其版本号，以及治理配置引用。
+# 这是每次任务启动时第二个必须读取的文件（在 model_context.md 之后）。
+#
+# 关联：
+#   - docs/model_context.md（项目全景描述）
+#   - config/releases/（历史 release manifest）
+#   - docs/INDEX.md（文档索引）
+#   - scripts/task_init_check.py（启动检查脚本）
+#=============================================================================
+
 active_release:
   id: release_2026_05_10_001
   git_commit: b24778a50812bc7b9c49ff72c793858b7949991e
@@ -10,13 +24,13 @@ active_release:
   judge_version: 0.1.0
   knowledge_base_version: kb_0.3.0
   lattice_version: 1.0.0
-  status: review
+  status: published
   lifecycle:
     current_phase: draft
     transitions:
       - from: null
         to: draft
-        timestamp: '2026-05-10T11:40:00+10:00'
+        timestamp: "2026-05-10T11:40:00+10:00"
         actor: system
         reason: 全局进化流程 — 同步 Phase 7e-9 + Lattice 框架至正式 Release
   governance:
@@ -29,7 +43,7 @@ active_release:
       - id: aemo_market_data
         name: AEMO NEM 电力市场数据
         source: https://aemo.com.au/energy-systems/electricity
-        last_fetched: '2026-05-06'
+        last_fetched: "2026-05-06"
         documents:
           - AEMO Connections Scorecard Q1 2026
           - ElectraNet TAPR 2026
@@ -46,7 +60,7 @@ active_release:
       - id: sichuan_energy_policy
         name: 四川省电力市场政策文件 2025-2026
         source: https://scb.nea.gov.cn/
-        last_fetched: '2026-05-05'
+        last_fetched: "2026-05-05"
         data_ref: "data/market_reference_cn.yaml"
         documents:
           - 四川省电力辅助服务管理实施细则（2026版）
@@ -330,13 +344,13 @@ active_release:
       - traces/
       - lattice/lattice_runtime/
   notes:
-    - '2026-05-05: Stage 1-6 完成 — 骨架 → 工作流 → 约束 → 审计 → 评估 → 版本治理'
-    - '2026-05-05: Phase 7a-7d 完成 — LLM-as-Judge → 动态评估集 → 候选变更管线 → 沙箱回归测试'
-    - '2026-05-09: Phase 7e-7f 完成 — 灰度发布管理 + 质量仪表盘'
-    - '2026-05-09: Phase 8 完成 — 工作流编排引擎 (workflow_runner)'
-    - '2026-05-09: Phase 9 完成 — 中断处理与恢复 (interruption_handler)'
-    - '2026-05-09: Lattice 框架 v1.0.0 集成 — 结构化任务分解与执行引擎'
-    - '2026-05-09: 通用工作流 ideation_convergence 添加'
-    - '2026-05-10: 全局进化流程 — 同步所有组件至正式 Release release_2026_05_10_001'
-    - 'Environment: VS Code + GitHub Copilot Agent (migrated from Codex).'
-  updated_at: '2026-05-10T11:40:00+10:00'
+    - "2026-05-05: Stage 1-6 完成 — 骨架 → 工作流 → 约束 → 审计 → 评估 → 版本治理"
+    - "2026-05-05: Phase 7a-7d 完成 — LLM-as-Judge → 动态评估集 → 候选变更管线 → 沙箱回归测试"
+    - "2026-05-09: Phase 7e-7f 完成 — 灰度发布管理 + 质量仪表盘"
+    - "2026-05-09: Phase 8 完成 — 工作流编排引擎 (workflow_runner)"
+    - "2026-05-09: Phase 9 完成 — 中断处理与恢复 (interruption_handler)"
+    - "2026-05-09: Lattice 框架 v1.0.0 集成 — 结构化任务分解与执行引擎"
+    - "2026-05-09: 通用工作流 ideation_convergence 添加"
+    - "2026-05-10: 全局进化流程 — 同步所有组件至正式 Release release_2026_05_10_001"
+    - "Environment: VS Code + GitHub Copilot Agent (migrated from Codex)."
+  updated_at: "2026-05-10T11:40:00+10:00"

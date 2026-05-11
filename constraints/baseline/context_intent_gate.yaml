@@ -1,3 +1,22 @@
+#=============================================================================
+# context_intent_gate.yaml — 强制前置门禁规则
+#
+# 功能：在每次任务启动时，必须先完成上下文读取与意图确认，才能继续执行。
+#       这是所有约束中最先被检查的规则。定义了5条门禁规则：
+#       1. mandatory_startup_read — 强制读取关键配置文件
+#       2. intent_confirmation_required — 意图确认字段检查
+#       3. high_risk_pause — 高风险任务暂停确认
+#       4. load_only_relevant_context — 仅加载相关上下文
+#       5. record_gate_in_snapshot — 门禁结果记录
+#
+# 关联：
+#   - config/workspace_usage_guide.md（Cline 行为标准第一步）
+#   - config/context-loading.yaml（上下文加载策略）
+#   - config/active-release.yaml（当前版本引用）
+#   - docs/INDEX.md（文档索引）
+#   - scripts/task_init_check.py（启动检查脚本）
+#=============================================================================
+
 constraint_pack:
   id: "baseline_context_intent_gate"
   version: "0.1.0"

@@ -1,3 +1,18 @@
+#=============================================================================
+# context-loading.yaml — 上下文加载策略
+#
+# 功能：定义每次任务启动时的上下文加载规则，包括强制入口文件、启动序列、
+#       加载策略、上下文窗口管理、审计期望。
+# 与 config/workspace_usage_guide.md 中的"强制启动序列"保持一致。
+#
+# 关联：
+#   - config/workspace_usage_guide.md（Cline 行为标准）
+#   - docs/model_context.md（项目全景入口）
+#   - config/active-release.yaml（当前版本引用）
+#   - docs/INDEX.md（文档索引）
+#   - scripts/task_init_check.py（启动检查脚本）
+#=============================================================================
+
 context_loading:
   version: "0.1.0"
   status: "draft"
@@ -17,6 +32,14 @@ context_loading:
     - "config/active-release.yaml"
     - "README.md"
     - "docs/current_workspace_creation_plan.md"
+    - "constraints/baseline/context_intent_gate.yaml"
+    - "config/workspace_usage_guide.md"
+  startup_sequence_purpose: >
+    每次任务启动时必须按顺序读取这些文件，以建立对项目全景、当前版本、治理规则和
+    执行标准的统一理解。此序列与 config/workspace_usage_guide.md 中定义的
+    "强制启动序列"保持一致。
+    注意：docs/INDEX.md 是文档索引，按需查阅而非强制读取。
+    当需要查找特定文档或确认文件用途时，应查阅 INDEX.md。
   on_missing_entrypoint: "block_and_report"
   loading_policy:
     mode: "layered_and_task_specific"

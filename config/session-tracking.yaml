@@ -1,6 +1,15 @@
-# 会话跟踪配置 (Session Tracking)
-# 用于记录跨对话的会话历史、关键决策和项目进展
-# 每次重要会话结束后，AI 助手应更新此文件
+#=============================================================================
+# session-tracking.yaml — 会话跟踪配置
+#
+# 功能：记录跨对话的会话历史、关键决策和项目进展。
+#       每次重要会话结束后，AI 助手应更新此文件。
+#       与 docs/user_profile.md 配合使用，构成跨对话记忆系统。
+#
+# 关联：
+#   - docs/user_profile.md（用户配置文件）
+#   - docs/INDEX.md（文档索引）
+#   - docs/retrospective_*.md（任务复盘记录）
+#=============================================================================
 
 session_tracking:
   version: "0.1.0"
@@ -21,6 +30,33 @@ session_tracking:
       files_modified:
         - "docs/user_profile.md (新建)"
         - "config/session-tracking.yaml (新建)"
+      status: "completed"
+    - id: "session_20260511_001"
+      date: "2026-05-11"
+      title: "Workspace 规则与工作流审计"
+      summary: >
+        对工作空间全部规则、配置、工作流和工具进行了全面审计，发现4处规则矛盾、
+        3组冗余、5处死角。完成了以下修复：
+        1. 合并两套 workspace_usage_guide.md，统一任务执行入口
+        2. 将 context-loading.yaml 的强制启动序列与工作标准对齐
+        3. 创建 scripts/task_init_check.py 作为任务启动强制检查点
+        4. 安装 GitHub MCP 服务器
+        5. 安装 YAML (Red Hat) VS Code 扩展
+        6. 创建 docs/INDEX.md 文档索引体系
+      key_decisions:
+        - "config/workspace_usage_guide.md 保留为 Cline 行为标准，docs/workspace_usage_guide.md 保留为用户操作指南"
+        - "强制启动序列统一为：model_context.md → active-release.yaml → README.md → current_workspace_creation_plan.md → context_intent_gate.yaml → workspace_usage_guide.md"
+        - "task_init_check.py 作为每次任务启动的强制检查点"
+        - "建立 docs/INDEX.md 文档索引，消除文档冗余"
+      files_modified:
+        - "config/workspace_usage_guide.md (更新 v2.0)"
+        - "docs/workspace_usage_guide.md (添加引用链接)"
+        - "config/context-loading.yaml (更新启动序列)"
+        - "scripts/task_init_check.py (新建)"
+        - ".vscode/mcp.json (添加 GitHub MCP)"
+        - "docs/INDEX.md (新建)"
+        - "docs/workspace_audit_report.md (新建)"
+        - "config/session-tracking.yaml (更新)"
       status: "completed"
 
   # 活跃上下文

@@ -1,0 +1,143 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# 项目参数配置文件示例 — 光储混合项目 (Hybrid)
+# ══════════════════════════════════════════════════════════════════════════════
+# 此文件由工作流生成，作为 financial_model_engine.py 的输入。
+# 交易策略层 (scripts/trading/) 根据 technology_type 自动加载对应策略。
+# ══════════════════════════════════════════════════════════════════════════════
+
+project:
+  name: "示例光储混合项目"
+  technology_type: "hybrid" # 决定加载 hybrid_strategy.py
+  capacity_mw: 150 # 项目总装机容量（MW）
+  capacity_kw: 150000 # 项目总装机容量（kW）
+
+technical:
+  equivalent_hours: 1800 # 光伏等效年利用小时数（h）
+  degradation_rate: 0.005 # 光伏年衰减率（0.5%/年）
+  construction_years: 2 # 建设期（年）
+  operation_years: 25 # 运营期（年）
+
+# ── BESS 参数（仅 BESS / Hybrid / Wind+BESS 类型需要） ──
+bess:
+  # 光伏部分参数
+  solar_capacity_kw: 150000 # 光伏装机容量（kW）
+  solar_equivalent_hours: 1800 # 光伏等效小时数（h）
+
+  # BESS 部分参数
+  bess_capacity_kw: 75000 # BESS 功率容量（kW）= 75MW
+  duration_hours: 2 # 储能时长（h）= 150MWh
+  round_trip_efficiency: 0.85 # 充放电效率（85%）
+  max_charge_rate: 1.0 # 最大充电倍率（C-rate）
+  max_discharge_rate: 1.0 # 最大放电倍率（C-rate）
+
+  # 充放电策略阈值
+  charge_price_threshold: 0.05 # 低于此价格充电（$/kWh）
+  discharge_price_threshold: 0.15 # 高于此价格放电（$/kWh）
+  grid_charge_premium: 0.01 # 从电网充电的额外成本（输配电费，$/kWh）
+
+  # SOC 限制
+  initial_soc: 0.5 # 初始 SOC（50%）
+  min_soc: 0.1 # 最低 SOC（10%）
+  max_soc: 0.9 # 最高 SOC（90%）
+
+# ── 电价曲线（典型日 24h，用于日内模拟） ──
+# 交易策略根据此曲线逐时段模拟运营决策
+price_curve:
+  type: "typical_day" # 典型日曲线
+  resolution: "hourly" # 分辨率：小时
+  hours: [
+      -0.03, # 0:00  负电价
+      -0.02, # 1:00  负电价
+      -0.01, # 2:00  负电价
+      0.01, # 3:00
+      0.02, # 4:00
+      0.03, # 5:00
+      0.05, # 6:00
+      0.08, # 7:00
+      0.10, # 8:00
+      0.12, # 9:00
+      0.14, # 10:00
+      0.16, # 11:00
+      0.18, # 12:00
+      0.15, # 13:00
+      0.12, # 14:00
+      0.10, # 15:00
+      0.08, # 16:00
+      0.06, # 17:00
+      0.20, # 18:00  晚峰
+      0.25, # 19:00  最高
+      0.22, # 20:00
+      0.18, # 21:00
+      0.12, # 22:00
+      0.06, # 23:00
+    ]
+
+costs:
+  capex_per_watt: 1.20 # CAPEX 单价（$/W）
+  capex_total: 180000000 # CAPEX 总额（$）
+  capex_schedule: [0.6, 0.4] # 建设期资金分配比例
+  opex_fixed_per_kw_year: 25 # 固定运营成本（$/kW/年）
+  opex_escalation_rate: 0.02 # 运营成本年增长率（2%）
+  insurance_rate: 0.005 # 保险费率（0.5%/年）
+
+  # 可选费用项
+  # development_cost: 5000000      # 开发费用（$）
+  # manda_cost: 3000000            # 并购费用（$）
+  # construction_management: 2000000  # 建设管理费（$）
+  # grid_connection_cost: 4000000  # 并网费用（$）
+  # land_lease_per_kw: 5           # 土地租金（$/kW/年）
+  # decommissioning_cost: 8000000  # 退役费用（$）
+
+financing:
+  debt_ratio: 0.70 # 债务比例（70%）
+  equity_ratio: 0.30 # 资本金比例（30%）
+  interest_rate: 0.06 # 贷款利率（6%）
+  loan_tenor_years: 10 # 贷款期限（年）
+  discount_rate: 0.10 # 折现率（10%）
+  tax_rate: 0.25 # 所得税率（25%）
+  depreciation_years: 15 # 折旧年限（年）
+
+# ── 购电方风险评估（可选） ──
+offtaker:
+  revenue_model: "hybrid" # 收入模式：ppa / market / hybrid
+  ppa_type: "corporate" # PPA 类型
+  ppa_tenor_years: 15 # PPA 期限（年）
+  counterparty:
+    name: "示例购电方"
+    industry: "manufacturing"
+    credit_rating: "A"
+    annual_free_cashflow: 50000000
+    annual_electricity_cost: 8000000
+    debt_to_asset_ratio: 0.45
+    interest_coverage_ratio: 4.5
+    is_listed: true
+  market_risk:
+    historical_price_volatility: 0.30
+    market_liquidity: "medium"
+    hedging_available: true
+    ppa_coverage_ratio: 0.6
+  subsidy_risk: "low"
+  credit_enhancement:
+    parent_guarantee: true
+    letter_of_credit: false
+    escrow_account: true
+    default_compensation: true
+    multilateral_guarantee: false
+    government_guarantee: false
+
+country_risk_level: "medium" # 国家风险等级
+exchange_rate_risk: "medium" # 汇率风险
+ppa_currency: "USD" # PPA 计价货币
+
+# ── 多情景分析（可选） ──
+scenarios:
+  乐观情景:
+    revenue:
+      ppa_price_per_kwh: 0.15
+    technical:
+      equivalent_hours: 2000
+  悲观情景:
+    revenue:
+      ppa_price_per_kwh: 0.08
+    technical:
+      equivalent_hours: 1500

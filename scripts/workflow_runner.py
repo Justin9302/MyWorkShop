@@ -125,7 +125,7 @@ WORKFLOW_INDUSTRY_MAP = {
     "business_model_validation": "business",
     "go_to_market_review": "business",
     "unit_economics_check": "business",
-    "solar_financial_model": "energy",
+    "new_energy_project_analysis": "energy",
     "investment_research": "finance",
     "risk_summary": "finance",
     "due_diligence": "finance",

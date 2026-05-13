@@ -207,7 +207,7 @@ class TestConstants(unittest.TestCase):
             "contract_review", "policy_qa",
             "business_model_design", "business_model_validation",
             "go_to_market_review", "unit_economics_check",
-            "solar_financial_model",
+            "new_energy_project_analysis",
             "investment_research", "risk_summary", "due_diligence",
             "sop_generation", "meeting_summary", "project_retrospective",
         ]

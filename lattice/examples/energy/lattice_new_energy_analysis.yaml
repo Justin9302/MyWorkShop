@@ -1,0 +1,193 @@
+# =============================================================================
+# LatticeWork 晶格方案 — 新能源项目分析工作流
+# 用途: 定义通用型新能源项目分析的顶层分解方案
+# 构建方向: Layer 4 (核心) → Layer 0 (外层)
+# =============================================================================
+
+lattice:
+  id: "lattice_new_energy_analysis_001"
+  name: "新能源项目分析工作流"
+  domain: "energy"
+  domain_type: "new_energy_project_analysis"
+  version: "1.0.0"
+  description: >
+    通用型新能源项目分析工作流，覆盖资源评估、技术方案比选、财务建模、
+    市场分析、风险评估和投资决策。不依赖特定 Excel 模型文件，
+    通过加载项目参数文件和约束文件实现计算。
+    支持光伏/风电/储能/光储混合/VPP/充电桩等多种技术方案。
+    支持多国家/地区扩展，自动创建新国家的约束和数据。
+  created_at: "2026-05-13T11:00:00+10:00"
+  updated_at: "2026-05-13T11:00:00+10:00"
+
+# ── 意图定义 ──────────────────────────────────────────────────────────────
+intent:
+  user_goal: >
+    对新能源项目进行全面的技术、经济、市场和风险评估分析，
+    生成结构化的分析报告和投资建议。
+
+  acceptance_criteria:
+    - "项目参数配置完整，包含技术方案、规模、地点、阶段等核心信息"
+    - "资源评估基于项目坐标推导，标注来源和置信度"
+    - "财务模型包含完整的现金流、IRR、NPV、回收期、偿债覆盖率"
+    - "收入模型区分市场/PPA/补贴/辅助服务多来源"
+    - "敏感性分析覆盖关键参数（电价、容量因子、CAPEX、折现率）"
+    - "情景分析包含保守/基准/乐观三种场景"
+    - "风险评估识别技术、市场、政策、执行四类风险"
+    - "报告包含项目概览、关键指标、图表、风险提示和人审门禁"
+    - "所有输出文件保存在 OUTPUT/<项目名>/ 目录下"
+    - "Python 代码采用多层模块化组装，每个模块保持小巧"
+
+  non_goals:
+    - "不依赖特定 Excel 模型文件"
+    - "不限定于特定国家或地区"
+    - "不限定于特定技术方案"
+    - "不替代最终投资决策（仅提供分析支持）"
+
+  constraints:
+    - "国家数据必须标注来源和获取日期，有效期不超过 90 天"
+    - "新国家首次使用时，自动创建对应约束和数据"
+    - "高风险输出必须有人审门禁"
+    - "所有参数必须标注来源（用户提供/推导/市场参考/分析师假设）"
+    - "Python 代码采用多层模块化组装，避免生成巨大文件"
+
+  risk_level: "medium"
+
+# ── 层级分解 ──────────────────────────────────────────────────────────────
+layers:
+  - layer: 4
+    name: "项目参数与边界定义层"
+    description: "核心层：定义项目范围、边界条件和参数基线"
+    tasks:
+      - task_id: "task_001"
+        name: "项目范围定义"
+        description: "确认技术方案（光伏/风电/储能/混合/VPP/充电桩）、装机规模、项目地点、开发阶段（绿地/并购/运营）、用户目标和验收标准"
+        depends_on: []
+
+      - task_id: "task_002"
+        name: "边界条件确认"
+        description: "确认资源条件（太阳能/风能）、电网接入条件、土地条件、许可清单、环境约束。如提供坐标则基于坐标推导选址参数"
+        depends_on: ["task_001"]
+
+      - task_id: "task_003"
+        name: "参数基线建立"
+        description: "建立 CAPEX/OPEX/电价/融资参数基线。逐项拆解设备采购、EPC、开发费用、运维成本、收入参数、融资结构。每个参数标注来源和置信度"
+        depends_on: ["task_001", "task_002"]
+
+      - task_id: "task_003b"
+        name: "参数数据校验"
+        description: "将用户输入的每个参数与本地市场参考数据和在线最新数据进行交叉对比，计算偏差百分比，生成校验报告，强制用户确认后才能继续。偏差规则：<±10% ✅ 正常，±10-25% 🟡 注意，>±25% 🔴 偏离大"
+        depends_on: ["task_003"]
+
+      - task_id: "task_003c"
+        name: "生成项目参数配置文件"
+        description: "根据确认后的边界条件参数，生成 project_config.yaml 文件，保存在 OUTPUT/<项目名>/project_config.yaml。该文件是通用型财务模型引擎的唯一输入，不生成任何 Python 代码"
+        depends_on: ["task_003b"]
+
+    assembly_test:
+      name: "核心层组装测试"
+      description: "验证项目参数完整性和一致性"
+      tests:
+        - "项目范围定义完整（技术方案/规模/地点/阶段）"
+        - "边界条件已确认（资源/接入/许可/土地）"
+        - "参数基线完整（CAPEX/OPEX/电价/融资）"
+        - "所有参数标注来源和置信度"
+        - "国家约束和数据已加载（或新建）"
+        - "参数数据校验通过（无 🔴 偏离大 标记，或用户已确认）"
+        - "校验报告已保存到 OUTPUT/<项目名>/outputs/"
+        - "project_config.yaml 已生成，包含所有边界条件参数"
+
+  - layer: 2
+    name: "经济分析层"
+    description: "购电方风险评估、财务模型运行（通用引擎）、多情景分析、敏感性分析"
+    tasks:
+      - task_id: "task_006b"
+        name: "购电方风险评估"
+        description: >
+          基于 project_config.yaml 中的 offtaker 配置，对购电方进行统一风险评估。
+          五维评估框架：
+          维度1: 收入模式风险（权重30%）— PPA/电力市场/混合模式
+          维度2: 交易对手信用风险（权重25%）— 信用评级、现金流、资产负债率
+          维度3: 市场与监管风险（权重20%）— 电价波动、补贴政策、市场流动性
+          维度4: 国家/政治风险（权重15%）— 政治稳定性、汇率风险、货币
+          维度5: 信用增强措施（权重10%）— 合同约定的增信措施
+
+          输出风险评分（1-5分）、风险等级、建议折现率溢价。
+          风险溢价自动调整折现率，影响 NPV 计算。
+          不假设母公司担保，仅评估合同明确约定的信用增强措施。
+        depends_on: ["task_003c"]
+
+      - task_id: "task_007"
+        name: "运行财务模型（通用引擎）"
+        description: >
+          调用 scripts/financial_model_engine.py，传入 project_config.yaml。
+          引擎自动执行：加载参数 → 购电方风险评估 → 构建现金流模型
+          → 计算 IRR/NPV/回收期/LCOE/DSCR
+          → 运行保守/基准/乐观三种情景 → 运行单因素敏感性分析
+          → 输出 financial_results.json + financial_summary.md。
+          所有项目共享同一套引擎代码，不生成项目特定的硬编码模块。
+        depends_on: ["task_003c", "task_006b"]
+
+    assembly_test:
+      name: "经济分析层组装测试"
+      description: "验证财务模型引擎运行结果"
+      tests:
+        - "financial_results.json 已生成，包含所有情景的财务指标"
+        - "financial_summary.md 已生成，包含可读报告"
+        - "IRR/NPV/回收期/LCOE 计算一致"
+        - "敏感性分析覆盖至少4个关键参数"
+        - "情景分析包含保守/基准/乐观三种场景"
+        - "如配置包含购电方参数，报告包含风险评估章节"
+        - "风险调整后折现率正确反映风险溢价"
+
+  - layer: 0
+    name: "报告与决策层"
+    description: "整合分析报告、投资建议、人审门禁"
+    tasks:
+      - task_id: "task_013"
+        name: "整合分析报告"
+        description: >
+          基于 financial_results.json + financial_summary.md，
+          结合项目参数、国家约束、数据校验报告，生成完整的项目分析报告。
+          包含项目概览、边界条件摘要、参数校验结果、核心财务指标、
+          多情景对比、敏感性分析、投资建议、风险提示。
+        depends_on: ["task_007"]
+
+      - task_id: "task_014"
+        name: "投资建议"
+        description: "基于分析结果给出投资建议（推荐/条件性推荐/不推荐）、下一步行动清单、待确认事项。高风险输出触发人审门禁"
+        depends_on: ["task_013"]
+
+    assembly_test:
+      name: "报告层组装测试"
+      description: "验证报告完整性和决策支持能力"
+      tests:
+        - "报告包含所有必需章节"
+        - "投资建议有明确依据"
+        - "高风险输出触发人审门禁"
+        - "所有文件保存到 OUTPUT/<项目名>/ 目录"
+
+# ── 执行策略 ──────────────────────────────────────────────────────────────
+execution_strategy:
+  direction: "bottom_up"
+  pcdca_required: true
+  max_pcdca_cycles_per_task: 5
+  human_in_the_loop:
+    plan_review_required: true
+    check_review_required: false
+    blocker_escalation: true
+
+# ── 全局阻塞点 ────────────────────────────────────────────────────────────
+global_blockers:
+  known:
+    - id: "blocker_missing_country_data"
+      description: "目标国家/地区的市场参考数据不存在，需要新建"
+      affected_tasks: ["task_002", "task_003"]
+      resolution: "自动创建国家约束和数据文件，标记数据来源和获取日期"
+    - id: "blocker_missing_coordinates"
+      description: "未提供项目坐标，无法进行选址推导"
+      affected_tasks: ["task_002", "task_004"]
+      resolution: "使用用户提供的文字描述地点信息，标注为低置信度推导"
+    - id: "blocker_high_risk_output"
+      description: "分析结果用于最终投资决策，需要人审"
+      affected_tasks: ["task_014"]
+      resolution: "触发人审门禁，等待业务负责人审批"

@@ -38,12 +38,12 @@ feature_flags:
         citation_required: true
     market_reference_data:
       enabled: true
-      rollout: "solar_financial_model"
+      rollout: "new_energy_project_analysis"
       description: "使用 data/market_reference_*.yaml 文件作为区域参考值对比的数据源"
       freshness_check:
         description: "在 confirm_boundary_parameters 步骤中检查数据文件的新鲜度，若超过 90 天未更新则提示用户"
     evaluation_sidecar:
-      enabled: false
+      enabled: true
       rollout: "contract_only"
     auto_update_prompts:
       enabled: false

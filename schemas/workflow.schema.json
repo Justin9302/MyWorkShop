@@ -52,6 +52,12 @@
         "model_routing": {
           "type": "string",
           "description": "Route ID reference to config/model-routing.yaml. Determines model family, reasoning effort, and output validation mode."
+        },
+        "execution_method": {
+          "type": "string",
+          "enum": ["linear", "lattice"],
+          "default": "linear",
+          "description": "Execution method: 'linear' for sequential steps, 'lattice' for LatticeWork task decomposition and PCDCA cycle execution."
         }
       }
     },

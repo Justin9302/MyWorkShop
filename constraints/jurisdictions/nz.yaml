@@ -1,0 +1,76 @@
+constraint_pack:
+  id: "jurisdiction_nz"
+  version: "1.0.0"
+  status: "active"
+metadata:
+  country: "nz"
+  country_name: "新西兰 (New Zealand)"
+  currency: "NZD"
+  currency_symbol: "$"
+  tax_rate: 0.28
+  gst_rate: 0.15
+  description: "新西兰电力行业司法管辖区约束"
+  effective_date: "2026-01-01"
+  last_updated: "2026-05-13"
+  authority_level: "reference"
+
+rules:
+  # ── 电力市场 ──
+  - id: "nz_electricity_market"
+    severity: "high"
+    rule: "新西兰电力市场以可再生能源为主（水电60%、地热18%、风能7%、天然气9%）。电网覆盖有限，偏远地区电力供应不稳定。离网光储项目是解决偏远农场电力短缺的重要方案。"
+
+  - id: "nz_grid_coverage"
+    severity: "high"
+    rule: "新西兰电网覆盖有限，偏远农场电力供应不稳定。离网光储项目可减少对化石燃料的依赖，提升农场能源自给率。全国光储离网项目缺口达5.6GW。"
+
+  # ── 税务 ──
+  - id: "nz_tax_corporate"
+    severity: "high"
+    rule: "新西兰企业所得税（Company Tax）法定税率为28%。"
+  - id: "nz_tax_depreciation_pv"
+    severity: "high"
+    rule: "新西兰IRD标准：光伏发电设备折旧年限为20年（直线法，5%/年）。"
+  - id: "nz_tax_depreciation_bess"
+    severity: "high"
+    rule: "新西兰IRD标准：储能设备折旧年限为15-20年。"
+  - id: "nz_gst"
+    severity: "medium"
+    rule: "新西兰商品服务税（GST）为15%。B2B交易可抵扣进项税。"
+
+  # ── 融资 ──
+  - id: "nz_project_finance"
+    severity: "medium"
+    rule: "新西兰可再生能源项目融资杠杆率通常为60-70%。商业贷款利率5.5-7.0%（2026年）。贷款期限通常为10-15年。"
+
+  # ── 资源数据 ──
+  - id: "nz_solar_resource_north"
+    severity: "high"
+    rule: "新西兰北岛等效光照小时：1400-1600 h/年（NIWA/Solargis数据）。"
+  - id: "nz_solar_resource_south"
+    severity: "high"
+    rule: "新西兰南岛等效光照小时：1300-1500 h/年（NIWA/Solargis数据）。"
+  - id: "nz_max_single_project"
+    severity: "high"
+    rule: "新西兰已知最大单体光伏项目约147 MW（Lodestone Energy）。"
+
+  # ── 电价 ──
+  - id: "nz_wholesale_price"
+    severity: "medium"
+    rule: "新西兰批发电价范围：80-150 NZD/MWh（NZ Electricity Authority数据）。"
+  - id: "nz_offgrid_ppa_price"
+    severity: "medium"
+    rule: "新西兰离网PPA电价范围：0.15-0.25 NZD/kWh（行业经验值）。"
+
+  # ── 碳排放 ──
+  - id: "nz_ets"
+    severity: "medium"
+    rule: "新西兰碳排放交易体系（NZ ETS）碳价约50-80 NZD/吨。光伏项目可获碳信用收入。"
+
+  # ── 运营 ──
+  - id: "nz_opex_ratio"
+    severity: "medium"
+    rule: "新西兰光伏项目年运营费约占CAPEX的1.0-2.0%。"
+  - id: "nz_inflation"
+    severity: "medium"
+    rule: "新西兰CPI通胀率约2-3%（2025-2026年）。运营成本应按通胀递增。"

@@ -197,7 +197,7 @@ workflow_groups:
   - id: "energy"
     name: "能源"
     workflows:
-      - "solar_financial_model"
+      - "new_energy_project_analysis"
   - id: "finance"
     name: "金融"
     workflows:

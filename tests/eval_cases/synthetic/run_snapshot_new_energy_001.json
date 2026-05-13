@@ -1,0 +1,242 @@
+{
+  "$schema": "https://example.local/schemas/run_snapshot.schema.json",
+  "snapshot_id": "snapshot_new_energy_001",
+  "workflow_id": "new_energy_project_analysis",
+  "workflow_version": "0.1.0",
+  "timestamp": "2026-05-13T11:00:00+10:00",
+  "project": {
+    "name": "测试项目-四川光储混合",
+    "technology_type": "hybrid",
+    "capacity": {
+      "solar_mwp": 100,
+      "storage_mw": 50,
+      "storage_mwh": 200
+    },
+    "location": "中国四川省凉山州",
+    "coordinates": {
+      "latitude": 27.5,
+      "longitude": 102.3
+    },
+    "development_stage": "greenfield",
+    "currency": "CNY"
+  },
+  "context_intent_gate": {
+    "status": "passed",
+    "confirmed_at": "2026-05-13T11:00:00+10:00",
+    "confirmation_outputs": [
+      "项目名称: 测试项目-四川光储混合",
+      "技术方案: 光储混合 (100MWp 光伏 + 50MW/200MWh 储能)",
+      "项目地点: 中国四川省凉山州",
+      "开发阶段: 绿地开发",
+      "目标国家: cn (已有约束和数据)",
+      "风险等级: medium"
+    ]
+  },
+  "country_context": {
+    "country_code": "cn",
+    "country_name": "China",
+    "constraint_file": "constraints/countries/cn.yaml",
+    "data_file": "data/market_reference_cn.yaml",
+    "data_freshness": {
+      "last_updated": "2026-05-05",
+      "freshness_days": 8,
+      "status": "fresh"
+    }
+  },
+  "boundary_parameters": {
+    "status": "confirmed",
+    "parameters": {
+      "capacity": {
+        "solar_mwp": 100,
+        "storage_mw": 50,
+        "storage_mwh": 200,
+        "solar_capacity_factor": 0.17,
+        "storage_efficiency": 0.9,
+        "storage_cycles_per_year": 365
+      },
+      "capex": {
+        "solar": {
+          "equipment": 250000000,
+          "epc": 80000000,
+          "idc": 15000000,
+          "total": 345000000,
+          "unit_cost_cny_per_w": 3.45
+        },
+        "storage": {
+          "battery_pack": 140000000,
+          "pcs_ems_bms": 30000000,
+          "epc": 20000000,
+          "total": 190000000,
+          "unit_cost_cny_per_kwh": 950
+        },
+        "total_capex": 535000000
+      },
+      "opex": {
+        "solar_fixed_cny_per_kw_year": 35,
+        "storage_fixed_cny_per_kw_year": 50,
+        "land_rent_cny_per_year": 2000000,
+        "insurance_cny_per_year": 3000000,
+        "management_cny_per_year": 1500000
+      },
+      "revenue": {
+        "ppa_price_cny_per_mwh": 350,
+        "spot_price_cny_per_mwh": 280,
+        "subsidy_cny_per_mwh": 50,
+        "ancillary_service_cny_per_mwh": 30
+      },
+      "financing": {
+        "leverage_ratio": 0.7,
+        "interest_rate": 0.045,
+        "loan_term_years": 15,
+        "repayment_type": "annuity",
+        "discount_rate": 0.08,
+        "tax_rate": 0.25,
+        "depreciation_method": "straight_line",
+        "depreciation_years": 20
+      },
+      "timeline": {
+        "construction_start": "2027-01-01",
+        "construction_end": "2028-06-30",
+        "operation_start": "2028-07-01",
+        "operation_years": 25
+      }
+    },
+    "parameter_sources": {
+      "solar_capacity_factor": "market_reference",
+      "capex_solar": "market_reference",
+      "capex_storage": "market_reference",
+      "ppa_price": "user_provided",
+      "discount_rate": "analyst_assumption"
+    }
+  },
+  "analysis_modules": {
+    "generated": true,
+    "module_list": [
+      "module_01_resource.py",
+      "module_02_technical.py",
+      "module_03_financial.py",
+      "module_04_market.py",
+      "module_05_risk.py",
+      "module_06_report.py"
+    ],
+    "output_dir": "OUTPUT/测试项目-四川光储混合/modules/"
+  },
+  "results": {
+    "resource_assessment": {
+      "ghi_kwh_per_m2_year": 1450,
+      "psh_hours_per_day": 4.0,
+      "solar_capacity_factor": 0.17,
+      "first_year_generation_mwh": 170000,
+      "annual_average_generation_mwh": 153000,
+      "net_export_mwh": 145350,
+      "derivation_source": "coordinate_based",
+      "confidence": "medium"
+    },
+    "financial_metrics": {
+      "irr_project": 0.092,
+      "irr_equity": 0.118,
+      "npv_cny": 45000000,
+      "payback_years": 8.5,
+      "lcoe_cny_per_mwh": 320,
+      "lcos_cny_per_mwh": 280
+    },
+    "debt_metrics": {
+      "min_dscr": 1.25,
+      "average_dscr": 1.45,
+      "llcr": 1.35,
+      "plcr": 1.3
+    },
+    "sensitivity_analysis": {
+      "top_sensitivity_factors": [
+        {
+          "parameter": "ppa_price",
+          "impact_range": [-0.25, 0.3]
+        },
+        {
+          "parameter": "solar_capacity_factor",
+          "impact_range": [-0.18, 0.22]
+        },
+        {
+          "parameter": "total_capex",
+          "impact_range": [-0.15, 0.12]
+        },
+        {
+          "parameter": "discount_rate",
+          "impact_range": [-0.1, 0.08]
+        }
+      ]
+    },
+    "scenario_analysis": {
+      "conservative": {
+        "irr_project": 0.065,
+        "npv_cny": -15000000
+      },
+      "base": {
+        "irr_project": 0.092,
+        "npv_cny": 45000000
+      },
+      "optimistic": {
+        "irr_project": 0.125,
+        "npv_cny": 120000000
+      }
+    },
+    "risk_assessment": {
+      "risks": [
+        {
+          "category": "market",
+          "risk": "电价下行风险",
+          "severity": "high",
+          "mitigation": "签订长期PPA锁定电价"
+        },
+        {
+          "category": "policy",
+          "risk": "补贴退坡风险",
+          "severity": "medium",
+          "mitigation": "保守场景假设补贴归零"
+        },
+        {
+          "category": "technical",
+          "risk": "光伏衰减超预期",
+          "severity": "medium",
+          "mitigation": "选用高质量组件，预留替换预算"
+        },
+        {
+          "category": "execution",
+          "risk": "建设延期风险",
+          "severity": "low",
+          "mitigation": "EPC合同含延期罚则"
+        }
+      ]
+    }
+  },
+  "human_review": {
+    "required": false,
+    "reason": "测试案例，非实际投资决策"
+  },
+  "report": {
+    "generated": true,
+    "format": "markdown",
+    "path": "OUTPUT/测试项目-四川光储混合/outputs/analysis_report.md",
+    "sections": [
+      "project_overview",
+      "key_financial_metrics",
+      "resource_assessment",
+      "technical_analysis",
+      "financial_analysis",
+      "market_analysis",
+      "risk_assessment",
+      "sensitivity_analysis",
+      "scenario_analysis",
+      "investment_recommendation",
+      "next_steps",
+      "risk_disclaimer"
+    ]
+  },
+  "metadata": {
+    "test_type": "synthetic",
+    "test_purpose": "验证新能源项目分析工作流的完整执行路径",
+    "expected_behavior": "所有步骤正常执行，输出完整分析报告",
+    "created_at": "2026-05-13T11:00:00+10:00",
+    "created_by": "system"
+  }
+}

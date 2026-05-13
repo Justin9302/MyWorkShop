@@ -1,0 +1,191 @@
+# =============================================================================
+# 项目参数配置文件模板 (project_config_template.yaml)
+# =============================================================================
+# 用途：作为新能源项目财务模型分析的输入模板。
+#       工作流在生成 project_config.yaml 时应严格遵循此模板结构。
+#       引擎 financial_model_engine.py 同时支持嵌套格式（本模板）和扁平格式。
+#
+# 使用说明：
+#   1. 复制此文件为 project_config.yaml
+#   2. 将占位符值（如 "项目名称"、0）替换为实际参数
+#   3. 可选字段可删除或留空，引擎会使用默认值
+#   4. 不要修改顶层键名（project/technical/costs/revenue/financing/offtaker）
+#   5. 不要修改嵌套层级结构
+# =============================================================================
+
+# ── 项目基本信息 ──────────────────────────────────────────────────────────────
+project:
+  name: "项目名称" # 必填，如：洛阳钼业刚果金光伏一期
+  technology_type: "solar" # 必填，支持所有新能源类型：solar / wind / battery / hydro / hybrid / 其他
+  capacity_mw: 130 # 必填，装机容量（兆瓦）
+  capacity_kw: 130000 # 必填，装机容量（千瓦）
+  development_stage: "greenfield" # 必填，如：greenfield / brownfield / operational
+  location:
+    country: "国家" # 必填
+    region: "地区" # 必填
+    coordinates:
+      latitude: 0.0 # 可选，纬度
+      longitude: 0.0 # 可选，经度
+
+# ── 技术参数 ──────────────────────────────────────────────────────────────────
+technical:
+  equivalent_hours: 1650 # 必填，等效满负荷小时数
+  capacity_factor: 0.188 # 可选，容量因子（0-1），留空自动计算
+  degradation_rate: 0.005 # 可选，年衰减率，默认 0.005
+  construction_years: 2 # 可选，建设期（年），默认 2
+  operation_years: 25 # 必填，运营期（年）
+
+# ── 成本参数 ──────────────────────────────────────────────────────────────────
+costs:
+  capex_per_watt: 0.75 # 必填，单位投资成本（美元/瓦）
+  capex_total: 97500000 # 必填，CAPEX总额（美元）
+  capex_schedule: [0.6, 0.4] # 可选，建设期投资分配比例，默认 [0.6, 0.4]
+
+  # ── 土地费用 ──
+  # 土地获取方式由 development_stage 决定：
+  #   greenfield（绿地开发）：通常为购买或长期租赁
+  #   brownfield/RTB（并购）：土地已包含在收购价中
+  land_cost_per_watt: 0 # 可选，土地购买费用（美元/瓦），计入CAPEX，默认 0
+  land_cost_total: 0 # 可选，土地购买费用总额（美元），计入CAPEX，默认 0
+  land_rent_per_kw_year: 0 # 可选，土地年租金（美元/千瓦/年），计入OPEX，默认 0
+  land_rent_escalation_rate: 0.02 # 可选，土地租金年增长率，默认 0.02
+
+  # ── 开发/并购费用（development_stage 决定使用哪些） ──
+  # greenfield（绿地开发项目）：
+  #   - 包含：环评、可研、设计、审批、法律等前期费用（不含土地）
+  #   - 通常占 CAPEX（不含土地）的 3-8%
+  # brownfield/RTB（并购/交钥匙项目）：
+  #   - 包含：收购溢价、尽调、法律、过户等交易费用
+  #   - 通常占收购价的 2-5%
+  development_cost_per_watt: 0.04 # 可选，开发/并购费用（美元/瓦），默认 0
+  development_cost_total: 0 # 可选，开发/并购费用总额（美元），默认 0
+
+  # ── 建设期费用 ──
+  construction_management_percent: 0.05 # 可选，建设管理费（占CAPEX比例），默认 0
+  grid_connection_cost_per_watt: 0.02 # 可选，并网接入费（美元/瓦），默认 0
+  contingency_percent: 0.10 # 可选，不可预见费（占CAPEX比例），默认 0
+
+  # ── 运营期费用 ──
+  opex_fixed_per_kw_year: 20 # 必填，固定运维成本（美元/千瓦/年）
+  opex_escalation_rate: 0.02 # 可选，运维成本年增长率，默认 0.02
+  insurance_rate: 0.005 # 可选，保险费率（占CAPEX比例），默认 0.005
+  labor_opex_per_kw_year: 0 # 可选，运维人工费（美元/千瓦/年），默认 0
+  management_fee_per_kw_year: 0 # 可选，管理费（美元/千瓦/年），默认 0
+  environmental_monitoring_per_kw_year: 0 # 可选，环境监测费（美元/千瓦/年），默认 0
+  replacement_reserve_per_kw_year: 0 # 可选，备件更换储备金（美元/千瓦/年），默认 0
+
+# ── 收入参数 ──────────────────────────────────────────────────────────────────
+revenue:
+  ppa_price_per_kwh: 0.13 # 必填，PPA电价（美元/千瓦时）
+  equivalent_hours: 1650 # 可选，等效小时数（用于发电量计算）
+  # 注意：annual_generation_kwh 由 capacity_kw × equivalent_hours 自动派生
+
+# ── 融资参数 ──────────────────────────────────────────────────────────────────
+financing:
+  debt_ratio: 0.70 # 可选，债务比例（0-1），默认 0.70
+  equity_ratio: 0.30 # 可选，资本金比例（0-1），默认 1 - debt_ratio
+  interest_rate: 0.06 # 可选，贷款利率，默认 0.06
+  loan_tenor_years: 10 # 可选，贷款期限（年），默认 10
+  discount_rate: 0.10 # 可选，折现率，默认 0.10
+  tax_rate: 0.25 # 可选，税率，默认 0.25
+  depreciation_years: 15 # 可选，折旧年限（年），默认 15
+
+# ── 购电方风险评估参数 ────────────────────────────────────────────────────────
+offtaker:
+  revenue_model: "ppa" # 可选，收入模式：ppa / market / hybrid，默认 ppa
+  ppa_type: "corporate" # 可选，PPA类型：corporate / utility / government，默认 corporate
+  ppa_tenor_years: 15 # 可选，PPA期限（年），默认 15
+  counterparty:
+    name: "购电方名称" # 可选
+    industry: "mining" # 可选，如：mining / manufacturing / commercial / technology / utility / government
+    credit_rating: "A-" # 可选，如：AAA / AA / A / BBB / BB / B / CCC
+    annual_free_cashflow: 100000000 # 可选，年自由现金流（美元）
+    annual_electricity_cost: 5000000 # 可选，年电费支出（美元）
+    debt_to_asset_ratio: 0.50 # 可选，资产负债率（0-1）
+    interest_coverage_ratio: 5.0 # 可选，利息覆盖倍数
+    is_listed: true # 可选，是否上市
+  credit_enhancement:
+    parent_guarantee: false # 可选，母公司担保
+    letter_of_credit: false # 可选，信用证
+    escrow_account: false # 可选，电费支付托管账户
+    default_compensation: false # 可选，违约赔偿条款
+    multilateral_guarantee: false # 可选，多边担保
+    government_guarantee: false # 可选，政府担保
+  subsidy_risk: "low" # 可选，补贴/绿证风险：low / medium / high / uncertain，默认 low
+  market_risk: # 仅当 revenue_model = market 或 hybrid 时填写
+    historical_price_volatility: 0.30 # 可选，历史电价波动率（0-1）
+    market_liquidity: "medium" # 可选，市场流动性：high / medium / low
+    hedging_available: false # 可选，是否可用对冲工具
+    ppa_coverage_ratio: 0.50 # 可选，PPA覆盖比例（仅hybrid模式，0-1）
+
+# ── 国家/政治风险参数 ─────────────────────────────────────────────────────────
+country_risk_level: "medium" # 可选，政治风险等级：very_low / low / medium_low / medium / medium_high / high / very_high，默认 medium
+exchange_rate_risk: "medium" # 可选，汇率风险：low / medium / high，默认 medium
+ppa_currency: "USD" # 可选，PPA计价货币，默认 USD
+
+# ── 可选参数（特定项目） ──────────────────────────────────────────────────────
+optional:
+  dust_degradation_penalty: 0.0 # 可选，沙尘衰减惩罚（年衰减率附加），默认 0
+  dust_cleaning_opex_per_kw: 0 # 可选，沙尘清洁运维成本（美元/千瓦/年），默认 0
+  security_opex_per_kw: 0 # 可选，安保运维成本（美元/千瓦/年），默认 0
+  community_opex_per_kw: 0 # 可选，社区运维成本（美元/千瓦/年），默认 0
+
+
+# ── 多情景分析参数 ────────────────────────────────────────────────────────────
+# 可选：定义多个情景进行对比分析
+# 每个情景只需包含与基准不同的参数
+# scenarios:
+#   保守情景:
+#     revenue:
+#       ppa_price_per_kwh: 0.10
+#     financing:
+#       debt_ratio: 0.70
+#   乐观情景:
+#     revenue:
+#       ppa_price_per_kwh: 0.16
+#     technical:
+#       equivalent_hours: 1800
+
+# ── 敏感性分析参数 ────────────────────────────────────────────────────────────
+# 可选：自定义敏感性分析参数
+# 默认分析：PPA电价、等效小时数、CAPEX、折现率
+# sensitivity_params:
+#   PPA电价:
+#     key: "ppa_price_per_kwh"
+#     low: 0.08
+#     high: 0.18
+#     steps: 5
+
+# ── 外部条件约束 ──────────────────────────────────────────────────────────────
+# 可选：启用外部条件约束引擎，基于AEMO ISP/AER官方轨迹数据自动推演
+# 市场变化对项目财务参数的影响（电价压缩、CAPEX学习曲线、FCAS衰减等）。
+#
+# 使用方式：
+#   1. 设置 enabled: true 启用约束引擎
+#   2. 指定 assessment_year 和 region
+#   3. 运行: python3 scripts/run_with_constraints.py --config project_config.yaml --output outputs/
+#   4. 或通过命令行覆盖: --assessment-year 2030 --region NSW
+#
+# 约束引擎将自动推演并覆盖以下参数：
+#   - revenue.ppa_price_per_kwh       ← 价差压缩后的加权电价
+#   - revenue.equivalent_hours        ← 竞争衰减后的等效小时数
+#   - costs.capex_per_watt            ← 学习曲线后的单位CAPEX
+#   - costs.capex_total               ← 学习曲线后的CAPEX总额
+#   - costs.grid_connection_cost      ← 接入成本（含年化涨幅+AI溢价）
+#   - revenue.fcas_aud_kw_year        ← FCAS收益（BESS竞争衰减）
+#   - financing.interest_rate         ← 融资利率（宏观+风险溢价调整）
+#   - financing.discount_rate         ← 折现率（跟随利率调整）
+#
+# 约束数据文件：constraints/australia_nem_trajectory.yaml
+# 约束引擎脚本：scripts/constraint_engine.py
+# 运行入口脚本：scripts/run_with_constraints.py
+# external_constraints:
+#   enabled: false                          # 是否启用约束引擎
+#   constraint_file: ""                      # 约束数据文件路径（留空自动查找）
+#   assessment_year: 2030                    # 评估年份（用于时间轴推演）
+#   region: "NSW"                            # NEM区域（NSW/VIC/QLD/SA）
+#   # 以下为可选手动覆盖参数（非零值时生效，覆盖约束引擎推演值）
+#   bess_capacity_addition_gw: 0             # 手动指定BESS新增容量(GW)
+#   construction_cost_escalation_pct: 0      # 建设成本上涨(%)
+#   grid_connection_cost_premium_pct: 0      # 接入费溢价(%)
+#   fcas_price_decline_pct: 0               # FCAS价格下降(%)

@@ -58,6 +58,25 @@ session_tracking:
         - "docs/workspace_audit_report.md (新建)"
         - "config/session-tracking.yaml (更新)"
       status: "completed"
+    - id: "session_20260512_001"
+      date: "2026-05-12"
+      title: "流程违规复盘 — 新闻评价任务"
+      summary: >
+        用户要求评价一篇关于 Intercontinental Energy 的澳洲可再生能源+数据中心新闻。
+        首次响应直接跳过了强制启动序列，未做意图确认、行业对齐、主动确认和复盘。
+        用户三次反馈后意识到流程违规。最终完成了强制加载、意图确认、复盘记录、
+        会话跟踪和用户配置文件的更新。
+        核心教训：所有任务（包括"看起来像闲聊"的任务）都必须走 5 步法。
+      key_decisions:
+        - "建立'任务类型无关'的强制启动习惯"
+        - "每次任务在 <thinking> 中显式记录理解意图三问"
+        - "初稿输出后主动确认方向"
+        - "任务完成后立即写复盘"
+      files_modified:
+        - "docs/retrospective_20260512.md (新建)"
+        - "config/session-tracking.yaml (更新)"
+        - "docs/user_profile.md (更新)"
+      status: "completed"
 
   # 活跃上下文
   active_context:

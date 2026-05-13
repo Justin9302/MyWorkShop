@@ -9,7 +9,7 @@ lifecycle:
   transitions:
     - from: null
       to: draft
-      timestamp: '2026-05-10T11:40:00+10:00'
+      timestamp: "2026-05-10T11:40:00+10:00"
       actor: system
       reason: 全局进化流程 — 同步 Phase 7e-9 + Lattice 框架至正式 Release
     - from: draft
@@ -22,8 +22,8 @@ lifecycle:
       timestamp: "2026-05-10T01:45:06Z"
       actor: feng
       reason: 晋升 via release_promote.sh
-created_at: '2026-05-10T11:40:00+10:00'
-updated_at: '2026-05-10T01:45:06Z'
+created_at: "2026-05-10T11:40:00+10:00"
+updated_at: "2026-05-10T01:45:06Z"
 components:
   workflow_version: 0.3.0
   constraint_pack_version: 0.4.0
@@ -45,40 +45,40 @@ changes:
     description: LatticeWork 结构化任务分解与执行框架 — schemas, scripts, workflows, templates, examples
   - type: added
     component: scripts/rollout_manager.py
-    description: 'Phase 7e: 灰度发布管理器'
+    description: "Phase 7e: 灰度发布管理器"
   - type: added
     component: config/rollout-policy.yaml
-    description: 'Phase 7e: 灰度发布策略配置'
+    description: "Phase 7e: 灰度发布策略配置"
   - type: added
     component: tests/phase7e/
-    description: 'Phase 7e: 灰度发布测试套件'
+    description: "Phase 7e: 灰度发布测试套件"
   - type: added
     component: scripts/dashboard.py
-    description: 'Phase 7f: 质量仪表盘脚本'
+    description: "Phase 7f: 质量仪表盘脚本"
   - type: added
     component: config/dashboard-config.yaml
-    description: 'Phase 7f: 仪表盘配置'
+    description: "Phase 7f: 仪表盘配置"
   - type: added
     component: tests/phase7f/
-    description: 'Phase 7f: 仪表盘测试套件'
+    description: "Phase 7f: 仪表盘测试套件"
   - type: added
     component: scripts/workflow_runner.py
-    description: 'Phase 8: 工作流编排引擎'
+    description: "Phase 8: 工作流编排引擎"
   - type: added
     component: scripts/workflow_status_indicator.py
-    description: 'Phase 8: 工作流状态指示器'
+    description: "Phase 8: 工作流状态指示器"
   - type: added
     component: config/session-tracking.yaml
-    description: 'Phase 8: 会话追踪配置'
+    description: "Phase 8: 会话追踪配置"
   - type: added
     component: tests/phase8/
-    description: 'Phase 8: 工作流编排引擎测试套件 (42 项)'
+    description: "Phase 8: 工作流编排引擎测试套件 (42 项)"
   - type: added
     component: scripts/interruption_handler.py
-    description: 'Phase 9: 中断处理核心脚本'
+    description: "Phase 9: 中断处理核心脚本"
   - type: added
     component: tests/phase9/
-    description: 'Phase 9: 中断处理测试套件 (63 项)'
+    description: "Phase 9: 中断处理测试套件 (63 项)"
   - type: added
     component: workflows/general/ideation_convergence.yaml
     description: 通用创意收敛工作流
@@ -141,7 +141,7 @@ workflow_list:
   - workflows/business/business_model_validation.yaml
   - workflows/business/go_to_market_review.yaml
   - workflows/business/unit_economics_check.yaml
-  - workflows/energy/solar_financial_model.yaml
+  - workflows/energy/new_energy_project_analysis.yaml
   - workflows/finance/investment_research.yaml
   - workflows/finance/risk_summary.yaml
   - workflows/finance/due_diligence.yaml
@@ -172,7 +172,7 @@ prompt_list:
   - prompts/business/business_model_validation.system.md
   - prompts/business/go_to_market_review.system.md
   - prompts/business/unit_economics_check.system.md
-  - prompts/energy/solar_financial_model.system.md
+  - prompts/energy/new_energy_project_analysis.system.md
   - prompts/finance/research_summary.system.md
   - prompts/finance/risk_summary.system.md
   - prompts/finance/due_diligence.system.md
@@ -189,7 +189,7 @@ evaluator_list:
   - evaluators/rubrics/contract_review.yaml
   - evaluators/rubrics/due_diligence.yaml
   - evaluators/rubrics/sop_generation.yaml
-  - evaluators/rubrics/solar_financial_model.yaml
+  # solar_financial_model 已合并至 new_energy_project_analysis 工作流
   - evaluators/rubrics/ideation_convergence.yaml
 rollback:
   previous_release: release_2026_05_05_001

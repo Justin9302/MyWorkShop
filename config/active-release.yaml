@@ -86,7 +86,8 @@ active_release:
       - workflows/business/business_model_validation.yaml
       - workflows/business/go_to_market_review.yaml
       - workflows/business/unit_economics_check.yaml
-      - workflows/energy/solar_financial_model.yaml
+      # solar_financial_model 已合并至 new_energy_project_analysis（通用新能源分析工作流）
+      - workflows/energy/new_energy_project_analysis.yaml
       - workflows/finance/investment_research.yaml
       - workflows/finance/risk_summary.yaml
       - workflows/finance/due_diligence.yaml
@@ -117,7 +118,8 @@ active_release:
       - prompts/business/business_model_validation.system.md
       - prompts/business/go_to_market_review.system.md
       - prompts/business/unit_economics_check.system.md
-      - prompts/energy/solar_financial_model.system.md
+      # solar_financial_model 已合并至 new_energy_project_analysis.system.md
+      - prompts/energy/new_energy_project_analysis.system.md
       - prompts/finance/research_summary.system.md
       - prompts/finance/risk_summary.system.md
       - prompts/finance/due_diligence.system.md
@@ -162,7 +164,7 @@ active_release:
       - evaluators/rubrics/contract_review.yaml
       - evaluators/rubrics/due_diligence.yaml
       - evaluators/rubrics/sop_generation.yaml
-      - evaluators/rubrics/solar_financial_model.yaml
+      # solar_financial_model 已合并至 new_energy_project_analysis 工作流
       - evaluators/rubrics/ideation_convergence.yaml
     schemas:
       - schemas/workflow.schema.json
@@ -256,6 +258,10 @@ active_release:
         - lattice/examples/energy/
         - lattice/examples/game/
         - lattice/examples/vpp_comprehensive/
+    country_constraints:
+      - constraints/countries/_template.yaml
+    market_reference:
+      - data/market_reference_index.yaml
     mcp_tools:
       - filesystem_read
       - filesystem_write

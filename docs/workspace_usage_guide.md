@@ -111,7 +111,7 @@
 
 ```bash
 # 运行工作流
-python scripts/workflow_runner.py workflows/energy/solar_financial_model.yaml
+python scripts/workflow_runner.py workflows/energy/new_energy_project_analysis.yaml
 
 # 运行评估
 python scripts/eval_runner.py --workflow <workflow-path>
@@ -179,7 +179,7 @@ python scripts/workflow_status_indicator.py report --snapshot runtime/workflow_r
 ╔══════════════════════════════════════════════════════════════╗
 ║  ⚡  工作流状态: 执行中
 ║
-║  工作流: solar_financial_model
+║  工作流: new_energy_project_analysis
 ║  运行 ID: run_abc123
 ║  当前节点: 市场数据验证
 ║  进度: 2/14
@@ -194,7 +194,7 @@ python scripts/workflow_status_indicator.py report --snapshot runtime/workflow_r
 ╔══════════════════════════════════════════════════════════════╗
 ║  ⏸️  工作流状态: 已暂停（等待用户输入）
 ║
-║  工作流: solar_financial_model
+║  工作流: new_energy_project_analysis
 ║  运行 ID: run_abc123
 ║  当前节点: confirm_intent
 ║  进度: 1/14

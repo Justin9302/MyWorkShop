@@ -1,0 +1,161 @@
+# =============================================================================
+# 刚果(金) — 国家约束文件
+# =============================================================================
+# 用于新能源项目分析的国别约束条件
+# 版本: v2.0（新增购电方营运风险评估框架）
+# =============================================================================
+
+country:
+  name: "刚果(金)"
+  code: "CD"
+  region: "中部非洲"
+
+# ── 能源政策 ──
+energy_policy:
+  electrification_rate: "~21%（全球最低之一）"
+  grid_reliability: "极低，频繁停电"
+  current_capacity: "~2,800 MW（水电为主）"
+  target_capacity: "2030年目标 4,500 MW"
+  renewable_target: "鼓励太阳能/水电"
+  feed_in_tariff: "无统一FIT，PPA协商定价"
+  ppa_currency: "美元（USD）为主"
+  ppa_typical_tenor: "15-25年（矿业项目可达30年）"
+
+# ── 税务环境 ──
+tax:
+  corporate_income_tax: 0.30
+  vat: 0.16
+  withholding_tax_dividends: 0.10
+  withholding_tax_interest: 0.10
+  import_duty: "5-20%（矿业设备可能有豁免）"
+  mining_special_tax: "利润的10%（矿业项目）"
+  tax_holiday: "矿业项目可协商"
+
+# ── 汇率 ──
+exchange_rate:
+  local_currency: "刚果法郎 (CDF)"
+  usd_rate: 2850
+  volatility: "高"
+  ppa_recommendation: "建议以美元计价PPA"
+
+# ── 政治风险 ──
+political_risk:
+  risk_level: "中-高"
+  description: "东部安全形势不稳定，但矿业省份相对稳定"
+  mitigation:
+    - "中国信保（SINOSURE）"
+    - "多边投资担保机构（MIGA）"
+    - "与大型矿业企业绑定降低风险"
+
+# ── 购电方营运风险评估框架（新增） ──
+offtaker_assessment:
+  framework: "矿业企业PPA风险评估"
+  description: "评估矿业企业作为购电方的30年PPA履约能力"
+  
+  assessment_dimensions:
+    - dimension: "矿山寿命匹配度"
+      weight: 0.30
+      criteria:
+        - "JORC资源量/年产量 >= PPA期限"
+        - "矿山已运营年限"
+        - "剩余可采储量"
+      rating_scale:
+        - "匹配: 剩余寿命 >= PPA期限"
+        - "部分匹配: 剩余寿命 >= PPA期限x70%"
+        - "不匹配: 剩余寿命 < PPA期限x70%"
+    
+    - dimension: "购电方财务实力"
+      weight: 0.25
+      criteria:
+        - "年自由现金流 / 年电费 >= 10x"
+        - "资产负债率 < 70%"
+        - "利息保障倍数 > 3x"
+        - "上市公司（信息披露透明）"
+      rating_scale:
+        - "强: 满足全部条件"
+        - "中: 满足2-3项"
+        - "弱: 满足0-1项"
+    
+    - dimension: "大宗商品周期抗风险能力"
+      weight: 0.20
+      criteria:
+        - "生产成本处于行业前25%分位"
+        - "产品组合多元化"
+        - "成本结构中可变成本占比"
+      rating_scale:
+        - "强: 成本优势明显，多元化产品"
+        - "中: 成本中等，单一产品"
+        - "弱: 成本高，单一产品"
+    
+    - dimension: "东道国政策稳定性"
+      weight: 0.15
+      criteria:
+        - "与东道国政府有稳定协议"
+        - "投资承诺（未来投资额）"
+        - "是否有争议解决机制"
+      rating_scale:
+        - "稳定: 有稳定协议+投资承诺"
+        - "一般: 有协议但无投资承诺"
+        - "不稳定: 无协议或存在争议"
+    
+    - dimension: "信用增强措施"
+      weight: 0.10
+      criteria:
+        - "母公司担保"
+        - "信用证/备用信用证"
+        - "电费支付托管账户"
+        - "违约赔偿条款"
+      rating_scale:
+        - "充分: 3项以上措施"
+        - "一般: 1-2项措施"
+        - "不足: 无信用增强措施"
+
+  overall_rating:
+    - "4.0以上: PPA风险极低，可接受30年期限"
+    - "3.0-3.9: PPA风险可控，建议15-20年期限"
+    - "3.0以下: PPA风险高，建议缩短期限或增加增信措施"
+
+# ── 太阳能资源 ──
+solar_resource:
+  ghi_annual: "2,000-2,200 kWh/m2/年"
+  ghi_daily: "5.5-6.0 kWh/m2/天"
+  equivalent_hours_range: "1,700-1,900 h/年（南部矿区）"
+  temperature: "20-30度（矿区）"
+  dust_risk: "高（矿区粉尘）"
+  dust_mitigation:
+    - "自清洁涂层组件"
+    - "自动清洗机器人"
+    - "定期人工清洗"
+
+# ── 矿区环境因素 ──
+mine_environment:
+  dust_degradation_penalty: 0.005
+  dust_cleaning_opex_per_kw: 3.0
+  security_opex_per_kw: 5.0
+  community_opex_per_kw: 2.0
+
+# ── 项目开发建议 ──
+development_advice:
+  - "优先选择矿业企业作为购电方（信用风险低）"
+  - "PPA以美元计价"
+  - "争取中国信保或MIGA担保"
+  - "EPC合同采用中国设备+中国承包商"
+  - "建设期12-18个月"
+  - "关注矿区粉尘对发电量的影响"
+  - "评估购电方矿山寿命与PPA期限匹配度"
+</write_to_file>
+<task_progress>
+- [x] 确认项目意图与边界条件
+- [x] 搜索TFM/KFM矿区坐标
+- [x] 搜索刚果(金)能源政策与市场数据
+- [x] 创建刚果(金)国家约束文件（含购电方评估框架）
+- [x] 创建刚果(金)市场参考数据文件
+- [x] 更新 market_reference_index.yaml
+- [x] 输出边界条件参数清单
+- [x] 参数数据校验与偏差检测
+- [x] 创建 project_config.yaml
+- [x] 运行 financial_model_engine.py
+- [x] 搜索洛阳钼业营运风险评估数据
+- [ ] 更新最终报告（加入购电方营运风险评估章节）
+</task_progress>
+</write_to_file>

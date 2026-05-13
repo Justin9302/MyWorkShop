@@ -1,0 +1,520 @@
+# =============================================================================
+# new_energy_project_analysis.yaml — 新能源项目分析工作流
+#
+# 功能：通用型新能源项目分析工作流，覆盖资源评估、技术方案比选、财务建模、
+#       市场分析、风险评估和投资决策。不依赖特定 Excel 模型文件，
+#       通过加载项目参数文件和约束文件实现计算。
+#
+# 关联：
+#   - lattice/examples/energy/lattice_new_energy_analysis.yaml（Lattice 分解方案）
+#   - constraints/industries/energy.yaml（能源行业约束）
+#   - constraints/countries/（国家约束）
+#   - data/market_reference_index.yaml（市场参考数据索引）
+#   - prompts/energy/new_energy_project_analysis.system.md（System Prompt）
+#
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  修改门禁 (Modification Gate)                                          ║
+# ║                                                                        ║
+# ║  本工作流及其关联的核心文件受修改门禁保护。任何对以下文件的修改        ║
+# ║  都必须先获得用户（你）的明确确认，才能进入修改流程：                  ║
+# ║                                                                        ║
+# ║  🔒 工作流文件本身：workflows/energy/new_energy_project_analysis.yaml  ║
+# ║  🔒 核心引擎：scripts/financial_model_engine.py                        ║
+# ║  🔒 配置加载：scripts/config_loader.py                                 ║
+# ║  🔒 输入模板：templates/project_config_template.yaml                   ║
+# ║  🔒 约束文件：constraints/ 目录下的所有 .yaml 文件                     ║
+# ║  🔒 市场数据：data/market_reference_*.yaml 文件                        ║
+# ║  🔒 测试文件：tests/phase9/ 目录下的所有测试文件                       ║
+# ║  🔒 工作流 schema：schemas/workflow.schema.json                        ║
+# ║                                                                        ║
+# ║  修改流程：                                                             ║
+# ║  1. 用户提出修改需求                                                   ║
+# ║  2. 工作流暂停，输出修改影响分析（哪些文件会变、影响范围）             ║
+# ║  3. 等待用户确认「进入修改流程」                                       ║
+# ║  4. 用户确认后，执行修改                                               ║
+# ║  5. 修改完成后，运行关联测试验证                                       ║
+# ║  6. 输出修改摘要和测试结果，等待用户最终确认                           ║
+# ║                                                                        ║
+# ║  例外：OUTPUT/<项目名>/ 目录下的项目文件不受此门禁保护，               ║
+# ║  因为它们属于项目分析产出，不影响工作流本身。                          ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+# =============================================================================
+
+workflow:
+  id: "new_energy_project_analysis"
+  name: "新能源项目分析"
+  industry: "energy"
+  description: >
+    通用型新能源项目分析工作流。覆盖资源评估、技术方案比选、财务建模、
+    市场分析、风险评估和投资决策全流程。
+
+    不依赖特定 Excel 模型文件，通过加载项目参数文件和约束文件实现计算。
+    支持光伏/风电/储能/光储混合/VPP/充电桩等多种技术方案。
+    支持多国家/地区扩展，当用户提示的国家不在过往记录中时，
+    自动创建对应国家的约束及相应的数据。
+
+    所有项目文件统一保存在 OUTPUT/<项目名>/ 目录下。
+    Python 代码采用多层模块化组装，每个模块保持小巧，方便审核。
+  role: "new_energy_project_analyst"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+  execution_method: "lattice"
+
+context_intent_gate:
+  required: true
+  required_reads:
+    - "config/active-release.yaml"
+    - "config/context-loading.yaml"
+    - "constraints/baseline/human_review.yaml"
+    - "constraints/industries/energy.yaml"
+    - "data/market_reference_index.yaml"
+  confirmation_outputs:
+    - "项目名称与技术方案（光伏/风电/储能/混合/VPP/充电桩）"
+    - "装机规模与项目地点"
+    - "开发阶段（绿地/并购/运营）"
+    - "目标国家/地区（检查是否有现有约束和数据）"
+    - "用户目标与验收标准"
+    - "风险等级评估"
+    - "缺失信息清单"
+    - "是否需要新建国家约束和数据"
+  block_conditions:
+    - "项目名称或技术方案未指定"
+    - "装机规模或项目地点缺失"
+    - "输出将用于最终投资决策且无人审"
+    - "目标国家/地区数据过期超过 90 天且用户未提供替代数据"
+    - "用户请求修改受修改门禁保护的文件，但未确认进入修改流程"
+
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers:
+    - "L0"
+    - "L1"
+    - "L2"
+    - "L3"
+    - "L4"
+    - "L5"
+    - "L6"
+    - "L8"
+
+inputs:
+  - name: "project_name"
+    required: true
+    description: "项目名称，用于创建 OUTPUT/<项目名>/ 目录"
+    data_class: "project_metadata"
+
+  - name: "technology_type"
+    required: true
+    description: "技术方案类型：solar / wind / storage / hybrid / vpp / charging"
+    data_class: "project_metadata"
+
+  - name: "capacity"
+    required: true
+    description: "装机规模（MW），光伏/风电为 MWp 或 MW，储能为 MW/MWh"
+    data_class: "project_metadata"
+
+  - name: "project_location"
+    required: true
+    description: "项目地点描述（国家/地区/省份/城市），用于加载对应约束和数据"
+    data_class: "project_metadata"
+
+  - name: "project_coordinates"
+    required: false
+    description: "项目坐标（纬度,经度），用于推导太阳能/风能资源和接入条件"
+    data_class: "project_site"
+
+  - name: "development_stage"
+    required: true
+    description: "开发阶段：greenfield / development_acquisition / operational_acquisition"
+    data_class: "project_metadata"
+
+  - name: "project_currency"
+    required: false
+    description: "项目货币（默认根据国家自动确定）"
+    data_class: "project_metadata"
+
+  - name: "discount_rate"
+    required: false
+    description: "折现率（默认根据国家和行业确定）"
+    data_class: "financial_parameter"
+
+  - name: "sensitivity_vars"
+    required: false
+    description: "敏感性分析变量列表（默认：电价、容量因子、CAPEX、折现率）"
+    data_class: "financial_parameter"
+
+retrieval:
+  scope:
+    - "country_market_reference"
+    - "energy_industry_constraints"
+    - "technology_reference_data"
+  source_filters:
+    - "authority_level_recorded"
+    - "effective_date_valid"
+    - "freshness_within_90_days"
+
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/baseline/tool_permissions.yaml"
+  - "constraints/baseline/context_intent_gate.yaml"
+  - "constraints/industries/energy.yaml"
+
+steps:
+  - id: "confirm_intent"
+    name: "确认分析范围与意图"
+    action: >
+      读取并确认用户提供的项目信息：项目名称、技术方案、装机规模、
+      项目地点、开发阶段、用户目标和验收标准。
+
+      检查目标国家/地区是否在 data/market_reference_index.yaml 中。
+      如不存在，标记为「新建国家」并准备创建对应约束和数据。
+
+      输出意图确认清单并等待用户确认。
+
+  - id: "load_country_context"
+    name: "加载国家约束与市场数据"
+    action: >
+      根据项目地点加载对应国家的约束包和市场参考数据。
+
+      如国家不存在：
+      1. 使用 fetch 工具获取该国最新能源政策、电价、补贴等信息
+      2. 创建 constraints/countries/<country_code>.yaml 约束文件
+      3. 创建 data/market_reference_<country_code>.yaml 数据文件
+      4. 确保所有数据标注来源和获取日期，有效期不超过 90 天
+
+      如国家存在但数据过期（超过 90 天）：
+      1. 标记过期数据
+      2. 询问用户是否允许在线获取最新数据
+      3. 如允许，使用 fetch 工具更新数据
+      4. 如不允许，使用现有数据并标注过期风险
+
+  - id: "confirm_boundary_parameters"
+    name: "输出并确认边界条件参数"
+    action: >
+      在运行分析引擎之前，必须输出以下边界条件参数清单，
+      逐项列出并等待用户确认后方可进入下一阶段。
+
+      如提供了项目坐标，优先基于坐标推导选址相关参数。
+
+      ### 必须输出的边界条件参数
+
+      1. **项目规模与技术参数**
+         - 装机容量（MWp/MW/MWh）
+         - 技术方案类型
+         - 容量因子/效率假设
+
+      2. **选址推导参数**（仅在提供坐标时产生）
+         - 太阳能资源（GHI/PSH）或风能资源（风速/风功率密度）
+         - 年发电量估算（首年/衰减后年均）
+         - 实际上网电量（厂用电/限电率折算）
+         - 电网接入评估（电压等级/距离/NEM区域/MLF）
+         - 场地条件（地形/土地覆盖/气温）
+         - 极端气候风险标记
+         - 接入成本估算
+
+      3. **投资成本参数** — CAPEX 逐项拆解
+         - 设备采购（组件/风机/储能/逆变器/支架/电气）
+         - EPC/安装工程（土建/电气/调试/管理费）
+         - 其他资本化成本（IDC/融资费/运营资本/接入设施）
+         - 运维成本 OPEX（固定/可变/土地/保险/电网/管理）
+         - 中期大修成本（电池更换/逆变器更换）
+
+      4. **开发费用**（并购项目）
+         - 前期开发费/审批费/土地费/顾问费/收购溢价
+
+      5. **收入参数**
+         - PPA电价/现货市场/绿证补贴/辅助服务/需求响应
+
+      6. **融资与税务参数**
+         - 杠杆率/利率/期限/还款方式/折现率/税率/折旧
+
+      7. **项目时间线**
+         - 建设/运营/退出时间
+
+      输出格式：结构化表格，每个参数标注来源（用户提供/推导/市场参考/假设）。
+      附区域参考值对比（六栏表格：参数 | 输入值 | 区域参考范围 | 偏差标记 | 来源 | 状态）。
+
+  - id: "validate_parameters"
+    name: "参数数据校验与偏差检测"
+    action: >
+      在用户确认边界条件参数后、生成分析代码前，**必须**执行以下数据校验流程，
+      将用户输入的每个参数与本地市场参考数据和在线最新数据进行交叉对比。
+
+      ### 校验流程
+
+      **Step 1: 加载本地市场参考数据**
+      从 data/market_reference_<country_code>.yaml 加载该国家的市场参考数据，
+      包括 CAPEX 范围、PPA 电价范围、容量因子范围、折现率范围、LCOE 范围等。
+
+      **Step 2: 逐参数对比与偏差标记**
+      对每个关键参数，计算用户输入值与本地参考范围的偏差百分比：
+
+      | 偏差范围 | 标记 | 含义 |
+      |---------|------|------|
+      | < ±10% | ✅ 正常 | 在合理范围内 |
+      | ±10% ~ ±25% | 🟡 注意 | 偏离正常范围，建议确认 |
+      | > ±25% | 🔴 偏离大 | 严重偏离市场参考值，必须确认 |
+
+      必须校验的参数清单（至少包含以下）：
+      - CAPEX 单位成本（AUD/kW 或当地货币/kW）
+      - PPA 电价（AUD/MWh 或当地货币/MWh）
+      - 容量因子（%）
+      - 折现率（%）
+      - LCOE 参考值（AUD/MWh 或当地货币/MWh）
+      - 融资利率（%）
+      - 杠杆率（%）
+      - 运维成本 OPEX（AUD/kW/年或当地货币/kW/年）
+
+      **Step 3: 在线数据交叉验证（可选）**
+      对于标记为 🟡 注意 或 🔴 偏离大的参数：
+      1. 使用 fetch 工具从权威来源获取该参数的最新市场数据
+      2. 将用户输入值与在线最新数据进行二次对比
+      3. 更新偏差标记
+
+      **Step 4: 生成校验报告**
+      输出结构化校验报告，格式如下：
+
+      ```
+      ╔══════════════════════════════════════════════════════════════╗
+      ║              参数数据校验报告                               ║
+      ╠══════════════════════════════════════════════════════════════╣
+      ║ 国家: 中国 | 数据来源: market_reference_cn.yaml            ║
+      ║ 数据新鲜度: 8 天 (有效期 90 天) | 状态: ✅ 有效            ║
+      ╠══════════════════════════════════════════════════════════════╣
+      ║ 参数              │ 输入值   │ 参考范围     │ 偏差 │ 标记  ║
+      ║───────────────────┼─────────┼─────────────┼──────┼───────╢
+      ║ 光伏 CAPEX        │ 3.45     │ 3.0-4.0     │ +5%  │ ✅    ║
+      ║                   │ CNY/W    │ CNY/W       │      │       ║
+      ║ 储能 CAPEX        │ 950      │ 800-1200    │ -5%  │ ✅    ║
+      ║                   │ CNY/kWh  │ CNY/kWh     │      │       ║
+      ║ PPA 电价          │ 350      │ 250-400     │ +12% │ 🟡    ║
+      ║                   │ CNY/MWh  │ CNY/MWh     │      │       ║
+      ║ 容量因子          │ 17%      │ 15-20%      │ -3%  │ ✅    ║
+      ║ 折现率            │ 8%       │ 6-10%       │ 0%   │ ✅    ║
+      ║ 融资利率          │ 4.5%     │ 3.5-5.5%    │ 0%   │ ✅    ║
+      ║ 杠杆率            │ 70%      │ 60-80%      │ 0%   │ ✅    ║
+      ╚══════════════════════════════════════════════════════════════╝
+      ```
+
+      **Step 5: 用户确认**
+      - 所有参数标记为 ✅ 正常：显示报告摘要，询问用户是否确认继续
+      - 存在 🟡 注意 参数：显示完整报告，解释偏差原因，询问用户是否确认
+      - 存在 🔴 偏离大 参数：**必须**显示完整报告，解释偏差原因，
+        提供在线获取最新数据的选项，用户确认后才能继续
+
+      **Step 6: 记录校验结果**
+      将校验报告保存到 OUTPUT/<项目名>/outputs/parameter_validation_report.md，
+      并在 run_snapshot 中记录校验摘要。
+
+  - id: "generate_project_config"
+    name: "生成项目参数配置文件"
+    action: >
+      根据确认后的边界条件参数，生成 project_config.yaml 文件，
+      保存在 OUTPUT/<项目名>/project_config.yaml。
+
+      该文件是通用型财务模型引擎的唯一输入，包含所有项目边界条件参数。
+      不生成任何 Python 代码——所有项目共享 scripts/financial_model_engine.py。
+
+      ### 模板引用
+
+      必须严格遵循 templates/project_config_template.yaml 的结构生成配置文件。
+      该模板定义了所有必需和可选字段的完整层级结构。
+
+      模板文件路径：templates/project_config_template.yaml
+
+      ### 配置验证
+
+      生成配置文件后，使用 scripts/config_loader.py 进行验证：
+      ```
+      python3 scripts/config_loader.py --config OUTPUT/<项目名>/project_config.yaml
+      ```
+
+      验证通过（无错误）后方可进入下一步。
+      如验证失败，修正配置后重新验证。
+
+      ### 结构要求
+
+      project_config.yaml 必须包含以下顶层键（按顺序）：
+      1. project — 项目基本信息
+      2. technical — 技术参数
+      3. costs — 成本参数
+      4. revenue — 收入参数
+      5. financing — 融资参数
+      6. offtaker — 购电方风险评估参数（可选，但建议包含）
+      7. country_risk_level — 国家风险等级
+      8. exchange_rate_risk — 汇率风险
+      9. ppa_currency — PPA计价货币
+      10. optional — 可选扩展参数
+      11. scenarios — 多情景分析参数（可选）
+      12. sensitivity_params — 敏感性分析参数（可选）
+
+      ### 格式注意事项（防止嵌套/读取错误）
+
+      1. 所有字符串值必须用双引号包裹（如 "项目名称"）
+      2. 所有数值不要加引号（如 130, 0.13）
+      3. 布尔值使用小写 true/false（不要用 yes/no 或 True/False）
+      4. 列表使用方括号格式（如 [0.6, 0.4]）
+      5. 不要使用制表符缩进，使用 2 空格缩进
+      6. 注释使用 # 号，不要使用 // 或 <!-- -->
+      7. 不要修改模板中定义的嵌套层级深度
+      8. 所有参数必须标注来源（user_provided / derived / market_reference / analyst_assumption）
+
+  - id: "run_financial_model"
+    name: "运行财务模型（通用引擎）"
+    action: >
+      调用通用型财务模型引擎 scripts/financial_model_engine.py，
+      传入项目参数配置文件 project_config.yaml。
+
+      命令：
+      ```
+      python3 scripts/financial_model_engine.py \
+          --config OUTPUT/<项目名>/project_config.yaml \
+          --output OUTPUT/<项目名>/outputs/
+      ```
+
+      引擎自动执行：
+      - 加载 project_config.yaml 中的项目边界条件
+      - 构建全生命周期现金流模型（建设期+运营期）
+      - 计算 IRR/NPV/回收期/LCOE/偿债覆盖率
+      - 运行保守/基准/乐观三种情景
+      - 运行单因素敏感性分析（电价/容量因子/CAPEX/折现率）
+      - 生成 financial_results.json（结构化数据）
+      - 生成 financial_summary.md（可读报告）
+
+      所有项目共享同一套引擎代码，不生成项目特定的硬编码模块。
+      如需扩展新功能，只需修改 financial_model_engine.py 一处。
+
+  - id: "generate_report"
+    name: "整合分析报告"
+    action: >
+      基于财务模型引擎的输出 financial_results.json 和 financial_summary.md，
+      结合项目参数、国家约束、数据校验报告，生成完整的项目分析报告。
+
+      报告包含：
+      - 项目概览（技术方案、规模、地点、开发阶段）
+      - 边界条件参数摘要
+      - 参数数据校验结果
+      - 核心财务指标（IRR/NPV/回收期/LCOE/DSCR）
+      - 多情景对比（保守/基准/乐观）
+      - 敏感性分析
+      - 投资建议与下一步行动
+      - 风险提示
+
+      保存到 OUTPUT/<项目名>/outputs/final_report.md。
+
+  - id: "human_review_gate"
+    name: "人工审核门禁"
+    action: >
+      对于用于融资决策或外部用途的报告，标记为需要人工审核。
+      输出审核摘要、风险等级和审核建议。
+      投资建议（推荐/条件性推荐/不推荐）和下一步行动清单。
+
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "用户补充项目名称、技术方案、装机规模或项目地点"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      ["missing_fields", "project_name", "technology_type", "checkpoint_id"]
+
+  - node_id: "load_country_context"
+    pause_reason: "country_data_not_found"
+    resume_condition: "用户确认创建新国家约束和数据，或提供替代国家"
+    cancel_condition: "用户取消分析"
+    audit_fields: ["country", "data_status", "fetch_required", "checkpoint_id"]
+
+  - node_id: "load_country_context"
+    pause_reason: "country_data_expired"
+    resume_condition: "用户批准在线获取最新数据 / 用户确认使用现有数据 / 用户提供替代数据"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "country",
+        "last_updated",
+        "freshness_days",
+        "fetch_result",
+        "checkpoint_id",
+      ]
+
+  - node_id: "confirm_boundary_parameters"
+    pause_reason: "boundary_parameters_not_confirmed"
+    resume_condition: "用户确认边界条件参数，或提出修改后重新确认"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      ["boundary_parameters_snapshot", "user_modifications", "checkpoint_id"]
+
+  - node_id: "confirm_boundary_parameters"
+    pause_reason: "missing_boundary_parameters"
+    resume_condition: "用户补充缺失的边界条件参数"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      ["missing_parameters", "user_supplied_values", "checkpoint_id"]
+
+  - node_id: "validate_parameters"
+    pause_reason: "parameter_deviation_high"
+    resume_condition: "用户确认接受偏离大的参数，或修正参数后重新校验"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "validation_report_path",
+        "deviated_parameters",
+        "deviation_levels",
+        "online_fetch_attempted",
+        "online_fetch_result",
+        "user_decision",
+        "checkpoint_id",
+      ]
+
+  - node_id: "validate_parameters"
+    pause_reason: "reference_data_expired"
+    resume_condition: "用户批准在线获取最新数据 / 用户确认使用现有数据"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "expired_parameters",
+        "last_updated",
+        "freshness_days",
+        "fetch_result",
+        "checkpoint_id",
+      ]
+
+  - node_id: "run_financial_model"
+    pause_reason: "model_calculation_error"
+    resume_condition: "用户修正参数后重新运行"
+    cancel_condition: "用户取消分析"
+    audit_fields: ["calculation_error", "affected_module", "checkpoint_id"]
+
+  - node_id: "human_review_gate"
+    pause_reason: "requires_human_approval"
+    resume_condition: "业务负责人批准报告对外使用"
+    cancel_condition: "审核人驳回报告"
+    audit_fields:
+      ["approval_status", "risk_level", "reviewer_role", "checkpoint_id"]
+
+outputs:
+  template: "prompts/energy/new_energy_project_analysis.system.md"
+  schema_ref: "schemas/run_snapshot.schema.json"
+  required_sections:
+    - "project_overview"
+    - "key_financial_metrics"
+    - "resource_assessment"
+    - "technical_analysis"
+    - "financial_analysis"
+    - "market_analysis"
+    - "risk_assessment"
+    - "sensitivity_analysis"
+    - "scenario_analysis"
+    - "investment_recommendation"
+    - "next_steps"
+    - "risk_disclaimer"
+
+human_review:
+  required_when:
+    - "输出用于融资决策或外部披露"
+    - "分析结果存在重大不确定性"
+    - "敏感性分析显示高风险敞口"
+    - "新建国家约束和数据未经审核"
+  reviewer_role: "project_finance_lead_or_independent_reviewer"
+
+version: "0.1.0"

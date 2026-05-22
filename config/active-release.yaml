@@ -98,6 +98,7 @@ active_release:
       - workflows/operations/sop_generation.yaml
       - workflows/operations/meeting_summary.yaml
       - workflows/operations/project_retrospective.yaml
+      - workflows/operations/system_health_check.yaml
       - workflows/general/ideation_convergence.yaml
       - workflows/country/country_report.yaml
     constraints:
@@ -131,6 +132,7 @@ active_release:
       - prompts/operations/sop_generation.system.md
       - prompts/operations/meeting_summary.system.md
       - prompts/operations/project_retrospective.system.md
+      - prompts/operations/system_health_check.system.md
       - prompts/evaluation/llm_judge.system.md
       - prompts/general/ideation_convergence.system.md
       - prompts/country/country_report.system.md
@@ -175,7 +177,6 @@ active_release:
     schemas:
       - schemas/workflow.schema.json
       - schemas/run_snapshot.schema.json
-      - schemas/solar_financial_run_snapshot.schema.json
       - schemas/eval_report.schema.json
       - schemas/context_load_plan.schema.json
       - schemas/interruption_event.schema.json
@@ -184,6 +185,7 @@ active_release:
       - schemas/release_manifest.schema.json
       - schemas/candidate_change.schema.json
       - schemas/regression_report.schema.json
+      - schemas/health_check_report.schema.json
     release_governance:
       manifest_schema: schemas/release_manifest.schema.json
       manifest_dir: config/releases/
@@ -377,5 +379,6 @@ active_release:
     - "2026-05-09: 通用工作流 ideation_convergence 添加"
     - "2026-05-10: 全局进化流程 — 同步所有组件至正式 Release release_2026_05_10_001"
     - "2026-05-22: 工作环境体检修复 — MCP 配置对齐、门禁规则统一、country 领域注册、会话跟踪更新、feature-flags 优先级说明、统一测试入口创建"
+    - "2026-05-22: 创建 system_health_check 工作流 — 全维度健康诊断与灰度进化方案，注册 workflow/prompt/schema"
     - "Environment: VS Code + GitHub Copilot Agent (migrated from Codex)."
-  updated_at: "2026-05-22T10:28:00+10:00"
+  updated_at: "2026-05-22T11:12:00+10:00"

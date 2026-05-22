@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/health_check_report.schema.json",
+  "title": "Health Check Report",
+  "description": "系统健康检查报告 — 记录全维度健康诊断结果和进化建议",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "check_metadata",
+    "executive_summary",
+    "dimension_findings",
+    "evolution_recommendations",
+    "risk_assessment",
+    "action_roadmap"
+  ],
+  "properties": {
+    "check_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "timestamp",
+        "release_context",
+        "scan_scope",
+        "scan_depth"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "pattern": "^hc_[0-9]{8}_[0-9]{3}$",
+          "description": "检查ID，格式：hc_YYYYMMDD_NNN"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "检查完成时间戳（ISO8601）"
+        },
+        "release_context": {
+          "type": "string",
+          "description": "检查时的活跃 release 版本"
+        },
+        "scan_scope": {
+          "type": "string",
+          "enum": ["full", "incremental"],
+          "description": "检查范围"
+        },
+        "scan_depth": {
+          "type": "string",
+          "enum": ["quick", "standard", "deep"],
+          "description": "检查深度"
+        }
+      }
+    },
+    "executive_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall_health_score",
+        "total_findings",
+        "critical_count",
+        "warning_count",
+        "info_count",
+        "key_risks"
+      ],
+      "properties": {
+        "overall_health_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "总体健康评分（0-1）"
+        },
+        "total_findings": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "发现总数"
+        },
+        "critical_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "严重发现数"
+        },
+        "warning_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "警告发现数"
+        },
+        "info_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "信息发现数"
+        },
+        "key_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "关键风险摘要"
+        }
+      }
+    },
+    "dimension_findings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_integrity",
+        "registration_consistency",
+        "rule_consistency",
+        "mcp_alignment",
+        "test_coverage",
+        "evolution_pipeline",
+        "documentation_health"
+      ],
+      "properties": {
+        "asset_integrity": {
+          "$ref": "#/$defs/dimension_finding"
+        },
+        "registration_consistency": {
+          "$ref": "#/$defs/dimension_finding"
+        },
+        "rule_consistency": {
+          "$ref": "#/$defs/dimension_finding"
+        },
+        "mcp_alignment": {
+          "$ref": "#/$defs/dimension_finding"
+        },
+        "test_coverage": {
+          "$ref": "#/$defs/dimension_finding"
+        },
+        "evolution_pipeline": {
+          "$ref": "#/$defs/dimension_finding"
+        },
+        "documentation_health": {
+          "$ref": "#/$defs/dimension_finding"
+        }
+      }
+    },
+    "evolution_recommendations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evolution_recommendation"
+      },
+      "description": "进化建议列表"
+    },
+    "risk_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["highest_risk", "immediate_actions", "deferred_items"],
+      "properties": {
+        "highest_risk": {
+          "type": "string",
+          "description": "最高风险描述"
+        },
+        "immediate_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "需要立即处理的事项"
+        },
+        "deferred_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "可推迟处理的事项"
+        }
+      }
+    },
+    "action_roadmap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_a", "phase_b", "phase_c"],
+      "properties": {
+        "phase_a": {
+          "$ref": "#/$defs/action_phase",
+          "description": "紧急修复（立即）"
+        },
+        "phase_b": {
+          "$ref": "#/$defs/action_phase",
+          "description": "短期改进（本周）"
+        },
+        "phase_c": {
+          "$ref": "#/$defs/action_phase",
+          "description": "中长期进化（本月）"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "dimension_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "score", "findings"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pass", "warn", "fail"],
+          "description": "维度状态"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "维度评分（0-1）"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding_item"
+          },
+          "description": "该维度的发现列表"
+        }
+      }
+    },
+    "finding_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "category", "description", "recommendation"],
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "warning", "info"],
+          "description": "严重程度"
+        },
+        "category": {
+          "type": "string",
+          "description": "发现类别（如 missing, orphan, version_mismatch, boundary_violation, conflict, redundancy, dead_zone, misalignment, outdated 等）"
+        },
+        "description": {
+          "type": "string",
+          "description": "发现描述"
+        },
+        "file_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "相关文件路径"
+        },
+        "recommendation": {
+          "type": "string",
+          "description": "修复建议"
+        }
+      }
+    },
+    "evolution_recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "priority",
+        "action",
+        "target",
+        "rationale",
+        "canary_suitable"
+      ],
+      "properties": {
+        "priority": {
+          "type": "string",
+          "enum": ["P0", "P1", "P2"],
+          "description": "优先级"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["create", "modify", "enhance", "deprecate"],
+          "description": "建议操作类型"
+        },
+        "target": {
+          "type": "string",
+          "description": "目标资产路径"
+        },
+        "rationale": {
+          "type": "string",
+          "description": "建议理由"
+        },
+        "canary_suitable": {
+          "type": "boolean",
+          "description": "是否适合灰度发布"
+        },
+        "canary_config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "traffic_split": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "灰度流量比例"
+            },
+            "observation_period": {
+              "type": "string",
+              "description": "观察期（如 7d, 3d）"
+            },
+            "rollback_conditions": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "score_drop_threshold": {
+                  "type": "number",
+                  "description": "评分下降阈值"
+                },
+                "risk_increase_threshold": {
+                  "type": "string",
+                  "description": "风险升级阈值"
+                }
+              }
+            }
+          },
+          "description": "灰度配置（canary_suitable 为 true 时必填）"
+        },
+        "expected_impact": {
+          "type": "string",
+          "description": "预期效果"
+        }
+      }
+    },
+    "action_phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "items", "timeline"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "阶段名称"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "该阶段的任务列表"
+        },
+        "timeline": {
+          "type": "string",
+          "description": "时间线描述"
+        }
+      }
+    }
+  }
+}

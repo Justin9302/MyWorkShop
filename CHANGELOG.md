@@ -7,6 +7,33 @@
 
 ---
 
+## [release_2026_05_22_001] - 2026-05-22
+
+### Added
+
+- 系统健康检查工作流
+  - `workflows/operations/system_health_check.yaml` — 全维度健康诊断与灰度进化工作流
+  - `prompts/operations/system_health_check.system.md` — 系统健康检查 system prompt
+  - `schemas/health_check_report.schema.json` — 健康报告 Schema
+- 健康检查报告输出
+  - `outputs/health_check_report_20260522.json` — 首次全维度健康检查报告
+
+### Changed
+
+- `config/active-release.yaml` — 注册 system_health_check 工作流/prompt/schema；移除已合并的 solar_financial_run_snapshot.schema.json 引用
+- `workflows/operations/system_health_check.yaml` — 版本号从 0.1.0 更新为 0.3.0 以匹配 active-release 声明
+- `docs/INDEX.md` — 同步组件目录列表
+
+### Fixed
+
+- `config/active-release.yaml` — 移除已合并但仍在声明的 solar_financial_run_snapshot.schema.json 引用，消除资产声明与文件系统的不一致
+
+### Notes
+
+- 首次全维度健康检查评分: 0.81/1.0
+- 发现 1 个 critical 问题、5 个 warning、2 个 info
+- 组件版本: workflow 0.3.0 / constraint 0.4.0 / prompt 0.2.0 / evaluator 0.2.0 / judge 0.1.0 / kb_0.3.0 / lattice 1.0.0
+
 ## [release_2026_05_10_001] - 2026-05-10
 
 ### Added

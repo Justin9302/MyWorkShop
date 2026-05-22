@@ -67,11 +67,14 @@
 
 ### 🔍 审计与评估
 
-| 文档                                | 用途                                     | 优先级         |
-| ----------------------------------- | ---------------------------------------- | -------------- |
-| `docs/workspace_audit_report.md`    | 工作空间审计报告（规则矛盾、冗余、死角） | P1（治理参考） |
-| `docs/phase3_validation_report.md`  | Phase 3 验证报告                         | P2（历史参考） |
-| `docs/codex_to_vscode_migration.md` | Codex 到 VS Code 迁移记录                | P2（历史参考） |
+| 文档/工作流                                        | 用途                                     | 优先级         |
+| -------------------------------------------------- | ---------------------------------------- | -------------- |
+| `docs/workspace_audit_report.md`                   | 工作空间审计报告（规则矛盾、冗余、死角） | P1（治理参考） |
+| `workflows/operations/system_health_check.yaml`    | 系统健康检查与进化工作流（按需触发）     | P1（治理参考） |
+| `prompts/operations/system_health_check.system.md` | 系统健康检查系统提示词                   | P1（治理参考） |
+| `schemas/health_check_report.schema.json`          | 健康检查报告 Schema                      | P1（治理参考） |
+| `docs/phase3_validation_report.md`                 | Phase 3 验证报告                         | P2（历史参考） |
+| `docs/codex_to_vscode_migration.md`                | Codex 到 VS Code 迁移记录                | P2（历史参考） |
 
 ### 🔄 同步管理
 
@@ -105,6 +108,7 @@
 ```
 Workspace_1/
 ├── config/          # 系统配置（版本化）
+│   └── releases/    #   发布清单
 ├── constraints/     # 约束规则包
 │   ├── baseline/    #   基线约束（6个）
 │   ├── industries/  #   行业约束（5个）
@@ -112,14 +116,29 @@ Workspace_1/
 │   └── countries/   #   国家约束（3个 + 模板）
 ├── docs/            # 文档（本文档所在目录）
 ├── evaluators/      # 评估规则和评分标准
-│   ├── rules/       #   规则检查
-│   └── rubrics/     #   评分标准
+│   ├── rules/       #   规则检查（3个）
+│   └── rubrics/     #   评分标准（6个）
 ├── lattice/         # Lattice 晶格框架
-├── prompts/         # 系统提示词（含 country/ 领域）
-├── schemas/         # JSON Schema 和 OpenAPI 定义
-├── scripts/         # 核心执行脚本（含 MCP 工具脚本）
-├── tests/           # 测试用例（8个阶段）
-├── workflows/       # 工作流定义（15个，含 country/）
+│   ├── schemas/     #   Schema 定义（6个）
+│   ├── scripts/     #   核心引擎（5个）
+│   ├── workflows/   #   工作流定义（3个）
+│   ├── templates/   #   模板文件（3个）
+│   └── examples/    #   示例（6个）
+├── prompts/         # 系统提示词（含 country/ 领域，共17个）
+├── schemas/         # JSON Schema 和 OpenAPI 定义（12个）
+├── scripts/         # 核心执行脚本（含 MCP 工具脚本，共20+个）
+├── tests/           # 测试用例（8个阶段 + eval_cases）
+│   ├── eval_cases/  #   评估样本（synthetic/ 6个）
+│   ├── regression/  #   回归测试（constraints/prompts/workflows）
+│   ├── phase7a/     #   LLM-as-Judge
+│   ├── phase7b/     #   动态评估集
+│   ├── phase7c/     #   候选变更管线
+│   ├── phase7d/     #   沙箱回归测试
+│   ├── phase7e/     #   灰度发布管理
+│   ├── phase7f/     #   质量仪表盘
+│   ├── phase8/      #   工作流编排引擎
+│   └── phase9/      #   中断处理与恢复
+├── workflows/       # 工作流定义（16个，含 country/ + system_health_check）
 ├── data/            # 数据文件（Git 排除）
 ├── input/           # 输入文件（Git 排除）
 ├── logs/            # 日志文件（Git 排除）
@@ -138,4 +157,4 @@ Workspace_1/
 
 ---
 
-_版本：v1.1 | 日期：2026-05-22 | 维护人：Cline_
+_版本：v1.2 | 日期：2026-05-22 | 维护人：Cline_

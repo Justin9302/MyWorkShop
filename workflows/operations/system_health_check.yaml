@@ -1,0 +1,208 @@
+#=============================================================================
+# system_health_check.yaml — 系统健康检查与进化工作流
+#
+# 功能：对工作空间进行全维度健康诊断，发现规则漏洞、资产冗余、配置脱节，
+#       生成进化建议并通过灰度管线（Phase 7e-7f）推动安全进化。
+#       按需触发，非定期执行。
+#
+# 关联：
+#   - prompts/operations/system_health_check.system.md（系统提示词）
+#   - schemas/health_check_report.schema.json（健康报告 Schema）
+#   - config/active-release.yaml（注册入口）
+#   - docs/workspace_audit_report.md（历史审计报告参考）
+#   - config/session-tracking.yaml（会话跟踪上下文）
+#   - scripts/rule_conflict_detector.py（规则冲突检测工具）
+#   - scripts/sync_checker.py（文档同步检查工具）
+#=============================================================================
+
+workflow:
+  id: "system_health_check"
+  name: "系统健康检查与进化"
+  industry: "operations"
+  description: >
+    对工作空间进行全维度健康诊断，发现规则漏洞、资产冗余、配置脱节，
+    生成进化建议并通过灰度管线（Phase 7e-7f）推动安全进化。
+    按需触发，非定期执行。
+  role: "system_health_auditor"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+
+context_intent_gate:
+  required: true
+  required_reads:
+    - "config/active-release.yaml"
+    - "docs/INDEX.md"
+    - "docs/workspace_audit_report.md"
+    - "config/session-tracking.yaml"
+  confirmation_outputs:
+    - "检查范围（full / incremental）"
+    - "检查深度（quick / standard / deep）"
+    - "是否允许自动生成灰度候选变更"
+    - "是否需要人工审批每个建议"
+  block_conditions:
+    - "工作空间未完成基础建设（无 active-release）"
+    - "存在未提交的 Git 修改导致审计基线不准确"
+    - "用户要求对平台资产进行破坏性操作且无审批"
+
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers: ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"]
+
+inputs:
+  - name: "scan_scope"
+    required: false
+    description: "检查范围：full（全部6个维度）/ incremental（仅检查自上次审计后的变更）"
+  - name: "scan_depth"
+    required: false
+    description: "检查深度：quick（仅表面一致性检查）/ standard（含规则交叉验证）/ deep（含运行数据回溯）"
+  - name: "auto_generate_candidates"
+    required: false
+    description: "是否自动将低风险建议转化为候选变更（candidate_change），进入灰度管线"
+  - name: "focus_dimensions"
+    required: false
+    description: "指定仅检查某些维度：asset_integrity, rule_consistency, mcp_alignment, test_coverage, evolution_pipeline, documentation_health"
+
+retrieval:
+  scope: ["all_platform_assets"]
+  source_filters: ["metadata_only_without_need"]
+
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/baseline/tool_permissions.yaml"
+  - "constraints/industries/operations.yaml"
+
+steps:
+  - id: "confirm_scope"
+    name: "确认检查范围与深度"
+    action: >
+      与用户确认：扫描范围（全量/增量）、检查深度（快速/标准/深度）、
+      是否自动生成候选变更、是否需要审批每个建议。如果是增量扫描，
+      需确认自上次审计后的关键变更。
+
+  - id: "asset_inventory"
+    name: "资产清单完整性盘点"
+    action: >
+      核对 active-release.yaml 中声明的所有组件（workflows, constraints, prompts,
+      evaluators, schemas, scripts, judges, knowledge_bases）与文件系统实际存在的对应关系。
+      检测：声明的文件是否缺失、未声明的文件是否存在于资产目录、版本号是否一致。
+      输出：资产完整性发现列表。
+    requires:
+      - "config/active-release.yaml"
+      - "docs/sync-manifest.yaml"
+
+  - id: "registration_consistency"
+    name: "文件注册与版本一致性检查"
+    action: >
+      检查所有平台资产的文件注册状态和版本一致性。包括：
+      1. 文件注册检查：每个在 active-release.yaml 中声明的组件文件，其文件头部的关联声明
+         是否与 active-release.yaml 中的注册条目一致（双向引用校验）。
+      2. 版本一致性检查：每个组件的 version 字段在以下位置是否一致：
+         - 组件文件自身的 version 声明（如 workflow.version, prompt 末尾版本号）
+         - active-release.yaml 中对应组件类型的版本号（workflow_version, prompt_version 等）
+         - release manifest 中的版本记录
+      3. 同步依赖检查：使用 sync_checker.py 验证 sync-manifest.yaml 中声明的所有依赖
+         是否满足（source 修改后 target 是否已同步更新）。
+      4. 新文件注册检查：对于近期新增的文件，检查是否已在 active-release.yaml 的
+         active_components 和 available_asset_roots 中注册，以及是否在 docs/INDEX.md 中有索引。
+      输出：注册与版本一致性发现列表。
+    requires:
+      - "config/active-release.yaml"
+      - "docs/sync-manifest.yaml"
+      - "scripts/sync_checker.py"
+      - "docs/INDEX.md"
+      - "config/releases/"
+
+  - id: "rule_consistency_audit"
+    name: "规则一致性审计"
+    action: >
+      对所有约束规则（constraints/baseline/, industries/, jurisdictions/）进行交叉审计，
+      检查规则间的矛盾、冗余、死角。检查 feature-flags 与 active-release 的优先级声明一致性。
+      检查 permissions.yaml 与 tool_permissions.yaml 的映射关系。
+
+  - id: "mcp_tool_alignment"
+    name: "MCP 与工具配置对齐检查"
+    action: >
+      检查 .vscode/mcp.json 中注册的 MCP 服务器与 config/mcp-tools.yaml
+      中声明的工具是否对齐。检查每个 MCP 服务器的命令是否可执行。
+      检查 config/permissions.yaml 中引用的工具是否在 mcp-tools.yaml 中存在定义。
+
+  - id: "test_coverage_check"
+    name: "测试覆盖与运行状态检查"
+    action: >
+      检查 tests/ 目录中各阶段的测试用例是否存在、是否可运行。
+      检查 run_all_tests.sh 是否覆盖了所有测试阶段。
+      检查 eval_cases 目录的样本分布是否合理（golden/regression/synthetic/baseline 的比例）。
+      检查 regression 测试的基线是否过时。
+
+  - id: "evolution_pipeline_check"
+    name: "进化管线健康检查"
+    action: >
+      检查 Phase 7 进化管线的每个组件是否健康可运行。
+      检查 candidate_changes 目录是否有停滞的候选变更。
+      检查 rollout 状态是否有处于"中间态"的变更。
+      检查 dashboard 趋势数据是否存在、是否有触发告警的指标。
+
+  - id: "documentation_health"
+    name: "文档健康检查"
+    action: >
+      检查 docs/INDEX.md 中的每个索引条目对应的文件是否存在、描述是否准确。
+      检查关键文件头部简介是否与文件实际内容一致（同步偏移检测）。
+      检查 retrospective 文件是否按规范创建。检查 sync-manifest.yaml 中声明的依赖是否满足。
+
+  - id: "generate_report_and_recommendations"
+    name: "生成健康报告与进化建议"
+    action: >
+      汇总所有维度的发现，生成结构化的健康报告（符合 health_check_report.schema.json）。
+      对每个发现给出优先级（P0/P1/P2）、建议操作（create/modify/enhance/deprecate）、
+      是否适合灰度发布、以及预期的效果评估指标。
+      最终呈现给用户：总体健康评分 + 关键发现摘要 + 推荐行动路线。
+
+  - id: "trigger_evolution"
+    name: "触发进化执行"
+    action: >
+      根据用户对建议的确认，按优先级依次执行进化操作。
+      对于标记为 canary_suitable 的变更，自动创建 candidate_change 并启动灰度管线。
+      对于需要直接发布的变更（规则修复、安全补丁），在用户确认后直接修改并更新 release。
+      对于需要新建资产的变更（workflow/prompt/schema），在用户确认后创建文件并注册到 active-release。
+
+interruptions:
+  - node_id: "confirm_scope"
+    pause_reason: "missing_required_input"
+    resume_condition: "用户提供检查范围"
+    cancel_condition: "用户取消健康检查"
+    audit_fields: ["scan_scope", "scan_depth", "auto_generate", "checkpoint_id"]
+
+  - node_id: "rule_consistency_audit"
+    pause_reason: "found_critical_inconsistency"
+    resume_condition: "用户确认如何处理发现的关键不一致"
+    cancel_condition: "用户选择忽略并继续"
+    audit_fields: ["critical_findings", "user_decision", "checkpoint_id"]
+
+  - node_id: "generate_report_and_recommendations"
+    pause_reason: "needs_human_review"
+    resume_condition: "用户审阅报告并给出指导意见"
+    cancel_condition: "用户暂停进化流程"
+    audit_fields:
+      ["report_id", "recommendation_count", "user_feedback", "checkpoint_id"]
+
+outputs:
+  template: "prompts/operations/system_health_check.system.md"
+  required_sections:
+    - "check_metadata"
+    - "executive_summary"
+    - "dimension_findings"
+    - "evolution_recommendations"
+    - "risk_assessment"
+    - "action_roadmap"
+  schema_ref: "schemas/health_check_report.schema.json"
+
+human_review:
+  required_when:
+    - "发现关键规则矛盾（可能导致错误输出）"
+    - "发现配置安全漏洞"
+    - "自动生成候选变更涉及高风险操作"
+    - "用户选择 deep 扫描模式"
+  reviewer_role: "workspace_administrator"
+
+version: "0.3.0"

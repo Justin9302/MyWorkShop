@@ -99,6 +99,9 @@ def check_startup_sequence_alignment(source_path, target_path, source_file, targ
 
 def check_file_list_presence(source_path, target_path, source_file, target_file):
     """检查目标文件是否包含源文件中的文件引用"""
+    # 如果 target 是目录，跳过文件引用检查（目录结构检查由 directory_structure_sync 处理）
+    if os.path.isdir(target_path):
+        return True, []
     source_files = set(re.findall(r"[\w/]+\.\w+", source_file))
     target_files = set(re.findall(r"[\w/]+\.\w+", target_file))
     missing = source_files - target_files

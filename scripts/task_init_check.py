@@ -41,6 +41,8 @@ CHECKLIST_ITEMS = [
     {"id": "step3_draft", "description": "第三步：输出初稿 — 目标80分，结构完整吗？"},
     {"id": "step4_confirm", "description": "第四步：主动确认 — 问对方\"是否符合预期\"了吗？"},
     {"id": "step5_iterate", "description": "第五步：优化迭代 — 是微调还是大改？"},
+    {"id": "file_lock", "description": "文件锁定检查：本次任务涉及的文件是否有 🔒 FILE LOCK 标记？如有，禁止修改！"},
+    {"id": "file_truncation", "description": "文件截断防护：是否已按\"文件截断防护决策树\"评估了所有待修改的已存在文件？是否根据截断状态和修改范围选择了正确的操作策略？"},
     {"id": "retrospective", "description": "复盘：任务完成后写复盘了吗？"},
     {"id": "index_update", "description": "索引更新：本次任务是否涉及新增/修改/废弃文档？INDEX.md 更新了吗？"},
     {"id": "header_sync", "description": "头部同步：本次任务是否修改了关键文件？头部简介同步更新了吗？"},

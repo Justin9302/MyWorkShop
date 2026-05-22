@@ -1,0 +1,58 @@
+#=============================================================================
+# release_2026_05_22_001.yaml — 工作空间体检与修复
+#=============================================================================
+id: "release_2026_05_22_001"
+date: "2026-05-22"
+type: "maintenance"
+status: "proposed"
+
+title: "工作空间体检与修复"
+
+changes:
+  - file: ".vscode/mcp.json"
+    action: "modified"
+    reason: "修复 MCP 配置脱节 — 添加 database-query 和 sequential-thinking 服务器配置"
+  - file: "config/mcp-tools.yaml"
+    action: "modified"
+    reason: "修复 audit 数值 — 更新为实际 MCP 工具数量"
+  - file: "constraints/baseline/context_intent_gate.yaml"
+    action: "modified"
+    reason: "修复门禁规则 — 添加 context-loading.yaml 启动序列对齐检查"
+  - file: "config/session-tracking.yaml"
+    action: "modified"
+    reason: "更新 active_context 为当前会话状态"
+  - file: "config/feature-flags.yaml"
+    action: "modified"
+    reason: "修复优先级说明 — 明确 feature-flags 与 active-release 的关系"
+  - file: "config/active-release.yaml"
+    action: "modified"
+    reason: "注册 country 领域组件（workflows/country/、prompts/country/、constraints/countries/）"
+  - file: "docs/INDEX.md"
+    action: "modified"
+    reason: "添加同步管理文档索引、更新版本号"
+  - file: "docs/sync-manifest.yaml"
+    action: "created"
+    reason: "新增文档同步依赖清单 — 声明文件间依赖关系"
+  - file: "scripts/sync_checker.py"
+    action: "created"
+    reason: "新增文档同步检查器 — 自动检查关联文件一致性"
+  - file: "scripts/run_all_tests.sh"
+    action: "created"
+    reason: "新增统一测试入口脚本"
+
+components_affected:
+  - "config/active-release.yaml"
+  - "config/mcp-tools.yaml"
+  - "config/feature-flags.yaml"
+  - "config/session-tracking.yaml"
+  - "config/context-loading.yaml"
+  - "constraints/baseline/context_intent_gate.yaml"
+  - "docs/INDEX.md"
+  - "docs/sync-manifest.yaml"
+  - "scripts/sync_checker.py"
+  - "scripts/run_all_tests.sh"
+  - ".vscode/mcp.json"
+
+rollback_plan:
+  - "git revert HEAD --no-commit"
+  - "删除新增文件: docs/sync-manifest.yaml, scripts/sync_checker.py, scripts/run_all_tests.sh"

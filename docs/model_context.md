@@ -19,32 +19,7 @@ Current release: `release_2026_05_10_001`, status: **draft** (pending promotion)
 
 The workspace is at **Stage 9: Interruption Recovery**.
 
-### Completed Stages
-
-| Stage   | Description                                                                      | Status      |
-| ------- | -------------------------------------------------------------------------------- | ----------- |
-| Stage 1 | Workspace skeleton & Git boundary                                                | ✅ Complete |
-| Stage 2 | Core platform config + 14 industry workflows                                     | ✅ Complete |
-| Stage 3 | Constraints & reference metadata (baseline, industry, jurisdiction)              | ✅ Complete |
-| Stage 4 | Audit logging, run snapshots, evaluator rules                                    | ✅ Complete |
-| Stage 5 | Evaluation sidecar service (eval_runner + API + synthetic snapshots)             | ✅ Complete |
-| Stage 6 | Version governance (release manifest, promote/rollback, CHANGELOG)               | ✅ Complete |
-| Stage 7 | Dynamic evolution — LLM-as-Judge, eval set management, candidate change pipeline | ✅ Complete |
-| Stage 8 | Workflow orchestration engine                                                    | ✅ Complete |
-| Stage 9 | Interruption handling & recovery                                                 | ✅ Complete |
-
-### Completed Phases
-
-| Phase    | Description                                        | Status      |
-| -------- | -------------------------------------------------- | ----------- |
-| Phase 7a | LLM-as-Judge evaluation engine upgrade             | ✅ Complete |
-| Phase 7b | Dynamic eval set precipitation & classification    | ✅ Complete |
-| Phase 7c | Improvement suggestion → candidate change pipeline | ✅ Complete |
-| Phase 7d | Sandbox regression testing                         | ✅ Complete |
-| Phase 7e | Canary release mechanism                           | ✅ Complete |
-| Phase 7f | Quality dashboard & auto-rollback                  | ✅ Complete |
-| Phase 8  | Workflow orchestration engine                      | ✅ Complete |
-| Phase 9  | Interruption handling & recovery                   | ✅ Complete |
+All 9 stages (Workspace skeleton → Interruption recovery) and 8 phases (7a→7f, Phase 8, Phase 9) are complete. See `CHANGELOG.md` for full stage history.
 
 ### Active Component Versions
 
@@ -73,10 +48,10 @@ The workspace is at **Stage 9: Interruption Recovery**.
 
 ## Required Startup Reading
 
-Before answering project-level questions, modifying platform assets, creating workflows, adding rules, or proposing implementation plans, read these files in order:
+Before answering project-level questions, modifying platform assets, creating workflows, adding rules, or proposing implementation plans, read these files **in order**:
 
 1. `config/active-release.yaml` — active component versions
-2. `README.md` — project overview
+2. `docs/agent_guide.md` — collaboration behaviour & discipline for AI agents
 3. `docs/current_workspace_creation_plan.md` — platform governance rules
 
 Then load only as needed:
@@ -96,7 +71,7 @@ Do:
 
 - Preserve the boundary between platform assets and business content.
 - Prefer versioned workflows, constraints, prompts, schemas, tests, and release manifests.
-- Read the active release manifest before assuming a workflow, prompt, constraint pack, evaluator, or knowledge base is active.
+- Read the active release manifest before assuming a workflow, constraint pack, evaluator, or knowledge base is active.
 - Use staged, task-specific context loading rather than loading every document at once.
 - Record or design for auditability, traceability, human review, and rollback.
 - Keep high-risk actions behind explicit human approval.

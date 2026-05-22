@@ -1,0 +1,308 @@
+#=============================================================================
+# prompt_manifest.yaml — 提示词版本清单与元数据
+#
+# 功能：为每个提示词文件提供独立的版本号、变更历史和元数据。
+#       这是提示词版本管理的核心索引文件。
+#
+# 关联：
+#   - config/active-release.yaml（全局版本号引用）
+#   - scripts/prompt_validator.py（提示词验证脚本）
+#   - scripts/prompt_eval.py（提示词评估脚本）
+#=============================================================================
+
+prompt_manifest:
+  version: "0.1.0"
+  updated_at: "2026-05-22T09:40:00+10:00"
+  prompts:
+    - id: "contract_review"
+      path: "prompts/legal/contract_review.system.md"
+      version: "0.2.0"
+      domain: "legal"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "policy_qa"
+      path: "prompts/legal/policy_qa.system.md"
+      version: "0.2.0"
+      domain: "legal"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "business_model_design"
+      path: "prompts/business/business_model_design.system.md"
+      version: "0.2.0"
+      domain: "business"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables:
+        - name: "business_idea"
+          type: "string"
+          required: true
+          description: "用户输入的商业创意描述"
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "business_model_validation"
+      path: "prompts/business/business_model_validation.system.md"
+      version: "0.2.0"
+      domain: "business"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "go_to_market_review"
+      path: "prompts/business/go_to_market_review.system.md"
+      version: "0.2.0"
+      domain: "business"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "unit_economics_check"
+      path: "prompts/business/unit_economics_check.system.md"
+      version: "0.2.0"
+      domain: "business"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "new_energy_project_analysis"
+      path: "prompts/energy/new_energy_project_analysis.system.md"
+      version: "0.2.0"
+      domain: "energy"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "research_summary"
+      path: "prompts/finance/research_summary.system.md"
+      version: "0.2.0"
+      domain: "finance"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "risk_summary"
+      path: "prompts/finance/risk_summary.system.md"
+      version: "0.2.0"
+      domain: "finance"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "due_diligence"
+      path: "prompts/finance/due_diligence.system.md"
+      version: "0.2.0"
+      domain: "finance"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "sop_generation"
+      path: "prompts/operations/sop_generation.system.md"
+      version: "0.2.0"
+      domain: "operations"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "meeting_summary"
+      path: "prompts/operations/meeting_summary.system.md"
+      version: "0.2.0"
+      domain: "operations"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "project_retrospective"
+      path: "prompts/operations/project_retrospective.system.md"
+      version: "0.2.0"
+      domain: "operations"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "ideation_convergence"
+      path: "prompts/general/ideation_convergence.system.md"
+      version: "0.2.0"
+      domain: "general"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "country_report"
+      path: "prompts/country/country_report.system.md"
+      version: "0.2.0"
+      domain: "country"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables: []
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.2.0"
+          date: "2026-05-10"
+          change: "随 release_2026_05_10_001 发布"
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"
+
+    - id: "llm_judge"
+      path: "prompts/evaluation/llm_judge.system.md"
+      version: "0.1.0"
+      domain: "evaluation"
+      target_model: "claude-3.5-sonnet"
+      max_tokens: 4000
+      variables:
+        - name: "criterion_description"
+          type: "string"
+          required: true
+          description: "评估标准的描述文本"
+        - name: "criterion"
+          type: "string"
+          required: true
+          description: "评估标准的定义"
+        - name: "output_summary"
+          type: "string"
+          required: true
+          description: "待评估的输出摘要"
+        - name: "sources"
+          type: "string"
+          required: true
+          description: "已检索的来源"
+        - name: "constraints"
+          type: "string"
+          required: true
+          description: "触发的约束"
+      last_eval_score: null
+      last_eval_date: null
+      changelog:
+        - version: "0.1.0"
+          date: "2026-05-05"
+          change: "初始创建"

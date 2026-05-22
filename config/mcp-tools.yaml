@@ -1,6 +1,18 @@
+#=============================================================================
+# mcp-tools.yaml — MCP 工具注册表与治理策略
+#
+# 功能：定义所有已注册 MCP 工具的元数据、权限和审计策略。
+#       这是 MCP 工具治理的核心索引文件，必须与实际 MCP 配置保持同步。
+#
+# 关联：
+#   - .vscode/mcp.json（VS Code MCP 配置）
+#   - cline_chinese_mcp_settings.json（CLINE MCP 配置）
+#   - config/active-release.yaml（全局版本号引用）
+#=============================================================================
+
 mcp_tools:
-  version: "0.2.0"
-  status: "draft"
+  version: "0.3.0"
+  status: "active"
   environment: "vscode_copilot"
   environments:
     codex:
@@ -10,6 +22,7 @@ mcp_tools:
       description: "VS Code + GitHub Copilot Agent + MCP extensions"
       status: "active"
       mcp_config: ".vscode/mcp.json"
+      cline_mcp_config: "cline_chinese_mcp_settings.json"
       native_capabilities:
         - "file_read_write"
         - "git_status_diff"
@@ -23,8 +36,9 @@ mcp_tools:
     external_network_tools_require_confirmation: true
     record_tool_results_as_summaries: true
   tools:
+    # ── 通用基础设施工具 ──
     - id: "filesystem_read"
-      purpose: "Read approved local platform assets and user-provided runtime files."
+      purpose: "读取工作区文件，支持所有领域技能的文件读取需求。"
       codex_impl: "filesystem_read"
       vscode_impl: "Copilot native file operations + MCP filesystem server"
       vscode_tools: ["read_file", "file_search", "list_dir"]
@@ -37,11 +51,19 @@ mcp_tools:
         - "internal"
         - "confidential"
       approval_required: "for_confidential_or_restricted_inputs"
+      associated_skills:
+        - "all"
     - id: "filesystem_write"
-      purpose: "Create or update versioned platform assets inside the workspace."
+      purpose: "在工作区内创建或更新版本化平台资产。"
       codex_impl: "filesystem_write"
       vscode_impl: "Copilot native write operations + MCP filesystem server"
-      vscode_tools: ["create_file", "replace_string_in_file", "insert_edit_into_file", "create_directory"]
+      vscode_tools:
+        [
+          "create_file",
+          "replace_string_in_file",
+          "insert_edit_into_file",
+          "create_directory",
+        ]
       permissions:
         read: true
         write: true
@@ -50,8 +72,10 @@ mcp_tools:
         - "public"
         - "internal"
       approval_required: true
+      associated_skills:
+        - "all"
     - id: "git_status"
-      purpose: "Inspect version-control state before and after platform changes."
+      purpose: "检查版本控制状态，用于变更前后的审计追踪。"
       codex_impl: "git_status"
       vscode_impl: "VS Code Git extension + Copilot get_changed_files"
       vscode_tools: ["get_changed_files", "run_in_terminal (git commands)"]
@@ -60,8 +84,10 @@ mcp_tools:
         write: false
         external_network: false
       approval_required: false
+      associated_skills:
+        - "all"
     - id: "fetch_official_sources"
-      purpose: "Retrieve approved official references when a workflow requires current external evidence."
+      purpose: "当工作流需要当前外部证据时，检索经批准的官方参考资料。"
       codex_impl: "fetch_official_sources"
       vscode_impl: "Copilot fetch_webpage + MCP fetch server"
       vscode_tools: ["fetch_webpage"]
@@ -72,7 +98,138 @@ mcp_tools:
       allowed_data_classes:
         - "public"
       approval_required: true
+      associated_skills:
+        - "research_summary"
+        - "country_report"
+        - "new_energy_project_analysis"
+
+    # ── 推理与逻辑分析工具 ──
+    - id: "sequential_thinking"
+      purpose: "结构化逻辑推理链，适合商业模式验证、金融模型推导等需要白盒推导的场景。"
+      mcp_server: "sequential-thinking"
+      command: "npx -y @modelcontextprotocol/server-sequential-thinking"
+      permissions:
+        read: false
+        write: false
+        external_network: false
+      approval_required: false
+      associated_skills:
+        - "business_model_design"
+        - "business_model_validation"
+        - "unit_economics_check"
+        - "due_diligence"
+        - "risk_summary"
+        - "ideation_convergence"
+
+    # ── 金融计算工具 ──
+    - id: "financial_calculator"
+      purpose: "金融模型计算：NPV/IRR/LCOE/回收期/贷款计算/敏感性分析/购电方风险评估。"
+      mcp_server: "financial-calculator"
+      command: "python3 scripts/mcp_financial_calculator.py"
+      permissions:
+        read: false
+        write: false
+        external_network: false
+      approval_required: false
+      associated_skills:
+        - "new_energy_project_analysis"
+        - "investment_research"
+        - "due_diligence"
+        - "unit_economics_check"
+      tools:
+        - "calculate_npv"
+        - "calculate_irr"
+        - "calculate_lcoe"
+        - "calculate_payback"
+        - "run_financial_model"
+        - "run_sensitivity"
+        - "assess_offtaker_risk"
+        - "calculate_loan_payment"
+
+    # ── 市场数据查询工具 ──
+    - id: "market_data"
+      purpose: "市场数据查询：NEM电力市场数据/PPA电价/CAPEX/MLF/并网成本/BESS策略/AI数据中心需求。"
+      mcp_server: "market-data"
+      command: "python3 scripts/mcp_market_data.py"
+      permissions:
+        read: true
+        write: false
+        external_network: false
+      approval_required: false
+      associated_skills:
+        - "new_energy_project_analysis"
+        - "investment_research"
+        - "country_report"
+
+    # ── 数据可视化工具 ──
+    - id: "data_viz"
+      purpose: "数据可视化：生成图表HTML/财务仪表盘/敏感性分析图/项目对比表格（Chart.js）。"
+      mcp_server: "data-viz"
+      command: "python3 scripts/mcp_data_viz.py"
+      permissions:
+        read: false
+        write: true
+        external_network: false
+      approval_required: false
+      associated_skills:
+        - "new_energy_project_analysis"
+        - "investment_research"
+        - "due_diligence"
+        - "risk_summary"
+
+    # ── PDF 文档解析工具 ──
+    - id: "pdf_parser"
+      purpose: "PDF文档解析：提取文本内容、分页查看，适合合同审查、报告分析等场景。"
+      mcp_server: "pdf-parser"
+      command: "npx -y @modelcontextprotocol/server-pdf"
+      permissions:
+        read: true
+        write: false
+        external_network: false
+      approval_required: false
+      associated_skills:
+        - "contract_review"
+        - "policy_qa"
+        - "due_diligence"
+        - "research_summary"
+
+    # ── 数据库查询工具 ──
+    - id: "database_query"
+      purpose: "数据库查询：支持SQLite/MySQL/PostgreSQL/Oracle/SQL Server，用于数据分析和报表查询。"
+      mcp_server: "database-query"
+      command: "npx -y @turingdance/database-mcp"
+      permissions:
+        read: true
+        write: false
+        external_network: false
+      approval_required: true
+      associated_skills:
+        - "due_diligence"
+        - "investment_research"
+        - "country_report"
+        - "risk_summary"
+
+    # ── GitHub API 工具 ──
+    - id: "github_api"
+      purpose: "GitHub API 操作（PR, Issue, 代码审查），用于版本管理和协作。"
+      mcp_server: "github"
+      command: "npx -y @anthropic/mcp-github"
+      permissions:
+        read: true
+        write: true
+        external_network: true
+      approval_required: true
+      associated_skills:
+        - "project_retrospective"
+        - "sop_generation"
+
   audit:
     record_requested_tool: true
     record_approval_status: true
     record_input_output_summaries: true
+    sync_check:
+      last_synced: "2026-05-22T10:27:00+10:00"
+      config_source: ".vscode/mcp.json"
+      registered_count: 10
+      actual_count: 10
+      status: "synced"

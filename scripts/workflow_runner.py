@@ -748,6 +748,187 @@ def generate_execution_plan(workflow_path: str, intent: str = "") -> Dict[str, A
 
 
 # ═══════════════════════════════════════════════════════════════
+# Prompt Injection Engine (Phase 10: 占位符引擎)
+# ═══════════════════════════════════════════════════════════════
+
+# 占位符正则：{{placeholder}} 或 {placeholder}
+PLACEHOLDER_PATTERN = re.compile(r"\{\{(\w+)\}\}|\{(\w+)\}")
+
+# 默认占位符值（当用户未提供时使用）
+DEFAULT_PLACEHOLDER_VALUES = {
+    "business_idea": "未提供商业创意描述",
+    "industry_context": "未指定行业上下文",
+    "jurisdiction": "未指定法域",
+    "user_intent": "未提供用户意图",
+    "output_format": "markdown",
+    "risk_level": "medium",
+}
+
+# 从 manifest 加载提示词元数据
+MANIFEST_PATH = "prompts/prompt_manifest.yaml"
+
+
+def load_prompt_manifest() -> Dict[str, Any]:
+    """加载 prompt_manifest.yaml，返回 id → entry 的索引。"""
+    manifest_path = resolve_path(MANIFEST_PATH)
+    if not os.path.exists(manifest_path):
+        return {"prompts": {}}
+
+    manifest = load_yaml(manifest_path)
+    prompts_list = manifest.get("prompt_manifest", {}).get("prompts", [])
+    indexed = {}
+    for p in prompts_list:
+        indexed[p["id"]] = p
+    return {"prompts": indexed}
+
+
+def extract_placeholders(content: str) -> List[str]:
+    """从提示词内容中提取所有占位符。"""
+    placeholders = set()
+    for match in PLACEHOLDER_PATTERN.finditer(content):
+        ph = match.group(1) or match.group(2)
+        placeholders.add(ph)
+    return sorted(placeholders)
+
+
+def inject_prompt_variables(
+    prompt_path: str,
+    variables: Dict[str, str],
+) -> Tuple[str, List[str]]:
+    """
+    将变量注入提示词模板，替换占位符。
+
+    Args:
+        prompt_path: 提示词文件路径
+        variables: 变量名 → 值的字典
+
+    Returns:
+        (filled_content, unresolved_placeholders)
+            - filled_content: 注入后的提示词内容
+            - unresolved_placeholders: 未解析的占位符列表
+    """
+    resolved_path = resolve_path(prompt_path)
+    if not os.path.exists(resolved_path):
+        print(f"⚠️  提示词文件不存在: {prompt_path}", file=sys.stderr)
+        return "", [f"file_not_found: {prompt_path}"]
+
+    with open(resolved_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 提取所有占位符
+    placeholders = extract_placeholders(content)
+    unresolved = []
+
+    # 替换占位符
+    for ph in placeholders:
+        # 优先使用用户提供的值
+        value = variables.get(ph)
+        if value is None:
+            # 其次使用默认值
+            value = DEFAULT_PLACEHOLDER_VALUES.get(ph)
+        if value is None:
+            # 标记为未解析
+            unresolved.append(ph)
+            continue
+
+        # 替换 {{placeholder}} 和 {placeholder} 两种格式
+        content = content.replace("{{" + ph + "}}", value)
+        content = content.replace("{" + ph + "}", value)
+
+    return content, unresolved
+
+
+def validate_prompt_paths(
+    workflow_path: str,
+    industry: str = "",
+) -> Dict[str, Any]:
+    """
+    校验工作流引用的提示词路径是否一致且存在。
+
+    检查：
+      1. workflow YAML 中 outputs.template 引用的路径
+      2. workflow_runner 自动拼接的 prompts/{industry}/{workflow_id}.system.md 路径
+      3. prompt_manifest.yaml 中注册的路径
+      4. 三者是否指向同一个文件
+
+    Args:
+        workflow_path: 工作流 YAML 路径
+        industry: 行业（可选，自动推断）
+
+    Returns:
+        {
+            "workflow_id": str,
+            "workflow_template_ref": str | None,
+            "runner_auto_path": str | None,
+            "manifest_path": str | None,
+            "paths_consistent": bool,
+            "all_exist": bool,
+            "issues": [str],
+        }
+    """
+    workflow = parse_workflow(workflow_path)
+    workflow_id = get_workflow_id(workflow)
+
+    if not industry:
+        industry = WORKFLOW_INDUSTRY_MAP.get(workflow_id, "unknown")
+
+    # 1. 从 workflow YAML 获取 outputs.template
+    outputs = workflow.get("outputs", {}) or workflow.get("output", {})
+    wf_template_ref = outputs.get("template", "")
+
+    # 2. workflow_runner 自动拼接路径
+    runner_auto_path = f"prompts/{industry}/{workflow_id}.system.md"
+
+    # 3. 从 manifest 获取路径
+    manifest_data = load_prompt_manifest()
+    manifest_entry = manifest_data.get("prompts", {}).get(workflow_id, {})
+    manifest_path = manifest_entry.get("path", "")
+
+    issues = []
+    paths_consistent = True
+    all_exist = True
+
+    # 检查文件是否存在
+    if wf_template_ref and not os.path.exists(resolve_path(wf_template_ref)):
+        issues.append(f"workflow 引用的提示词文件不存在: {wf_template_ref}")
+        all_exist = False
+
+    if not os.path.exists(resolve_path(runner_auto_path)):
+        issues.append(f"runner 自动拼接路径不存在: {runner_auto_path}")
+        all_exist = False
+
+    if manifest_path and not os.path.exists(resolve_path(manifest_path)):
+        issues.append(f"manifest 注册路径不存在: {manifest_path}")
+        all_exist = False
+
+    # 检查路径一致性
+    resolved_paths = set()
+    if wf_template_ref:
+        resolved_paths.add(os.path.normpath(resolve_path(wf_template_ref)))
+    resolved_paths.add(os.path.normpath(resolve_path(runner_auto_path)))
+    if manifest_path:
+        resolved_paths.add(os.path.normpath(resolve_path(manifest_path)))
+
+    if len(resolved_paths) > 1:
+        paths_consistent = False
+        issues.append(
+            f"路径不一致: workflow={wf_template_ref}, "
+            f"runner={runner_auto_path}, "
+            f"manifest={manifest_path}"
+        )
+
+    return {
+        "workflow_id": workflow_id,
+        "workflow_template_ref": wf_template_ref or None,
+        "runner_auto_path": runner_auto_path,
+        "manifest_path": manifest_path or None,
+        "paths_consistent": paths_consistent,
+        "all_exist": all_exist,
+        "issues": issues,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
 # MCP Tool Registry
 # ═══════════════════════════════════════════════════════════════
 

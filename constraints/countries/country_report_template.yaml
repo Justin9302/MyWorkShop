@@ -1,0 +1,795 @@
+# =============================================================================
+# country_report_template.yaml — 国别报告约束模板
+#
+# 用途：定义特定国家的政治、经济、安全、行业政策、税收与法律等
+#       全方位约束条件。用于国别报告工作流（country_report）的
+#       数据收集和约束加载阶段。
+#
+# 与 constraints/countries/_template.yaml 的区别：
+#   - _template.yaml 侧重能源行业约束（电价、补贴、CAPEX等）
+#   - 本模板侧重国别风险评估（政治、经济、安全、政策、税收等）
+#
+# 创建规则：
+#   1. 使用 fetch 工具获取该国最新政治、经济、安全、政策信息
+#   2. 所有数据标注来源和获取日期
+#   3. 有效期不超过 90 天
+#   4. 文件名为 <country_code>_report.yaml（如 au_report.yaml, cn_report.yaml）
+# =============================================================================
+
+constraint_pack:
+  id: "country_report_<country_code>"
+  version: "0.1.0"
+  status: "draft"
+
+metadata:
+  country: "<country_name>"
+  country_code: "<country_code>"
+  region: "<region>"
+  capital: "<capital_city>"
+  population: "<population>"
+  official_language: "<language>"
+  currency: "<currency_code>"
+  timezone: "<timezone>"
+  description: "<国家名称>国别风险评估约束与数据"
+  effective_date: "<YYYY-MM-DD>"
+  last_updated: "<YYYY-MM-DD>"
+  data_freshness_days: 0
+  authority_level: "reference"
+
+  # ── 数据来源索引 ──
+  data_sources:
+    - id: "source_1"
+      name: "<来源名称>"
+      type: "international_organization / government / industry / media"
+      url: "<来源URL>"
+      access_date: "<YYYY-MM-DD>"
+      data_type: "political / economic / security / policy / tax / business"
+
+    - id: "source_2"
+      name: "<来源名称>"
+      type: "international_organization / government / industry / media"
+      url: "<来源URL>"
+      access_date: "<YYYY-MM-DD>"
+      data_type: "political / economic / security / policy / tax / business"
+
+# ── 通用规则 ──
+rules:
+  - id: "country_data_freshness"
+    severity: "high"
+    rule: "本文件数据自 last_updated 起有效期 90 天。超过 90 天必须重新获取最新数据或标注过期风险。"
+
+  - id: "separate_fact_assumption"
+    severity: "high"
+    rule: "必须明确区分政治/经济事实（已发布数据）、推断（基于数据的推测）、假设（待验证的判断）和待验证事项。"
+
+  - id: "source_attribution"
+    severity: "high"
+    rule: "所有数据必须标注来源 ID（引用 data_sources 列表中的来源）和获取日期。"
+
+# ── 政治环境约束 ──
+political:
+  government_type: "<政府类型：总统制/议会制/君主制/一党制等>"
+  head_of_state: "<国家元首姓名及任期>"
+  head_of_government: "<政府首脑姓名及任期>"
+  next_election_date: "<下次大选/选举日期>"
+  election_cycle_years: <选举周期年数>
+
+  # ── 治理指标 ──
+  governance_indicators:
+    wgi_voice_accountability:
+      score: "<分数>"
+      percentile: "<百分位排名>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    wgi_political_stability:
+      score: "<分数>"
+      percentile: "<百分位排名>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    wgi_government_effectiveness:
+      score: "<分数>"
+      percentile: "<百分位排名>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    wgi_regulatory_quality:
+      score: "<分数>"
+      percentile: "<百分位排名>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    wgi_rule_of_law:
+      score: "<分数>"
+      percentile: "<百分位排名>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    wgi_control_of_corruption:
+      score: "<分数>"
+      percentile: "<百分位排名>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+  corruption_perceptions_index:
+    score: "<CPI分数，0-100>"
+    rank: "<全球排名>"
+    year: "<数据年份>"
+    source_id: "source_1"
+
+  # ── 地缘政治风险 ──
+  geopolitical_risks:
+    - risk: "<地缘政治风险描述>"
+      level: "low / medium / high"
+      impact: "<潜在影响>"
+      source_id: "source_1"
+
+  # ── 国际协定 ──
+  international_agreements:
+    bilateral_investment_treaties:
+      with_china: true/false
+      total_count: <总数>
+      source_id: "source_1"
+
+    double_taxation_treaties:
+      with_china: true/false
+      total_count: <总数>
+      source_id: "source_1"
+
+    wto_member: true/false
+    icsid_member: true/false
+    miga_member: true/false
+
+# ── 汇兑自由度约束 ──
+exchange_freedom:
+  # ── 外汇管制制度 ──
+  exchange_control_regime:
+    regime_type: "free / managed / controlled / closed"
+    local_currency_convertibility: "fully_convertible / partially_convertible / non_convertible"
+    exchange_rate_system: "free_float / managed_float / crawling_peg / fixed / dual / multiple"
+    official_rate_usd: <官方汇率>
+    parallel_market_rate_usd: <平行市场汇率>
+    parallel_market_premium: "<平行市场溢价百分比>"
+    source_id: "source_1"
+
+  # ── 利润汇回限制 ──
+  profit_repatriation:
+    dividend_repatriation:
+      allowed: true/false
+      approval_required: true/false
+      approval_authority: "<审批机构>"
+      typical_processing_time_days: <处理天数>
+      annual_limit_usd: "<年度上限金额>"
+      additional_tax_withholding: "<额外预提税率>"
+      source_id: "source_1"
+
+    interest_repatriation:
+      allowed: true/false
+      approval_required: true/false
+      approval_authority: "<审批机构>"
+      typical_processing_time_days: <处理天数>
+      source_id: "source_1"
+
+    royalty_repatriation:
+      allowed: true/false
+      approval_required: true/false
+      approval_authority: "<审批机构>"
+      typical_processing_time_days: <处理天数>
+      source_id: "source_1"
+
+    capital_repatriation:
+      allowed: true/false
+      lock_in_period_years: <锁定期年限>
+      approval_required: true/false
+      approval_authority: "<审批机构>"
+      source_id: "source_1"
+
+  # ── 强制结汇要求 ──
+  mandatory_surrender:
+    exists: true/false
+    surrender_percentage: "<强制结汇比例>"
+    applicable_to: "all_exports / specific_sectors / none"
+    source_id: "source_1"
+
+  # ── 离岸账户与NDF ──
+  offshore_arrangements:
+    offshore_account_allowed: true/false
+    ndf_market_available: true/false
+    ndf_tenors_available: "<可用期限>"
+    source_id: "source_1"
+
+  # ── 历史违约记录 ──
+  historical_defaults:
+    sovereign_default_history:
+      exists: true/false
+      last_event_year: "<最近违约年份>"
+      details: "<违约详情>"
+      source_id: "source_1"
+
+    capital_control_tightening:
+      exists: true/false
+      last_event_year: "<最近收紧年份>"
+      details: "<收紧详情>"
+      source_id: "source_1"
+
+    forex_account_freeze:
+      exists: true/false
+      last_event_year: "<最近冻结年份>"
+      details: "<冻结详情>"
+      source_id: "source_1"
+
+  # ── 汇兑自由度评分参考 ──
+  scoring_reference:
+    imf_areaer_restriction_index: "<IMF限制指数>"
+    overall_freedom_score: "<综合评分，1-5>"
+    assessment_summary: "<评估摘要>"
+    source_id: "source_1"
+
+# ── 电力市场与能源需求约束 ──
+energy_market:
+  # ── 矿业与工业PPA市场 ──
+  mining_and_ppa:
+    mining_gdp_share:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    major_minerals:
+      - mineral: "<矿种>"
+        annual_production: "<年产量>"
+        unit: "<单位>"
+        global_rank: "<全球排名>"
+        source_id: "source_1"
+
+    mining_electricity_consumption:
+      value: "<TWh>"
+      share_of_total: "<占全国比例>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    existing_ppa_contracts:
+      - mining_company: "<矿企名称>"
+        capacity_mw: "<容量MW>"
+        contract_end_year: "<合同到期年>"
+        renewal_likelihood: "high / medium / low"
+        source_id: "source_1"
+
+    new_mining_projects:
+      - project_name: "<项目名称>"
+        mineral: "<矿种>"
+        expected_power_demand_mw: "<预计电力需求MW>"
+        expected_commissioning_year: "<预计投产年>"
+        development_stage: "feasibility / construction / permitting / exploration"
+        source_id: "source_1"
+
+    mining_company_credit:
+      overall_credit_quality: "investment_grade / speculative / mixed / poor"
+      source_id: "source_1"
+
+  # ── 电力市场规模 ──
+  power_market:
+    total_installed_capacity_gw:
+      value: "<GW>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    generation_mix:
+      coal:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+      gas:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+      hydro:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+      nuclear:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+      solar:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+      wind:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+      biomass:
+        share: "<百分比>"
+        capacity_gw: "<GW>"
+        source_id: "source_1"
+
+    annual_generation_twh:
+      value: "<TWh>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    electricity_consumption_twh:
+      value: "<TWh>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    per_capita_consumption_kwh:
+      value: "<kWh>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    demand_growth_rate:
+      value: "<百分比>"
+      period: "近3年CAGR"
+      source_id: "source_1"
+
+    demand_forecast:
+      value: "<百分比>"
+      period: "未来5年CAGR"
+      source_id: "source_1"
+
+    power_deficit:
+      exists: true/false
+      details: "<电力缺口详情>"
+      source_id: "source_1"
+
+    grid_coverage_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    transmission_loss_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    renewable_energy_share:
+      value: "<百分比>"
+      target: "<目标百分比及年份>"
+      source_id: "source_1"
+
+    market_structure: "monopoly / single_buyer / wholesale_competition / retail_competition"
+    wholesale_price:
+      value: "<价格>"
+      unit: "USD/MWh"
+      source_id: "source_1"
+
+    retail_price_industrial:
+      value: "<价格>"
+      unit: "USD/MWh"
+      source_id: "source_1"
+
+    retail_price_residential:
+      value: "<价格>"
+      unit: "USD/MWh"
+      source_id: "source_1"
+
+  # ── 人口与消费市场 ──
+  population_and_consumption:
+    total_population:
+      value: "<人口数>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    population_growth_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    urbanization_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    gdp_per_capita:
+      value: "<USD>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    electrification_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    residential_electricity_consumption:
+      value: "<TWh>"
+      share_of_total: "<占全国比例>"
+      source_id: "source_1"
+
+    ac_penetration_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    ev_penetration_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+  # ── 制造业与工业用电 ──
+  manufacturing_and_industry:
+    manufacturing_gdp_share:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    major_industries:
+      - industry: "<工业门类>"
+        electricity_consumption_share: "<用电占比>"
+        source_id: "source_1"
+
+    industrial_parks:
+      count: <数量>
+      details: "<工业园区详情>"
+      source_id: "source_1"
+
+    data_center_development:
+      exists: true/false
+      planned_capacity_mw: "<规划容量MW>"
+      source_id: "source_1"
+
+    industrial_electricity_consumption:
+      value: "<TWh>"
+      share_of_total: "<占全国比例>"
+      growth_rate: "<增长率>"
+      source_id: "source_1"
+
+    industrial_electricity_price:
+      value: "<价格>"
+      unit: "USD/MWh"
+      cross_subsidy: "exists / not_exists"
+      source_id: "source_1"
+
+  # ── 新能源发展环境 ──
+  renewable_energy_environment:
+    solar_irradiance:
+      value: "<kWh/m²/年>"
+      source_id: "source_1"
+
+    wind_speed:
+      value: "<m/s>"
+      source_id: "source_1"
+
+    current_renewable_capacity_gw:
+      value: "<GW>"
+      source_id: "source_1"
+
+    renewable_target:
+      capacity_gw: "<目标GW>"
+      target_year: "<目标年份>"
+      source_id: "source_1"
+
+    renewable_certificate_system:
+      exists: true/false
+      details: "<证书制度详情>"
+      source_id: "source_1"
+
+    grid_absorption_capacity:
+      assessment: "strong / moderate / weak"
+      details: "<消纳能力评估>"
+      source_id: "source_1"
+
+    energy_storage_policy:
+      exists: true/false
+      details: "<储能政策详情>"
+      source_id: "source_1"
+
+    green_electricity_market:
+      maturity: "mature / developing / nascent / none"
+      details: "<绿电市场详情>"
+      source_id: "source_1"
+
+# ── 经济环境约束 ──
+economic:
+  # ── 宏观经济指标 ──
+  macro_indicators:
+    gdp_growth_rate:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    inflation_rate:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    unemployment_rate:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    fiscal_deficit_gdp:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    public_debt_gdp:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    foreign_reserves:
+      value: "<金额，USD>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    foreign_reserves_import_coverage:
+      value: "<月数>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+  # ── 主权信用评级 ──
+  sovereign_credit_ratings:
+    moodys:
+      rating: "<评级>"
+      outlook: "positive / stable / negative"
+      date: "<评级日期>"
+      source_id: "source_1"
+
+    sp:
+      rating: "<评级>"
+      outlook: "positive / stable / negative"
+      date: "<评级日期>"
+      source_id: "source_1"
+
+    fitch:
+      rating: "<评级>"
+      outlook: "positive / stable / negative"
+      date: "<评级日期>"
+      source_id: "source_1"
+
+  # ── 汇率信息 ──
+  exchange_rate:
+    local_currency: "<当地货币代码>"
+    usd_rate: <兑美元汇率>
+    eur_rate: <兑欧元汇率>
+    cny_rate: <兑人民币汇率>
+    regime: "fixed / managed_float / free_float / pegged"
+    volatility: "low / medium / high"
+    last_updated: "<YYYY-MM-DD>"
+    source_id: "source_1"
+
+  # ── 资本管制 ──
+  capital_controls:
+    profit_repatriation: "free / restricted / prohibited"
+    profit_repatriation_details: "<利润汇回限制详情>"
+    foreign_investment_approval: "not_required / sectoral / universal"
+    foreign_investment_approval_details: "<外资审批要求详情>"
+    source_id: "source_1"
+
+  # ── 国际收支 ──
+  balance_of_payments:
+    current_account_gdp:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    fdi_inflow:
+      value: "<金额，USD>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+    external_debt_gdp:
+      value: "<百分比>"
+      year: "<数据年份>"
+      source_id: "source_1"
+
+# ── 安全环境约束 ──
+security:
+  # ── 国内安全 ──
+  domestic_security:
+    crime_rate: "very_low / low / medium / high / very_high"
+    terrorism_threat: "none / low / medium / high / critical"
+    social_unrest_risk: "very_low / low / medium / high / very_high"
+    labor_conflict_risk: "very_low / low / medium / high / very_high"
+    source_id: "source_1"
+
+  # ── 区域安全 ──
+  regional_security:
+    border_security: "stable / tense / conflict"
+    regional_conflict_spillover: "none / low / medium / high"
+    source_id: "source_1"
+
+  # ── 项目安全参考 ──
+  project_security:
+    expat_security_risk: "very_low / low / medium / high / very_high"
+    asset_security_risk: "very_low / low / medium / high / very_high"
+    cybersecurity_risk: "very_low / low / medium / high / very_high"
+    security_cost_per_person_per_year:
+      value: "<金额，USD>"
+      description: "外籍员工人均年安保成本参考"
+      source_id: "source_1"
+
+  # ── 旅行建议 ──
+  travel_advisory:
+    level: "1_normal / 2_caution / 3_reconsider / 4_avoid"
+    issuer: "<发布机构>"
+    date: "<YYYY-MM-DD>"
+    details: "<旅行建议详情>"
+    source_id: "source_1"
+
+# ── 行业政策约束 ──
+industry_policy:
+  # ── 外资准入 ──
+  foreign_investment:
+    general_attitude: "welcoming / selective / restrictive / hostile"
+    negative_list_exists: true/false
+    sectors_with_restrictions:
+      - sector: "<受限制行业>"
+        restriction: "<限制详情>"
+        source_id: "source_1"
+
+    max_foreign_ownership:
+      default: "<默认上限百分比>"
+      sector_specific:
+        - sector: "<行业>"
+          limit: "<上限百分比>"
+          source_id: "source_1"
+
+  # ── 许可证与审批 ──
+  licensing:
+    key_licenses:
+      - license: "<许可证名称>"
+        issuing_authority: "<颁发机构>"
+        estimated_timeline: "<预计审批时间>"
+        complexity: "low / medium / high"
+        source_id: "source_1"
+
+  # ── 本地化要求 ──
+  localization:
+    local_content_requirement:
+      exists: true/false
+      details: "<本地成分要求详情>"
+      target_percentage: "<目标百分比>"
+      source_id: "source_1"
+
+    local_employment_requirement:
+      exists: true/false
+      details: "<本地雇佣要求详情>"
+      source_id: "source_1"
+
+  # ── 知识产权 ──
+  intellectual_property:
+    ip_protection_level: "strong / moderate / weak / very_weak"
+    patent_protection_years: <专利保护年限>
+    enforcement_effectiveness: "effective / moderate / ineffective"
+    source_id: "source_1"
+
+  # ── 贸易政策 ──
+  trade_policy:
+    average_tariff_rate:
+      value: "<百分比>"
+      source_id: "source_1"
+
+    free_trade_agreements:
+      - partner: "<FTA伙伴>"
+        effective_date: "<生效日期>"
+        source_id: "source_1"
+
+    export_controls:
+      exists: true/false
+      details: "<出口管制详情>"
+      source_id: "source_1"
+
+# ── 税收与法律约束 ──
+tax_legal:
+  # ── 公司税 ──
+  corporate_tax:
+    standard_rate: "<百分比>"
+    reduced_rates:
+      - condition: "<适用条件>"
+        rate: "<优惠税率>"
+        source_id: "source_1"
+
+    capital_gains_tax_rate: "<百分比>"
+    source_id: "source_1"
+
+  # ── 增值税 ──
+  vat:
+    standard_rate: "<百分比>"
+    reduced_rates:
+      - condition: "<适用条件>"
+        rate: "<优惠税率>"
+        source_id: "source_1"
+
+    registration_threshold: "<注册门槛金额>"
+    source_id: "source_1"
+
+  # ── 预提税 ──
+  withholding_tax:
+    dividends:
+      standard_rate: "<百分比>"
+      treaty_rate_with_china: "<对华协定税率>"
+      source_id: "source_1"
+
+    interest:
+      standard_rate: "<百分比>"
+      treaty_rate_with_china: "<对华协定税率>"
+      source_id: "source_1"
+
+    royalties:
+      standard_rate: "<百分比>"
+      treaty_rate_with_china: "<对华协定税率>"
+      source_id: "source_1"
+
+  # ── 关税 ──
+  customs_duties:
+    average_rate: "<百分比>"
+    special_zones:
+      - zone: "<特区/保税区名称>"
+        benefits: "<关税优惠详情>"
+        source_id: "source_1"
+
+  # ── 税收优惠 ──
+  tax_incentives:
+    tax_holiday:
+      exists: true/false
+      details: "<免税期详情>"
+      duration_years: <年限>
+      source_id: "source_1"
+
+    investment_tax_credit:
+      exists: true/false
+      details: "<投资税收抵免详情>"
+      rate: "<抵免率>"
+      source_id: "source_1"
+
+    accelerated_depreciation:
+      exists: true/false
+      details: "<加速折旧详情>"
+      source_id: "source_1"
+
+    loss_carryforward:
+      years: <亏损结转年限>
+      source_id: "source_1"
+
+    special_economic_zone:
+      exists: true/false
+      details: "<经济特区税收优惠详情>"
+      source_id: "source_1"
+
+  # ── 劳动法 ──
+  labor_law:
+    minimum_wage:
+      amount: "<金额>"
+      currency: "<货币>"
+      period: "monthly / weekly / hourly"
+      source_id: "source_1"
+
+    standard_work_hours: "<每周标准工时>"
+    overtime_rate: "<加班费率>"
+    severance_pay: "<遣散费规则>"
+    foreign_worker_permit: "<外籍员工工作许可要求>"
+    unionization_rate: "<工会化率百分比>"
+    mandatory_benefits: "<强制福利清单>"
+    source_id: "source_1"
+
+  # ── 争议解决 ──
+  dispute_resolution:
+    judicial_independence: "high / moderate / low / very_low"
+    contract_enforcement_days: <合同执行平均天数>
+    arbitration_recognition: "full / partial / limited / none"
+    icsid_recognition: true/false
+    uncitral_recognition: true/false
+    source_id: "source_1"
+
+# ── 营商便利度 ──
+business_environment:
+  doing_business_rank:
+    overall_rank: <全球排名>
+    year: "<数据年份>"
+    source_id: "source_1"
+
+  infrastructure_quality:
+    transportation: "excellent / good / fair / poor / very_poor"
+    electricity: "excellent / good / fair / poor / very_poor"
+    telecommunications: "excellent / good / fair / poor / very_poor"
+    logistics: "excellent / good / fair / poor / very_poor"
+    source_id: "source_1"
+
+  labor_force:
+    education_level: "high / medium / low"
+    english_proficiency: "high / medium / low"
+    skilled_labor_availability: "abundant / adequate / limited / scarce"
+    source_id: "source_1"
+
+  quality_of_life:
+    overall: "high / medium / low"
+    healthcare_quality: "high / medium / low"
+    international_schools: "abundant / limited / none"
+    housing_quality: "high / medium / low"
+    source_id: "source_1"

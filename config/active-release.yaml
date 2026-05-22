@@ -13,9 +13,9 @@
 #=============================================================================
 
 active_release:
-  id: release_2026_05_10_001
-  git_commit: b24778a50812bc7b9c49ff72c793858b7949991e
-  git_tag: release_2026_05_10_001
+  id: release_2026_05_22_001
+  git_commit: HEAD
+  git_tag: release_2026_05_22_001
   stage: stage_9_interruption_recovery
   workflow_version: 0.3.0
   constraint_pack_version: 0.4.0
@@ -38,6 +38,10 @@ active_release:
     model_routing: config/model-routing.yaml
     permissions: config/permissions.yaml
     feature_flags: config/feature-flags.yaml
+    feature_flags_override: >
+      active-release.yaml 的 governance 引用优先级高于 feature-flags.yaml。
+      feature-flags 是 active-release 的子集，用于细粒度运行时控制。
+      当两者冲突时，以 active-release.yaml 的 governance 配置为准。
     mcp_tools: config/mcp-tools.yaml
     knowledge_bases:
       - id: aemo_market_data
@@ -95,6 +99,7 @@ active_release:
       - workflows/operations/meeting_summary.yaml
       - workflows/operations/project_retrospective.yaml
       - workflows/general/ideation_convergence.yaml
+      - workflows/country/country_report.yaml
     constraints:
       - constraints/baseline/privacy.yaml
       - constraints/baseline/citation.yaml
@@ -128,6 +133,7 @@ active_release:
       - prompts/operations/project_retrospective.system.md
       - prompts/evaluation/llm_judge.system.md
       - prompts/general/ideation_convergence.system.md
+      - prompts/country/country_report.system.md
     judge_config: evaluators/rubrics/shared_judge_config.yaml
     judge_models:
       - deepseek-chat
@@ -181,7 +187,7 @@ active_release:
     release_governance:
       manifest_schema: schemas/release_manifest.schema.json
       manifest_dir: config/releases/
-      active_manifest: config/releases/release_2026_05_10_001.yaml
+      active_manifest: config/releases/release_2026_05_22_001.yaml
       promote_script: scripts/release_promote.sh
       rollback_script: scripts/rollback.sh
       governance_doc: docs/release_governance.md
@@ -260,6 +266,9 @@ active_release:
         - lattice/examples/vpp_comprehensive/
     country_constraints:
       - constraints/countries/_template.yaml
+      - constraints/countries/au_report.yaml
+      - constraints/countries/cd_report.yaml
+      - constraints/countries/country_report_template.yaml
     market_reference:
       - data/market_reference_index.yaml
     mcp_tools:
@@ -267,6 +276,13 @@ active_release:
       - filesystem_write
       - git_status
       - fetch_official_sources
+      - sequential_thinking
+      - financial_calculator
+      - market_data
+      - data_viz
+      - pdf_parser
+      - database_query
+      - github_api
   available_asset_roots:
     workflows:
       - workflows/legal/
@@ -275,6 +291,7 @@ active_release:
       - workflows/operations/
       - workflows/energy/
       - workflows/general/
+      - workflows/country/
     constraints:
       - constraints/baseline/
       - constraints/industries/
@@ -286,6 +303,7 @@ active_release:
       - prompts/operations/
       - prompts/energy/
       - prompts/general/
+      - prompts/country/
     agents:
       - .github/agents/
     evaluators:
@@ -358,5 +376,6 @@ active_release:
     - "2026-05-09: Lattice 框架 v1.0.0 集成 — 结构化任务分解与执行引擎"
     - "2026-05-09: 通用工作流 ideation_convergence 添加"
     - "2026-05-10: 全局进化流程 — 同步所有组件至正式 Release release_2026_05_10_001"
+    - "2026-05-22: 工作环境体检修复 — MCP 配置对齐、门禁规则统一、country 领域注册、会话跟踪更新、feature-flags 优先级说明、统一测试入口创建"
     - "Environment: VS Code + GitHub Copilot Agent (migrated from Codex)."
-  updated_at: "2026-05-10T11:40:00+10:00"
+  updated_at: "2026-05-22T10:28:00+10:00"

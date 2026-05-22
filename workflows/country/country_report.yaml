@@ -1,0 +1,687 @@
+# =============================================================================
+# country_report.yaml — 国别报告工作流
+#
+# 功能：在项目评估阶段，对所在国的政治、经济、安全、行业政策、税收等
+#       方面进行系统性约束分析，输出结构化国别风险评估报告。
+#
+# 关联：
+#   - prompts/country/country_report.system.md（System Prompt）
+#   - constraints/countries/country_report_template.yaml（国别报告约束模板）
+#   - constraints/countries/（国家约束文件）
+#   - constraints/baseline/（基线约束）
+# =============================================================================
+
+workflow:
+  id: "country_report"
+  name: "国别报告分析"
+  industry: "general"
+  description: >
+    在项目评估阶段，对所在国的政治、经济、安全、行业政策、税收等方面
+    进行系统性约束分析。输出结构化国别风险评估报告，支持投资决策、
+    项目评估、合规审查和战略进入分析。
+
+    覆盖八大核心维度：
+    1. 政治稳定性（政府治理、地缘政治、政策连续性）
+    2. 经济基本面（宏观指标、主权信用、汇率风险）
+    3. 汇兑自由度（外汇管制、利润汇回、资本转移风险）
+    4. 电力市场与能源需求（矿业PPA、电力市场规模、人口消费、制造业）
+    5. 安全形势（国内安全、区域风险、项目安保）
+    6. 行业政策（准入限制、产业政策、审批要求）
+    7. 税收与法律（税制、税收优惠、劳动法、争议解决）
+    8. 营商便利度（营商环境、基础设施、人才供给）
+
+    采用双层加权评分体系，每个维度 1-5 分，基于行业权重加权汇总，
+    输出综合风险等级、资本金溢价系数与缓解措施建议。
+  role: "country_risk_analyst"
+  risk_default: "medium"
+  model_routing: "standard_analysis"
+  execution_method: "linear"
+
+context_intent_gate:
+  required: true
+  required_reads:
+    - "config/active-release.yaml"
+    - "config/context-loading.yaml"
+    - "constraints/baseline/human_review.yaml"
+    - "constraints/baseline/citation.yaml"
+    - "constraints/baseline/privacy.yaml"
+  confirmation_outputs:
+    - "目标国家/地区名称"
+    - "报告用途（项目评估 / 投资决策 / 合规审查 / 战略进入）"
+    - "报告深度（快速概览 / 标准分析 / 深度尽调）"
+    - "目标行业（用于行业政策维度的针对性分析）"
+    - "用户特定关注领域（如有）"
+    - "数据新鲜度要求（默认 90 天内）"
+    - "是否需要新建国家约束文件"
+  block_conditions:
+    - "目标国家/地区未指定"
+    - "报告用途未明确"
+    - "输出将用于最终投资决策且无人审"
+    - "目标国家/地区数据过期超过 90 天且用户未提供替代数据"
+
+context_loading:
+  strategy: "layered_and_task_specific"
+  layers:
+    - "L0"
+    - "L1"
+    - "L2"
+    - "L3"
+    - "L4"
+    - "L5"
+    - "L8"
+
+inputs:
+  - name: "target_country"
+    required: true
+    description: "目标国家/地区名称（如 刚果(金)、澳大利亚、中国）"
+    data_class: "project_metadata"
+
+  - name: "report_purpose"
+    required: true
+    description: "报告用途：project_evaluation / investment_decision / compliance_review / market_entry"
+    data_class: "project_metadata"
+
+  - name: "report_depth"
+    required: true
+    description: "报告深度：quick_overview / standard_analysis / deep_due_diligence"
+    data_class: "project_metadata"
+
+  - name: "target_industry"
+    required: false
+    description: "目标行业（如 energy / mining / manufacturing / finance），用于行业政策维度的针对性分析"
+    data_class: "project_metadata"
+
+  - name: "focus_areas"
+    required: false
+    description: "用户特定关注领域列表（如 ['tax_incentives', 'political_risk', 'labor_law']）"
+    data_class: "project_metadata"
+
+  - name: "data_freshness_days"
+    required: false
+    description: "数据新鲜度要求（默认 90 天）"
+    data_class: "project_metadata"
+
+retrieval:
+  scope:
+    - "country_constraints"
+    - "international_organization_data"
+    - "industry_specific_policy"
+    - "energy_market_data"
+  source_filters:
+    - "authority_level_recorded"
+    - "effective_date_valid"
+    - "freshness_within_90_days"
+
+constraints:
+  - "constraints/baseline/privacy.yaml"
+  - "constraints/baseline/citation.yaml"
+  - "constraints/baseline/human_review.yaml"
+  - "constraints/baseline/tool_permissions.yaml"
+  - "constraints/baseline/context_intent_gate.yaml"
+
+steps:
+  - id: "confirm_intent"
+    name: "确认分析范围与意图"
+    action: >
+      读取并确认用户提供的国别报告信息：目标国家/地区、报告用途、
+      报告深度、目标行业、用户特定关注领域。
+
+      检查目标国家/地区是否已有约束文件和数据。
+      如不存在，标记为「新建国家」并准备创建对应约束。
+
+      输出意图确认清单并等待用户确认。
+
+  - id: "gather_country_context"
+    name: "加载国家约束与背景数据"
+    action: >
+      根据目标国家加载对应的约束包和市场参考数据。
+
+      如国家不存在：
+      1. 使用 fetch 工具从权威来源获取该国最新信息
+      2. 创建 constraints/countries/<country_code>.yaml 约束文件
+      3. 确保所有数据标注来源和获取日期，有效期不超过 90 天
+
+      如国家存在但数据过期（超过 90 天）：
+      1. 标记过期数据
+      2. 询问用户是否允许在线获取最新数据
+      3. 如允许，使用 fetch 工具更新数据
+      4. 如不允许，使用现有数据并标注过期风险
+
+  - id: "political_assessment"
+    name: "政治稳定性评估"
+    action: >
+      对目标国家的政治环境进行系统性评估，包括：
+
+      ### 评估维度
+
+      1. **政治体制与治理结构**
+         - 政体类型（民主/威权/混合）
+         - 政府稳定性与更迭风险
+         - 行政/立法/司法权力制衡
+         - 腐败感知指数（CPI）与治理指标
+
+      2. **政策连续性与可预测性**
+         - 近期重大政策变化
+         - 选举周期与政策波动风险
+         - 外资政策的历史稳定性
+
+      3. **地缘政治风险**
+         - 国际关系与联盟
+         - 制裁/贸易限制风险
+         - 区域冲突与边境争端
+         - 多边组织参与度
+
+      4. **政治风险缓解机制**
+         - 双边投资协定（BIT）
+         - 多边投资担保机构（MIGA）
+         - 政治风险保险可用性
+
+      ### 数据来源优先级
+      - 一级：World Bank Governance Indicators、Transparency International CPI
+      - 二级：EIU Country Risk、Control Risks
+      - 三级：官方政府文件、国际媒体报道
+
+      ### 输出
+      政治风险评估报告，包含评分（1-5分）、关键风险因素、缓解建议。
+
+  - id: "economic_assessment"
+    name: "经济基本面评估"
+    action: >
+      对目标国家的经济环境进行系统性评估，包括：
+
+      ### 评估维度
+
+      1. **宏观经济指标**
+         - GDP 增长率（近3年+预测）
+         - 通货膨胀率
+         - 失业率
+         - 财政赤字/GDP 比率
+         - 公共债务/GDP 比率
+         - 外汇储备充足性
+
+      2. **主权信用评级**
+         - Moody's / S&P / Fitch 评级
+         - 评级展望（正面/稳定/负面）
+         - 近期评级变动历史
+
+      3. **货币与汇率风险**
+         - 汇率制度（固定/浮动/管理浮动）
+         - 汇率波动性
+         - 资本账户开放程度
+         - 外汇管制政策
+         - 利润汇回限制
+
+      4. **国际收支**
+         - 经常账户余额
+         - 外国直接投资（FDI）流入趋势
+         - 外债结构与偿债能力
+
+      ### 数据来源优先级
+      - 一级：IMF World Economic Outlook、World Bank
+      - 二级：Moody's / S&P / Fitch 主权评级报告
+      - 三级：中央银行、财政部官方数据
+
+      ### 输出
+      经济基本面评估报告，包含评分（1-5分）、关键风险因素、缓解建议。
+
+  - id: "energy_market_assessment"
+    name: "电力市场与能源需求评估"
+    action: >
+      对目标国家的电力市场和能源需求进行系统性评估，这是新能源投资
+      的核心决策依据。重点分析矿业PPA机会、电力市场规模、人口消费
+      和制造业等电力消费驱动因素。
+
+      ### 评估维度
+
+      1. **矿业与工业PPA市场**
+         - 矿业产值占GDP比重及增长趋势
+         - 主要矿业品种（铜、锂、钴、镍、金、铁矿石等）及产量
+         - 矿业用电量及占全国电力消费比例
+         - 现有矿企PPA签约情况（到期时间、续约需求）
+         - 新建矿业项目规划及电力需求预测
+         - 矿业企业信用评级与PPA履约能力
+         - 工业用户（冶炼、加工）电力需求
+
+      2. **电力市场规模与发展**
+         - 总装机容量（GW）及电源结构（煤/气/水/核/风光/生物质）
+         - 年发电量（TWh）及增长率
+         - 电力消费总量（TWh）及人均消费量
+         - 电力需求增长率（近3年+预测）
+         - 电力缺口与停电频率
+         - 电网覆盖率与输配电损耗率
+         - 可再生能源占比及发展目标
+         - 电力市场结构（垄断/单一买家/批发竞争/零售竞争）
+         - 电力批发价格与零售电价水平
+
+      3. **人口与消费市场**
+         - 总人口及增长率
+         - 城镇化率及趋势
+         - 人均GDP及购买力平价
+         - 居民用电普及率
+         - 居民用电量及增长趋势
+         - 空调/制冷设备普及率（影响夏季尖峰负荷）
+         - 电动汽车渗透率及充电基础设施
+
+      4. **制造业与工业用电**
+         - 制造业增加值占GDP比重
+         - 主要工业门类及用电强度
+         - 工业园区/经济特区发展
+         - 数据中心建设规划（高耗电新业态）
+         - 工业用电量及增长趋势
+         - 工业电价水平及交叉补贴情况
+
+      5. **新能源发展环境**
+         - 风光资源禀赋（辐照强度、风速、可利用小时数）
+         - 新能源装机现状及规划目标
+         - 可再生能源配额/证书制度
+         - 电网消纳能力与灵活性资源
+         - 储能政策与市场机会
+         - 绿电交易市场成熟度
+
+      ### 数据来源优先级
+      - 一级：IEA、IRENA、BP Statistical Review、各国能源部/电力监管机构
+      - 二级：World Bank、IMF、各国矿业部/统计局
+      - 三级：行业协会报告（如世界矿业大会）、咨询公司报告
+
+      ### 输出
+      电力市场与能源需求评估报告，包含评分（1-5分）、关键数据表格、
+      矿业PPA机会分析、电力需求预测、风险因素、缓解建议。
+
+  - id: "security_assessment"
+    name: "安全形势评估"
+    action: >
+      对目标国家的安全环境进行系统性评估，包括：
+
+      ### 评估维度
+
+      1. **国内安全形势**
+         - 暴力犯罪率
+         - 恐怖主义威胁等级
+         - 社会动荡与抗议活动
+         - 罢工与劳工冲突风险
+
+      2. **区域安全风险**
+         - 边境安全
+         - 周边地区冲突溢出风险
+         - 海盗/海上安全（如适用）
+
+      3. **项目安全风险**
+         - 项目现场安全评估
+         - 人员安全风险（外籍员工）
+         - 资产安全风险（盗窃/破坏）
+         - 网络安全风险
+
+      4. **安保成本评估**
+         - 安保人员配置需求
+         - 安保设施投资估算
+         - 安全保险成本
+         - 应急撤离计划
+
+      ### 数据来源优先级
+      - 一级：Control Risks、Aon Political Risk Map
+      - 二级：IISS Armed Conflict Database、UCDP
+      - 三级：外交部旅行警告、当地安全报告
+
+      ### 输出
+      安全形势评估报告，包含评分（1-5分）、关键风险因素、安保成本估算、缓解建议。
+
+  - id: "industry_policy_assessment"
+    name: "行业政策评估"
+    action: >
+      对目标国家与目标行业相关的政策环境进行系统性评估，包括：
+
+      ### 评估维度
+
+      1. **行业准入政策**
+         - 外资持股比例限制
+         - 行业准入负面清单
+         - 许可证/牌照要求
+         - 本地化要求（本地成分/本地雇佣）
+
+      2. **产业政策与激励**
+         - 国家产业战略与优先领域
+         - 补贴/激励政策
+         - 出口加工区/经济特区政策
+         - 研发税收抵免
+
+      3. **监管环境**
+         - 监管机构与框架
+         - 审批流程复杂度与时间
+         - 合规成本估算
+         - 监管不确定性评估
+
+      4. **知识产权保护**
+         - 知识产权法律框架
+         - 执法有效性
+         - 技术转让要求
+         - 商业秘密保护
+
+      5. **贸易政策**
+         - 关税与非关税壁垒
+         - 自由贸易协定（FTA）覆盖
+         - 进出口限制
+         - 原产地规则
+
+      ### 数据来源优先级
+      - 一级：政府官方政策文件、投资促进机构
+      - 二级：WTO Trade Policy Review、UNCTAD Investment Policy Review
+      - 三级：行业协会报告、国际律所分析
+
+      ### 输出
+      行业政策评估报告，包含评分（1-5分）、关键政策风险、合规要求清单、缓解建议。
+
+  - id: "tax_legal_assessment"
+    name: "税收与法律环境评估"
+    action: >
+      对目标国家的税收和法律环境进行系统性评估，包括：
+
+      ### 评估维度
+
+      1. **税制概况**
+         - 公司所得税税率与税基
+         - 增值税/销售税率
+         - 预提税（股息/利息/特许权使用费）
+         - 关税与进口税
+         - 财产税/土地税
+         - 社保缴款
+
+      2. **税收优惠与激励**
+         - 免税期（Tax Holiday）
+         - 投资税收抵免
+         - 加速折旧政策
+         - 亏损结转规则
+         - 经济特区税收优惠
+
+      3. **国际税收**
+         - 双边税收协定网络
+         - 受控外国公司（CFC）规则
+         - 转让定价规则
+         - 税收信息交换协议（TIEA）
+         - BEPS 合规状态
+
+      4. **劳动法与雇佣**
+         - 最低工资标准
+         - 工作时间与加班规定
+         - 解雇保护与遣散费
+         - 外籍员工工作许可
+         - 工会与集体谈判
+         - 强制福利（社保/医保/养老金）
+
+      5. **争议解决**
+         - 司法体系独立性与效率
+         - 仲裁认可度（ICSID / UNCITRAL）
+         - 合同执行便利度
+         - 破产法律框架
+
+      ### 数据来源优先级
+      - 一级：政府税务机关、法律文本
+      - 二级：PwC/EY/KPMG/Deloitte 国家税收指南
+      - 三级：World Bank Doing Business、国际律所分析
+
+      ### 输出
+      税收与法律环境评估报告，包含评分（1-5分）、关键风险因素、合规要求清单、缓解建议。
+
+  - id: "risk_scoring_and_recommendation"
+    name: "综合风险评分与建议"
+    action: >
+      基于以上八个维度的评估结果，进行综合风险评分、资本金溢价系数计算
+      和战略建议输出。
+
+      ### 评分方法论
+
+      采用双层加权评分体系：
+
+      ```
+      ┌──────────────────────────┬──────┬──────────────────────────────┐
+      │ 维度                     │ 权重  │ 子项                         │
+      ├──────────────────────────┼──────┼──────────────────────────────┤
+      │ 1. 政治稳定性            │ 15%  │ 政府稳定性 / 治理能力 / 地缘 │
+      │ 2. 经济基本面            │ 15%  │ 宏观指标 / 信用 / 汇率       │
+      │ 3. 汇兑自由度            │ 14%  │ 外汇管制 / 利润汇回 / 资本   │
+      │ 4. 电力市场与能源需求    │ 18%  │ 矿业PPA / 电力规模 / 消费   │
+      │ 5. 安全形势              │ 11%  │ 国内安全 / 区域安全 / 项目   │
+      │ 6. 行业政策              │ 15%  │ 准入 / 补贴 / 审批 / 本地化  │
+      │ 7. 税收与法律            │ 7%   │ 税负 / 优惠 / 劳动法 / 仲裁  │
+      │ 8. 营商便利度            │ 5%   │ 营商环境 / 基建 / 人才       │
+      ├──────────────────────────┼──────┼──────────────────────────────┤
+      │ 综合风险评分              │ 100% │ 1.0 - 5.0                   │
+      └──────────────────────────┴──────┴──────────────────────────────┘
+      ```
+
+      ### 评分标准（每维度 1-5 分）
+
+      - **1 分（低风险）**：风险因素极少，有完善的制度和缓解机制
+      - **2 分（中低风险）**：存在轻微风险因素，但整体可控
+      - **3 分（中等风险）**：存在明显风险因素，需要主动管理
+      - **4 分（中高风险）**：风险因素显著，需要重点缓解措施
+      - **5 分（高风险）**：风险因素严重，建议重新评估进入策略
+
+      ### 综合风险等级
+
+      | 加权总分 | 风险等级 | 含义 |
+      |---------|---------|------|
+      | 1.0 - 1.8 | 🟢 低 | 适合进入，标准风险管理 |
+      | 1.8 - 2.6 | 🟢🟡 中低 | 适合进入，加强风险监控 |
+      | 2.6 - 3.4 | 🟡 中 | 谨慎进入，需要风险缓解计划 |
+      | 3.4 - 4.2 | 🟠 中高 | 建议重新评估，需要强缓解措施 |
+      | 4.2 - 5.0 | 🔴 高 | 不建议进入，除非有特殊优势 |
+
+      ### 资本金溢价系数
+
+      基于综合风险评分，计算资本金溢价系数（Capital Premium Factor），
+      用于调整项目资本成本以反映国别风险。
+
+      **计算公式：**
+
+      ```
+      资本金溢价系数 = (综合风险评分 - 1) × 基准溢价率
+
+      其中：
+      - 综合风险评分：1.0 - 5.0
+      - 基准溢价率：3%（可根据行业和项目类型调整）
+      - 资本金溢价系数：0% - 12%
+      ```
+
+      **溢价系数对照表：**
+
+      | 综合风险评分 | 风险等级 | 资本金溢价系数 | 示例应用 |
+      |-------------|---------|---------------|---------|
+      | 1.0 - 1.8   | 🟢 低   | 0% - 2.4%     | 项目折现率 +0~2.4% |
+      | 1.8 - 2.6   | 🟢🟡 中低 | 2.4% - 4.8%   | 项目折现率 +2.4~4.8% |
+      | 2.6 - 3.4   | 🟡 中   | 4.8% - 7.2%   | 项目折现率 +4.8~7.2% |
+      | 3.4 - 4.2   | 🟠 中高 | 7.2% - 9.6%   | 项目折现率 +7.2~9.6% |
+      | 4.2 - 5.0   | 🔴 高   | 9.6% - 12.0%  | 项目折现率 +9.6~12% |
+
+      **使用说明：**
+      - 资本金溢价系数应叠加到项目的基础折现率上
+      - 例如：基础折现率 8% + 国别溢价 5% = 调整后折现率 13%
+      - 对于有主权担保或国际开发机构参与的项目，可酌情降低溢价系数
+      - 对于高风险国家但有强信用增强措施（如MIGA担保）的项目，
+        可应用 50% 的溢价折扣
+
+      ### 输出内容
+
+      1. **综合风险评分矩阵** — 八维度评分与加权汇总
+      2. **资本金溢价系数** — 基于综合评分的溢价百分比
+      3. **情景分析** — 保守/基准/乐观三种情景下的风险评分与溢价系数
+      4. **关键风险热力图** — 按影响程度和发生概率排序
+      5. **缓解措施建议** — 针对每个高风险维度的具体缓解策略
+      6. **国别进入策略建议** — 基于风险等级的进入方式建议
+         - 低风险：直接进入，标准投资结构
+         - 中低风险：进入，加强尽职调查
+         - 中等风险：寻找本地合作伙伴，分阶段进入
+         - 中高风险：仅通过合资/特许经营方式进入
+         - 高风险：暂缓进入，或通过出口/代理方式试水
+
+  - id: "generate_report"
+    name: "整合国别报告"
+    action: >
+      基于以上所有维度的评估结果，整合生成完整的国别报告。
+
+      ### 报告结构
+
+      1. **执行摘要** — 综合风险等级、关键发现、核心建议（1-2页）
+      2. **国家概览** — 基本信息、人口、地理、语言、时区等
+      3. **政治稳定性评估** — 评分、分析、风险因素、缓解建议
+      4. **经济基本面评估** — 评分、分析、风险因素、缓解建议
+      5. **汇兑自由度评估** — 评分、分析、风险因素、缓解建议
+      6. **电力市场与能源需求评估** — 评分、矿业PPA、电力规模、消费、缓解建议
+      7. **安全形势评估** — 评分、分析、风险因素、安保成本、缓解建议
+      8. **行业政策评估** — 评分、分析、合规要求、缓解建议
+      9. **税收与法律环境评估** — 评分、分析、合规要求、缓解建议
+      10. **综合风险评分与建议** — 评分矩阵、资本金溢价、情景分析、进入策略
+      11. **数据来源与参考文献** — 所有引用数据的来源和获取日期
+      12. **免责声明** — 报告使用限制和责任声明
+
+      ### 保存路径
+
+      报告保存到 OUTPUT/<项目名>/country_report.md
+
+  - id: "human_review_gate"
+    name: "人工审核门禁"
+    action: >
+      对于用于投资决策或外部披露的国别报告，标记为需要人工审核。
+
+      输出审核摘要，包含：
+      - 综合风险等级
+      - 关键风险因素摘要
+      - 数据新鲜度状态
+      - 建议的审核人角色
+      - 审核清单
+
+interruptions:
+  - node_id: "confirm_intent"
+    pause_reason: "missing_required_input"
+    resume_condition: "用户补充目标国家、报告用途或报告深度"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      ["missing_fields", "target_country", "report_purpose", "checkpoint_id"]
+
+  - node_id: "gather_country_context"
+    pause_reason: "country_data_not_found"
+    resume_condition: "用户确认创建新国家约束和数据，或提供替代国家"
+    cancel_condition: "用户取消分析"
+    audit_fields: ["country", "data_status", "fetch_required", "checkpoint_id"]
+
+  - node_id: "gather_country_context"
+    pause_reason: "country_data_expired"
+    resume_condition: "用户批准在线获取最新数据 / 用户确认使用现有数据 / 用户提供替代数据"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "country",
+        "last_updated",
+        "freshness_days",
+        "fetch_result",
+        "checkpoint_id",
+      ]
+
+  - node_id: "political_assessment"
+    pause_reason: "political_risk_critical"
+    resume_condition: "用户确认接受高风险评估结果，或要求补充数据后重新评估"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      ["risk_score", "critical_factors", "data_sources", "checkpoint_id"]
+
+  - node_id: "economic_assessment"
+    pause_reason: "economic_risk_critical"
+    resume_condition: "用户确认接受高风险评估结果，或要求补充数据后重新评估"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      ["risk_score", "critical_factors", "data_sources", "checkpoint_id"]
+
+  - node_id: "energy_market_assessment"
+    pause_reason: "energy_market_data_insufficient"
+    resume_condition: "用户提供补充数据或确认使用现有数据进行评估"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "mining_ppa_opportunity",
+        "power_market_size",
+        "demand_growth_rate",
+        "data_completeness",
+        "checkpoint_id",
+      ]
+
+  - node_id: "security_assessment"
+    pause_reason: "security_risk_critical"
+    resume_condition: "用户确认接受高风险评估结果，或要求补充数据后重新评估"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "risk_score",
+        "critical_factors",
+        "security_cost_estimate",
+        "checkpoint_id",
+      ]
+
+  - node_id: "industry_policy_assessment"
+    pause_reason: "policy_restriction_significant"
+    resume_condition: "用户确认接受政策限制评估结果，或要求补充数据后重新评估"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "restriction_level",
+        "affected_sectors",
+        "compliance_requirements",
+        "checkpoint_id",
+      ]
+
+  - node_id: "tax_legal_assessment"
+    pause_reason: "tax_legal_risk_significant"
+    resume_condition: "用户确认接受税收法律风险评估结果，或要求补充数据后重新评估"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "risk_score",
+        "critical_factors",
+        "compliance_requirements",
+        "checkpoint_id",
+      ]
+
+  - node_id: "risk_scoring_and_recommendation"
+    pause_reason: "overall_risk_high"
+    resume_condition: "用户确认接受高风险评估结果和进入策略建议"
+    cancel_condition: "用户取消分析"
+    audit_fields:
+      [
+        "overall_score",
+        "risk_level",
+        "entry_strategy_recommendation",
+        "checkpoint_id",
+      ]
+
+  - node_id: "human_review_gate"
+    pause_reason: "requires_human_approval"
+    resume_condition: "业务负责人批准报告对外使用"
+    cancel_condition: "审核人驳回报告"
+    audit_fields:
+      ["approval_status", "risk_level", "reviewer_role", "checkpoint_id"]
+
+outputs:
+  template: "prompts/country/country_report.system.md"
+  required_sections:
+    - "executive_summary"
+    - "country_overview"
+    - "political_assessment"
+    - "economic_assessment"
+    - "exchange_freedom_assessment"
+    - "energy_market_assessment"
+    - "security_assessment"
+    - "industry_policy_assessment"
+    - "tax_legal_assessment"
+    - "risk_scoring_and_recommendation"
+    - "data_sources_and_references"
+    - "disclaimer"
+
+human_review:
+  required_when:
+    - "报告用于投资决策或外部披露"
+    - "综合风险等级为中高或高"
+    - "存在关键数据缺失或过期"
+    - "新建国家约束和数据未经审核"
+    - "政治或安全风险评估为高风险"
+    - "电力市场数据不完整或存在重大不确定性"
+  reviewer_role: "country_risk_lead_or_independent_reviewer"
+
+version: "0.2.0"

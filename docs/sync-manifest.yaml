@@ -1,0 +1,596 @@
+#=============================================================================
+# sync-manifest.yaml — 文档同步依赖清单
+#
+# 功能：声明所有文件之间的依赖关系。每次修改一个文件后，
+#       必须根据此清单检查关联文件是否需要同步更新。
+#
+# 用法：
+#   scripts/sync_checker.py --check-source <修改的文件>
+#
+# check_kind 类型说明：
+#   - version_alignment:        版本号必须一致
+#   - component_list_presence:  组件列表必须包含新增项
+#   - exact_list_match:         列表必须完全一致
+#   - list_superset_check:      目标列表必须是源列表的超集
+#   - startup_sequence_alignment: 启动序列必须一致
+#   - process_step_alignment:   流程步骤必须一致
+#   - file_list_presence:       文件列表必须包含新增项
+#   - directory_structure_sync: 目录结构描述必须同步
+#   - session_reference_sync:   会话引用必须指向最新
+#   - changelog_entry_exists:   CHANGELOG 条目必须存在
+#   - mcp_tool_list_sync:       MCP 工具列表必须同步
+#   - feature_flag_sync:        功能开关状态必须同步
+#   - prompt_manifest_sync:     Prompt 清单必须同步
+#   - git_boundary_sync:        Git 边界规则必须同步
+#   - available_asset_root_sync: 可用资产根目录必须同步
+#   - country_constraint_sync:  国家约束引用必须同步
+#   - market_reference_sync:    市场数据引用必须同步
+#   - knowledge_base_sync:      知识库引用必须同步
+#   - schema_list_sync:         Schema 列表必须同步
+#   - judge_config_sync:        Judge 配置必须同步
+#   - judge_model_sync:         Judge 模型列表必须同步
+#   - eval_set_directory_sync:  评估集目录必须同步
+#   - regression_test_sync:     回归测试配置必须同步
+#   - dashboard_test_sync:      仪表盘测试配置必须同步
+#   - rollout_test_sync:        灰度发布测试配置必须同步
+#   - workflow_runner_sync:     工作流运行器配置必须同步
+#   - interruption_handler_sync: 中断处理器配置必须同步
+#   - lattice_schema_sync:      Lattice Schema 列表必须同步
+#   - lattice_script_sync:      Lattice 脚本列表必须同步
+#   - lattice_workflow_sync:    Lattice 工作流列表必须同步
+#   - lattice_template_sync:    Lattice 模板列表必须同步
+#   - lattice_example_sync:     Lattice 示例列表必须同步
+#   - rubric_reference_sync:    评分标准引用必须同步
+#   - evaluation_api_sync:      评估 API 契约必须同步
+#   - evaluation_architecture_sync: 评估架构文档必须同步
+#   - evaluation_evolution_sync: 评估进化计划必须同步
+#   - evaluation_test_snapshot_sync: 评估测试快照必须同步
+#   - evaluation_regression_sync: 评估回归测试必须同步
+#   - release_governance_sync:  发布治理文档必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试必须同步
+#   - release_judge_config_sync: 发布 Judge 配置必须同步
+#   - release_judge_model_sync: 发布 Judge 模型必须同步
+#   - release_eval_set_sync:    发布评估集必须同步
+#   - release_candidate_change_sync: 发布候选变更必须同步
+#   - release_regression_report_sync: 发布回归报告必须同步
+#   - release_eval_set_config_sync: 发布评估集配置必须同步
+#   - release_eval_set_schema_sync: 发布评估集 Schema 必须同步
+#   - release_candidate_change_schema_sync: 发布候选变更 Schema 必须同步
+#   - release_regression_report_schema_sync: 发布回归报告 Schema 必须同步
+#   - release_regression_output_sync: 发布回归测试输出目录必须同步
+#   - release_eval_set_directory_sync: 发布评估集目录必须同步
+#   - release_rubric_sync:      发布评分标准必须同步
+#   - release_evaluation_api_sync: 发布评估 API 契约必须同步
+#   - release_evaluation_architecture_sync: 发布评估架构文档必须同步
+#   - release_evaluation_evolution_sync: 发布评估进化计划必须同步
+#   - release_evaluation_test_snapshot_sync: 发布评估测试快照必须同步
+#   - release_evaluation_regression_sync: 发布评估回归测试必须同步
+#   - release_governance_doc_sync: 发布治理文档引用必须同步
+#   - release_manifest_schema_sync: 发布 manifest Schema 必须同步
+#   - release_manifest_dir_sync: 发布 manifest 目录必须同步
+#   - release_active_manifest_sync: 活跃发布 manifest 必须同步
+#   - release_promote_script_sync: 发布提升脚本必须同步
+#   - release_rollback_script_sync: 发布回滚脚本必须同步
+#   - release_changelog_sync:   发布变更日志必须同步
+#   - release_runner_sync:      发布运行器必须同步
+#   - release_api_sync:         发布 API 契约必须同步
+#   - release_architecture_sync: 发布架构文档必须同步
+#   - release_evolution_sync:   发布进化计划必须同步
+#   - release_test_snapshot_sync: 发布测试快照必须同步
+#   - release_regression_sync:  发布回归测试
+
+#=============================================================================
+# 同步依赖声明
+# 每次修改 source 文件后，必须检查所有 target 文件是否需要同步更新
+#=============================================================================
+
+sync_dependencies:
+  # ── active-release.yaml ──
+  - source: "config/active-release.yaml"
+    modify_triggers:
+      - target: "docs/model_context.md"
+        reason: "组件版本号变更"
+        check_kind: "version_alignment"
+      - target: "docs/INDEX.md"
+        reason: "组件注册变更（增/删 workflow/constraint/prompt）"
+        check_kind: "component_list_presence"
+      - target: "CHANGELOG.md"
+        reason: "版本更新日志"
+        check_kind: "changelog_entry_exists"
+      - target: "config/releases/"
+        reason: "发布状态变更需同步 manifest"
+        check_kind: "release_manifest_sync"
+
+  # ── mcp-tools.yaml ──
+  - source: "config/mcp-tools.yaml"
+    modify_triggers:
+      - target: ".vscode/mcp.json"
+        reason: "MCP 工具列表必须与实际配置一致"
+        check_kind: "exact_list_match"
+      - target: "config/active-release.yaml"
+        reason: "active MCP 工具列表变更"
+        check_kind: "list_superset_check"
+
+  # ── context_intent_gate.yaml ──
+  - source: "constraints/baseline/context_intent_gate.yaml"
+    modify_triggers:
+      - target: "config/context-loading.yaml"
+        reason: "启动序列规则变更"
+        check_kind: "startup_sequence_alignment"
+      - target: "config/workspace_usage_guide.md"
+        reason: "任务启动流程变更"
+        check_kind: "process_step_alignment"
+
+  # ── context-loading.yaml ──
+  - source: "config/context-loading.yaml"
+    modify_triggers:
+      - target: "constraints/baseline/context_intent_gate.yaml"
+        reason: "启动序列规则变更"
+        check_kind: "startup_sequence_alignment"
+      - target: "config/workspace_usage_guide.md"
+        reason: "任务启动流程变更"
+        check_kind: "process_step_alignment"
+
+  # ── session-tracking.yaml ──
+  - source: "config/session-tracking.yaml"
+    modify_triggers:
+      - target: "docs/user_profile.md"
+        reason: "会话历史引用"
+        check_kind: "session_reference_sync"
+
+  # ── feature-flags.yaml ──
+  - source: "config/feature-flags.yaml"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "功能开关状态变更"
+        check_kind: "feature_flag_sync"
+
+  # ── prompts/ 目录 ──
+  - source: "prompts/prompt_manifest.yaml"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "Prompt 清单变更"
+        check_kind: "prompt_manifest_sync"
+
+  # ── workflows/ 目录 ──
+  - source: "workflows/"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "工作流注册变更"
+        check_kind: "component_list_presence"
+      - target: "docs/INDEX.md"
+        reason: "工作流数量变更"
+        check_kind: "directory_structure_sync"
+
+  # ── constraints/ 目录 ──
+  - source: "constraints/"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "约束注册变更"
+        check_kind: "component_list_presence"
+      - target: "docs/INDEX.md"
+        reason: "约束数量变更"
+        check_kind: "directory_structure_sync"
+
+  # ── docs/ 目录 ──
+  - source: "docs/"
+    modify_triggers:
+      - target: "docs/INDEX.md"
+        reason: "文档索引变更"
+        check_kind: "file_list_presence"
+
+  # ── scripts/ 目录 ──
+  - source: "scripts/"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "脚本注册变更"
+        check_kind: "component_list_presence"
+
+  # ── schemas/ 目录 ──
+  - source: "schemas/"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "Schema 注册变更"
+        check_kind: "schema_list_sync"
+
+  # ── evaluators/ 目录 ──
+  - source: "evaluators/"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "评估器注册变更"
+        check_kind: "component_list_presence"
+
+  # ── lattice/ 目录 ──
+  - source: "lattice/"
+    modify_triggers:
+      - target: "config/active-release.yaml"
+        reason: "Lattice 框架注册变更"
+        check_kind: "component_list_presence"
+
+  # ── .vscode/mcp.json ──
+  - source: ".vscode/mcp.json"
+    modify_triggers:
+      - target: "config/mcp-tools.yaml"
+        reason: "MCP 工具列表变更"
+        check_kind: "exact_list_match"
+      - target: "config/active-release.yaml"
+        reason: "MCP 工具列表变更"
+        check_kind: "list_superset_check"
+
+  # ── INDEX.md ──
+  - source: "docs/INDEX.md"
+    modify_triggers:
+      - target: "docs/sync-manifest.yaml"
+        reason: "文档索引变更需同步依赖清单"
+        check_kind: "file_list_presence"

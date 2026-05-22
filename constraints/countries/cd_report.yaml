@@ -1,0 +1,889 @@
+# =============================================================================
+# cd_report.yaml — 刚果(金)国别报告约束与数据
+#
+# 用途：刚果(金)国别风险评估的约束与数据文件
+# 创建日期：2026-05-14
+# 数据有效期：90天（至 2026-08-12）
+# =============================================================================
+
+constraint_pack:
+  id: "country_report_cd"
+  version: "0.1.0"
+  status: "draft"
+
+metadata:
+  country: "刚果(金)"
+  country_code: "cd"
+  region: "中部非洲"
+  capital: "金沙萨"
+  population: "约1.02亿（2025年）"
+  official_language: "法语"
+  currency: "CDF（刚果法郎）"
+  timezone: "UTC+1 / UTC+2"
+  description: "刚果(金)国别风险评估约束与数据"
+  effective_date: "2026-05-14"
+  last_updated: "2026-05-14"
+  data_freshness_days: 0
+  authority_level: "reference"
+
+  data_sources:
+    - id: "source_1"
+      name: "World Bank Governance Indicators"
+      type: "international_organization"
+      url: "https://www.worldbank.org/en/publication/worldwide-governance-indicators"
+      access_date: "2026-05-14"
+      data_type: "political"
+
+    - id: "source_2"
+      name: "Transparency International CPI"
+      type: "international_organization"
+      url: "https://www.transparency.org/en/cpi"
+      access_date: "2026-05-14"
+      data_type: "political"
+
+    - id: "source_3"
+      name: "IMF World Economic Outlook"
+      type: "international_organization"
+      url: "https://www.imf.org/en/Publications/WEO"
+      access_date: "2026-05-14"
+      data_type: "economic"
+
+    - id: "source_4"
+      name: "S&P / Moody's / Fitch Sovereign Ratings"
+      type: "international_organization"
+      url: "https://www.spglobal.com/ratings"
+      access_date: "2026-05-14"
+      data_type: "economic"
+
+    - id: "source_5"
+      name: "IMF AREAER Annual Report"
+      type: "international_organization"
+      url: "https://www.imf.org/en/Publications/Annual-Report-on-Exchange-Arrangements-and-Exchange-Restrictions"
+      access_date: "2026-05-14"
+      data_type: "economic"
+
+    - id: "source_6"
+      name: "刚果(金)能源与水资源部 / 国家电力公司(SNEL)"
+      type: "government"
+      url: "https://www.minergie.gouv.cd"
+      access_date: "2026-05-14"
+      data_type: "energy"
+
+    - id: "source_7"
+      name: "IEA / IRENA"
+      type: "international_organization"
+      url: "https://www.iea.org"
+      access_date: "2026-05-14"
+      data_type: "energy"
+
+    - id: "source_8"
+      name: "World Bank / IMF Country Reports"
+      type: "international_organization"
+      url: "https://www.worldbank.org/en/country/drc"
+      access_date: "2026-05-14"
+      data_type: "economic"
+
+    - id: "source_9"
+      name: "刚果(金)中央银行(BCC)"
+      type: "government"
+      url: "https://www.bcc.cd"
+      access_date: "2026-05-14"
+      data_type: "economic"
+
+    - id: "source_10"
+      name: "Control Risks / Aon Political Risk Map"
+      type: "industry"
+      url: "https://www.controlrisks.com"
+      access_date: "2026-05-14"
+      data_type: "security"
+
+    - id: "source_11"
+      name: "USGS / 刚果(金)矿业部"
+      type: "government"
+      url: "https://www.usgs.gov"
+      access_date: "2026-05-14"
+      data_type: "energy"
+
+    - id: "source_12"
+      name: "PwC / KPMG Africa Tax Guide"
+      type: "industry"
+      url: "https://www.pwc.com"
+      access_date: "2026-05-14"
+      data_type: "tax"
+
+    - id: "source_13"
+      name: "World Bank Doing Business"
+      type: "international_organization"
+      url: "https://www.doingbusiness.org"
+      access_date: "2026-05-14"
+      data_type: "business"
+
+    - id: "source_14"
+      name: "洛阳钼业(CMOC Group)年报/公告"
+      type: "industry"
+      url: "https://www.cmoc.com"
+      access_date: "2026-05-14"
+      data_type: "industry"
+
+    - id: "source_15"
+      name: "UNCTAD Investment Policy Review"
+      type: "international_organization"
+      url: "https://unctad.org"
+      access_date: "2026-05-14"
+      data_type: "policy"
+
+rules:
+  - id: "country_data_freshness"
+    severity: "high"
+    rule: "本文件数据自 last_updated 起有效期 90 天。超过 90 天必须重新获取最新数据或标注过期风险。"
+
+  - id: "separate_fact_assumption"
+    severity: "high"
+    rule: "必须明确区分政治/经济事实（已发布数据）、推断（基于数据的推测）、假设（待验证的判断）和待验证事项。"
+
+  - id: "source_attribution"
+    severity: "high"
+    rule: "所有数据必须标注来源 ID（引用 data_sources 列表中的来源）和获取日期。"
+
+  - id: "cd_ppa_currency"
+    severity: "high"
+    rule: "刚果(金)PPA必须以美元计价，CDF汇率波动大（年均贬值10-15%），不接受CDF计价PPA。"
+
+  - id: "cd_offtaker_assessment"
+    severity: "high"
+    rule: "矿业企业PPA必须进行购电方营运风险评估，包括矿山寿命匹配度、财务实力、大宗商品周期抗风险能力、东道国政策稳定性、信用增强措施五个维度。"
+
+# ── 政治环境约束 ──
+political:
+  government_type: "半总统制共和国"
+  head_of_state: "总统费利克斯·齐塞克迪（Félix Tshisekedi，2019年1月上任，2023年12月连任）"
+  head_of_government: "总理朱迪斯·苏米努瓦（Judith Suminwa，2024年6月上任）"
+  next_election_date: "2028年12月（总统选举）"
+  election_cycle_years: 5
+
+  governance_indicators:
+    wgi_voice_accountability:
+      score: "-1.25"
+      percentile: "18.5"
+      year: "2024"
+      source_id: "source_1"
+    wgi_political_stability:
+      score: "-1.85"
+      percentile: "8.0"
+      year: "2024"
+      source_id: "source_1"
+    wgi_government_effectiveness:
+      score: "-1.55"
+      percentile: "12.5"
+      year: "2024"
+      source_id: "source_1"
+    wgi_regulatory_quality:
+      score: "-1.40"
+      percentile: "15.0"
+      year: "2024"
+      source_id: "source_1"
+    wgi_rule_of_law:
+      score: "-1.60"
+      percentile: "10.5"
+      year: "2024"
+      source_id: "source_1"
+    wgi_control_of_corruption:
+      score: "-1.35"
+      percentile: "14.0"
+      year: "2024"
+      source_id: "source_1"
+
+  corruption_perceptions_index:
+    score: "20"
+    rank: "162/180"
+    year: "2024"
+    source_id: "source_2"
+
+  geopolitical_risks:
+    - risk: "东部地区武装冲突持续（M23叛军、ADF等武装组织活跃）"
+      level: "high"
+      impact: "矿业省份（南基伍、北基伍）安全形势严峻，可能影响项目安全和物流"
+      source_id: "source_10"
+    - risk: "大湖地区地缘政治紧张（刚果(金)-卢旺达关系恶化）"
+      level: "high"
+      impact: "卢旺达被指控支持M23叛军，区域稳定受威胁"
+      source_id: "source_10"
+    - risk: "选举后政治不确定性"
+      level: "medium"
+      impact: "2023年大选后政治局势基本稳定，但反对派质疑选举公正性"
+      source_id: "source_10"
+    - risk: "资源民族主义抬头"
+      level: "medium"
+      impact: "矿业合同重新谈判风险，出口管制政策变化"
+      source_id: "source_15"
+
+  international_agreements:
+    bilateral_investment_treaties:
+      with_china: true
+      total_count: 12
+      source_id: "source_15"
+    double_taxation_treaties:
+      with_china: true
+      total_count: 8
+      source_id: "source_12"
+    wto_member: true
+    icsid_member: true
+    miga_member: true
+
+# ── 汇兑自由度约束 ──
+exchange_freedom:
+  exchange_control_regime:
+    regime_type: "controlled"
+    local_currency_convertibility: "partially_convertible"
+    exchange_rate_system: "managed_float"
+    official_rate_usd: 2850
+    parallel_market_rate_usd: 2900-3000
+    parallel_market_premium: "2-5%"
+    source_id: "source_5"
+
+  profit_repatriation:
+    dividend_repatriation:
+      allowed: true
+      approval_required: true
+      approval_authority: "刚果(金)中央银行(BCC)"
+      typical_processing_time_days: 30-60
+      annual_limit_usd: "无明确上限，但需逐笔审批"
+      additional_tax_withholding: "10%"
+      source_id: "source_5"
+    interest_repatriation:
+      allowed: true
+      approval_required: true
+      approval_authority: "刚果(金)中央银行(BCC)"
+      typical_processing_time_days: 30-60
+      source_id: "source_5"
+    royalty_repatriation:
+      allowed: true
+      approval_required: true
+      approval_authority: "刚果(金)中央银行(BCC)"
+      typical_processing_time_days: 30-60
+      source_id: "source_5"
+    capital_repatriation:
+      allowed: true
+      lock_in_period_years: 5
+      approval_required: true
+      approval_authority: "刚果(金)中央银行(BCC)"
+      source_id: "source_5"
+
+  mandatory_surrender:
+    exists: true
+    surrender_percentage: "50%（矿业出口收入）"
+    applicable_to: "矿业出口企业"
+    source_id: "source_5"
+
+  offshore_arrangements:
+    offshore_account_allowed: true
+    ndf_market_available: false
+    ndf_tenors_available: "N/A"
+    source_id: "source_5"
+
+  historical_defaults:
+    sovereign_default_history:
+      exists: true
+      last_event_year: "2020"
+      details: "刚果(金)曾多次发生主权债务重组，2020年因COVID-19暂停偿债"
+      source_id: "source_4"
+    capital_control_tightening:
+      exists: true
+      last_event_year: "2023"
+      details: "2023年BCC加强外汇管制，要求矿业企业50%出口收入强制结汇"
+      source_id: "source_5"
+    forex_account_freeze:
+      exists: false
+      last_event_year: "N/A"
+      details: "无外汇账户冻结历史"
+      source_id: "source_5"
+
+  scoring_reference:
+    imf_areaer_restriction_index: "0.65（较高限制）"
+    overall_freedom_score: "4"
+    assessment_summary: "刚果(金)实行管理浮动汇率制度，存在显著外汇管制。矿业企业需强制结汇50%出口收入，利润汇回需BCC逐笔审批，流程30-60天。CDF年均贬值10-15%，平行市场溢价2-5%。"
+    source_id: "source_5"
+
+# ── 电力市场与能源需求约束 ──
+energy_market:
+  mining_and_ppa:
+    mining_gdp_share:
+      value: "约25%（含矿业+相关服务）"
+      year: "2025"
+      source_id: "source_8"
+
+    major_minerals:
+      - mineral: "钴"
+        annual_production: "约14万吨"
+        unit: "吨"
+        global_rank: "1（全球70%+产量）"
+        source_id: "source_11"
+      - mineral: "铜"
+        annual_production: "约280万吨"
+        unit: "吨"
+        global_rank: "3（全球10%+产量）"
+        source_id: "source_11"
+      - mineral: "钽"
+        annual_production: "约800吨"
+        unit: "吨"
+        global_rank: "1"
+        source_id: "source_11"
+      - mineral: "钻石"
+        annual_production: "约1,300万克拉"
+        unit: "克拉"
+        global_rank: "5"
+        source_id: "source_11"
+      - mineral: "黄金"
+        annual_production: "约50吨"
+        unit: "吨"
+        global_rank: "15"
+        source_id: "source_11"
+      - mineral: "锂"
+        annual_production: "勘探阶段（Manono锂矿项目）"
+        unit: "吨"
+        global_rank: "潜在前5"
+        source_id: "source_11"
+
+    mining_electricity_consumption:
+      value: "约6 TWh（估算）"
+      share_of_total: "约60%（矿业是最大电力消费部门）"
+      year: "2025"
+      source_id: "source_6"
+
+    existing_ppa_contracts:
+      - mining_company: "洛阳钼业(CMOC) - TFM矿"
+        capacity_mw: "约120 MW（自有水电+电网）"
+        contract_end_year: "持续运营"
+        renewal_likelihood: "high"
+        source_id: "source_14"
+      - mining_company: "洛阳钼业(CMOC) - KFM矿"
+        capacity_mw: "约70 MW（新建+电网）"
+        contract_end_year: "持续运营"
+        renewal_likelihood: "high"
+        source_id: "source_14"
+      - mining_company: "Glencore - Kamoto Copper Company"
+        capacity_mw: "约200 MW"
+        contract_end_year: "持续运营"
+        renewal_likelihood: "high"
+        source_id: "source_11"
+      - mining_company: "Sicomines（华刚矿业）"
+        capacity_mw: "约150 MW"
+        contract_end_year: "持续运营"
+        renewal_likelihood: "high"
+        source_id: "source_11"
+
+    new_mining_projects:
+      - project_name: "Manono锂矿（AVZ Minerals/紫金矿业）"
+        mineral: "锂"
+        expected_power_demand_mw: "100+ MW"
+        expected_commissioning_year: "2027-2028"
+        development_stage: "permitting"
+        source_id: "source_11"
+      - project_name: "TFM混合矿扩建（洛阳钼业）"
+        mineral: "铜/钴"
+        expected_power_demand_mw: "80+ MW"
+        expected_commissioning_year: "2026"
+        development_stage: "construction"
+        source_id: "source_14"
+      - project_name: "Kisanfu铜钴矿扩建"
+        mineral: "铜/钴"
+        expected_power_demand_mw: "50+ MW"
+        expected_commissioning_year: "2027"
+        development_stage: "feasibility"
+        source_id: "source_11"
+
+    mining_company_credit:
+      overall_credit_quality: "mixed"
+      source_id: "source_4"
+
+  power_market:
+    total_installed_capacity_gw:
+      value: "约2.8 GW"
+      year: "2025"
+      source_id: "source_6"
+
+    generation_mix:
+      hydro:
+        share: "95%+"
+        capacity_gw: "约2.7 GW"
+        source_id: "source_6"
+      solar:
+        share: "2%"
+        capacity_gw: "约0.05 GW"
+        source_id: "source_6"
+      diesel/heavy_fuel:
+        share: "3%"
+        capacity_gw: "约0.1 GW"
+        source_id: "source_6"
+
+    annual_generation_twh:
+      value: "约10 TWh"
+      year: "2025"
+      source_id: "source_6"
+
+    electricity_consumption_twh:
+      value: "约8 TWh"
+      year: "2025"
+      source_id: "source_6"
+
+    per_capita_consumption_kwh:
+      value: "约100 kWh（全球最低之一）"
+      year: "2025"
+      source_id: "source_6"
+
+    demand_growth_rate:
+      value: "5-8%"
+      period: "近3年CAGR（受矿业扩张驱动）"
+      source_id: "source_6"
+
+    demand_forecast:
+      value: "6-10%"
+      period: "未来5年CAGR（矿业电气化+铜钴产量增长）"
+      source_id: "source_6"
+
+    power_deficit:
+      exists: true
+      details: "电力缺口显著，现有装机无法满足矿业和居民需求，频繁停电（日均停电4-8小时）"
+      source_id: "source_6"
+
+    grid_coverage_rate:
+      value: "约21%（全球最低之一）"
+      source_id: "source_6"
+
+    transmission_loss_rate:
+      value: "20-30%（极高）"
+      source_id: "source_6"
+
+    renewable_energy_share:
+      value: "97%+（几乎全部为水电）"
+      target: "2030年目标4,500 MW装机"
+      source_id: "source_6"
+
+    market_structure: "monopoly（SNEL为国有垄断企业）"
+    wholesale_price:
+      value: "约$0.08-0.12 USD/kWh（SNEL电网）"
+      unit: "USD/kWh"
+      source_id: "source_6"
+
+    retail_price_industrial:
+      value: "约$0.10-0.15 USD/kWh"
+      unit: "USD/kWh"
+      source_id: "source_6"
+
+    retail_price_residential:
+      value: "约$0.05-0.08 USD/kWh（补贴后）"
+      unit: "USD/kWh"
+      source_id: "source_6"
+
+  population_and_consumption:
+    total_population:
+      value: "约1.02亿"
+      year: "2025"
+      source_id: "source_8"
+
+    population_growth_rate:
+      value: "3.2%（全球最高之一）"
+      source_id: "source_8"
+
+    urbanization_rate:
+      value: "47%"
+      source_id: "source_8"
+
+    gdp_per_capita:
+      value: "约$660 USD"
+      year: "2025"
+      source_id: "source_3"
+
+    electrification_rate:
+      value: "约21%"
+      source_id: "source_6"
+
+    residential_electricity_consumption:
+      value: "约2 TWh"
+      share_of_total: "约25%"
+      source_id: "source_6"
+
+    ac_penetration_rate:
+      value: "约5%（城市地区）"
+      source_id: "source_8"
+
+    ev_penetration_rate:
+      value: "<0.1%"
+      source_id: "source_8"
+
+  manufacturing_and_industry:
+    manufacturing_gdp_share:
+      value: "约15%（含矿业加工）"
+      year: "2025"
+      source_id: "source_8"
+
+    major_industries:
+      - industry: "矿业（铜/钴开采与冶炼）"
+        electricity_consumption_share: "60%"
+        source_id: "source_6"
+      - industry: "制造业（食品加工、建材）"
+        electricity_consumption_share: "10%"
+        source_id: "source_6"
+      - industry: "商业/服务业"
+        electricity_consumption_share: "10%"
+        source_id: "source_6"
+
+    industrial_parks:
+      count: 5+
+      details: "卢本巴希、科卢韦齐等矿业城市有工业园区"
+      source_id: "source_8"
+
+    data_center_development:
+      exists: false
+      planned_capacity_mw: "无规划"
+      source_id: "source_8"
+
+    industrial_electricity_consumption:
+      value: "约6 TWh"
+      share_of_total: "约75%"
+      growth_rate: "6-8%"
+      source_id: "source_6"
+
+    industrial_electricity_price:
+      value: "约$0.10-0.15 USD/kWh"
+      unit: "USD/kWh"
+      cross_subsidy: "exists（居民用电受补贴）"
+      source_id: "source_6"
+
+  renewable_energy_environment:
+    solar_irradiance:
+      value: "2,000-2,200 kWh/m²/年（南部矿区）"
+      source_id: "source_7"
+
+    wind_speed:
+      value: "3-5 m/s（较低）"
+      source_id: "source_7"
+
+    current_renewable_capacity_gw:
+      value: "约2.7 GW（几乎全部为水电）"
+      source_id: "source_6"
+
+    renewable_target:
+      capacity_gw: "4,500 MW（2030年目标）"
+      target_year: "2030"
+      source_id: "source_6"
+
+    renewable_certificate_system:
+      exists: false
+      details: "无可再生能源证书制度"
+      source_id: "source_6"
+
+    grid_absorption_capacity:
+      assessment: "weak"
+      details: "电网基础设施薄弱，输电损耗20-30%，SNEL财务状况差，无力大规模投资电网扩建"
+      source_id: "source_6"
+
+    energy_storage_policy:
+      exists: false
+      details: "无储能政策"
+      source_id: "source_6"
+
+    green_electricity_market:
+      maturity: "none"
+      details: "无绿电交易市场，PPA以矿业企业自用为主"
+      source_id: "source_6"
+
+# ── 经济环境约束 ──
+economic:
+  macro_indicators:
+    gdp_growth_rate:
+      value: "6.2%"
+      year: "2025"
+      source_id: "source_3"
+    inflation_rate:
+      value: "15.8%"
+      year: "2025"
+      source_id: "source_3"
+    unemployment_rate:
+      value: "约30%（非正式就业占比高）"
+      year: "2025"
+      source_id: "source_8"
+    fiscal_deficit_gdp:
+      value: "-2.5%"
+      year: "2025"
+      source_id: "source_3"
+    public_debt_gdp:
+      value: "约95%"
+      year: "2025"
+      source_id: "source_3"
+    foreign_reserves:
+      value: "约$50亿 USD"
+      year: "2025"
+      source_id: "source_9"
+    foreign_reserves_import_coverage:
+      value: "约2个月"
+      year: "2025"
+      source_id: "source_9"
+
+  sovereign_credit_ratings:
+    moodys:
+      rating: "Caa1"
+      outlook: "stable"
+      date: "2025-12"
+      source_id: "source_4"
+    sp:
+      rating: "B-"
+      outlook: "stable"
+      date: "2025-12"
+      source_id: "source_4"
+    fitch:
+      rating: "CCC+"
+      outlook: "stable"
+      date: "2025-12"
+      source_id: "source_4"
+
+  exchange_rate:
+    local_currency: "CDF"
+    usd_rate: 2850
+    eur_rate: 3100
+    cny_rate: 395
+    regime: "managed_float"
+    volatility: "high"
+    last_updated: "2026-05-14"
+    source_id: "source_5"
+
+  capital_controls:
+    profit_repatriation: "restricted"
+    profit_repatriation_details: "利润汇回需BCC审批，30-60天处理时间，10%预提税"
+    foreign_investment_approval: "sectoral"
+    foreign_investment_approval_details: "矿业投资需与政府签订合作协议（Convention），经议会批准"
+    source_id: "source_5"
+
+  balance_of_payments:
+    current_account_gdp:
+      value: "-3.5%（赤字）"
+      year: "2025"
+      source_id: "source_3"
+    fdi_inflow:
+      value: "约$25亿 USD"
+      year: "2025"
+      source_id: "source_8"
+    external_debt_gdp:
+      value: "约65%"
+      year: "2025"
+      source_id: "source_3"
+
+# ── 安全环境约束 ──
+security:
+  domestic_security:
+    crime_rate: "high"
+    terrorism_threat: "high"
+    social_unrest_risk: "medium"
+    labor_conflict_risk: "medium"
+    source_id: "source_10"
+
+  regional_security:
+    border_security: "tense"
+    regional_conflict_spillover: "high"
+    source_id: "source_10"
+
+  project_security:
+    expat_security_risk: "high"
+    asset_security_risk: "high"
+    cybersecurity_risk: "low"
+    security_cost_per_person_per_year:
+      value: "约$50,000-100,000 USD"
+      description: "外籍员工人均年安保成本参考（含武装安保、防弹车辆、安全住所）"
+      source_id: "source_10"
+
+  travel_advisory:
+    level: "4_avoid（东部省份）/ 3_reconsider（其他地区）"
+    issuer: "多国外交部"
+    date: "2026-05-14"
+    details: "东部北基伍、南基伍、伊图里省为最高风险地区，武装冲突和绑架风险高。矿业省份（卢阿拉巴、上加丹加）安全形势相对可控。"
+    source_id: "source_10"
+
+# ── 行业政策约束 ──
+industry_policy:
+  foreign_investment:
+    general_attitude: "welcoming（矿业领域）"
+    negative_list_exists: true
+    sectors_with_restrictions:
+      - sector: "矿业"
+        restriction: "需签订合作协议（Convention），经议会批准；政府可持有免费10%干股+最高15%可购股份"
+        source_id: "source_15"
+      - sector: "电信"
+        restriction: "外资持股限制"
+        source_id: "source_15"
+      - sector: "媒体"
+        restriction: "外资限制"
+        source_id: "source_15"
+
+    max_foreign_ownership:
+      default: "100%（多数行业）"
+      sector_specific:
+        - sector: "矿业"
+          limit: "100%（但政府有权免费获得10%干股）"
+          source_id: "source_15"
+
+  licensing:
+    key_licenses:
+      - license: "矿业许可证（Permis de Recherche / Permis d'Exploitation）"
+        issuing_authority: "矿业部"
+        estimated_timeline: "6-18个月"
+        complexity: "high"
+        source_id: "source_15"
+      - license: "环境与社会影响评估（EIES）"
+        issuing_authority: "环境部"
+        estimated_timeline: "6-12个月"
+        complexity: "medium"
+        source_id: "source_15"
+      - license: "发电许可证"
+        issuing_authority: "能源与水资源部"
+        estimated_timeline: "6-12个月"
+        complexity: "medium"
+        source_id: "source_6"
+
+  localization:
+    local_content_requirement:
+      exists: true
+      details: "矿业法要求优先采购本地产品和服务，雇佣本地员工"
+      target_percentage: "无明确量化目标"
+      source_id: "source_15"
+    local_employment_requirement:
+      exists: true
+      details: "外籍员工需获得工作许可，企业需证明本地员工不可得"
+      source_id: "source_15"
+
+  intellectual_property:
+    ip_protection_level: "weak"
+    patent_protection_years: 20
+    enforcement_effectiveness: "ineffective"
+    source_id: "source_15"
+
+  trade_policy:
+    average_tariff_rate:
+      value: "约12%"
+      source_id: "source_15"
+    free_trade_agreements:
+      - partner: "SADC（南部非洲发展共同体）"
+        effective_date: "持续"
+        source_id: "source_15"
+      - partner: "ECCAS（中部非洲国家经济共同体）"
+        effective_date: "持续"
+        source_id: "source_15"
+      - partner: "非洲大陆自由贸易区(AfCFTA)"
+        effective_date: "2021"
+        source_id: "source_15"
+    export_controls:
+      exists: true
+      details: "钴和铜精矿出口受管制，鼓励本地加工"
+      source_id: "source_15"
+
+# ── 税收与法律约束 ──
+tax_legal:
+  corporate_tax:
+    standard_rate: "30%"
+    reduced_rates:
+      - condition: "矿业项目（矿业法特别条款）"
+        rate: "30%（另加矿业特别税10%利润）"
+        source_id: "source_12"
+    capital_gains_tax_rate: "30%"
+    source_id: "source_12"
+
+  vat:
+    standard_rate: "16%"
+    reduced_rates:
+      - condition: "基本食品、药品"
+        rate: "0%"
+        source_id: "source_12"
+    registration_threshold: "CDF 80,000,000/年"
+    source_id: "source_12"
+
+  withholding_tax:
+    dividends:
+      standard_rate: "10%"
+      treaty_rate_with_china: "5%"
+      source_id: "source_12"
+    interest:
+      standard_rate: "10%"
+      treaty_rate_with_china: "10%"
+      source_id: "source_12"
+    royalties:
+      standard_rate: "20%"
+      treaty_rate_with_china: "10%"
+      source_id: "source_12"
+
+  customs_duties:
+    average_rate: "约12%"
+    special_zones:
+      - zone: "矿业项目进口设备"
+        benefits: "可协商豁免或减免进口关税"
+        source_id: "source_12"
+
+  tax_incentives:
+    tax_holiday:
+      exists: true
+      details: "矿业项目可协商免税期（通常3-5年）"
+      duration_years: 3-5
+      source_id: "source_12"
+    investment_tax_credit:
+      exists: true
+      details: "矿业投资可享受投资税收抵免"
+      rate: "可协商"
+      source_id: "source_12"
+    accelerated_depreciation:
+      exists: true
+      details: "矿业设备可加速折旧"
+      source_id: "source_12"
+    loss_carryforward:
+      years: "5年"
+      source_id: "source_12"
+    special_economic_zone:
+      exists: false
+      details: "无经济特区，但矿业项目可通过Convention获得特殊待遇"
+      source_id: "source_12"
+
+  labor_law:
+    minimum_wage:
+      amount: "约$100-150 USD/月"
+      currency: "USD"
+      period: "monthly"
+      source_id: "source_8"
+    standard_work_hours: "45小时/周"
+    overtime_rate: "1.5x-2x"
+    severance_pay: "按年资计算"
+    foreign_worker_permit: "需工作许可（Carte de Travail），雇主需证明本地员工不可得"
+    unionization_rate: "约15%"
+    mandatory_benefits: "社保（CNSS）、医疗保险、工伤保险、年假"
+    source_id: "source_8"
+
+  dispute_resolution:
+    judicial_independence: "low"
+    contract_enforcement_days: "约600天"
+    arbitration_recognition: "partial"
+    icsid_recognition: true
+    uncitral_recognition: true
+    source_id: "source_13"
+
+# ── 营商便利度 ──
+business_environment:
+  doing_business_rank:
+    overall_rank: 183
+    year: "2020（最新可用排名）"
+    source_id: "source_13"
+
+  infrastructure_quality:
+    transportation: "poor"
+    electricity: "very_poor"
+    telecommunications: "fair"
+    logistics: "poor"
+    source_id: "source_13"
+
+  labor_force:
+    education_level: "low"
+    english_proficiency: "low"
+    skilled_labor_availability: "scarce"
+    source_id: "source_8"
+
+  quality_of_life:
+    overall: "low"
+    healthcare_quality: "low"
+    international_schools: "limited（金沙萨、卢本巴希有国际学校）"
+    housing_quality: "low"
+    source_id: "source_13"

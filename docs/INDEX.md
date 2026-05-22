@@ -1,7 +1,7 @@
 # 文档索引 (Documentation Index)
 
 > 本文档是 Workspace_1 所有文档的唯一入口索引。
-> 最后更新：2026-05-11
+> 最后更新：2026-05-22
 
 ---
 
@@ -21,6 +21,7 @@
 | 查看会话历史            | `config/session-tracking.yaml`            |
 | 查看任务复盘            | `docs/retrospective_YYYYMMDD.md`          |
 | 查看审计报告            | `docs/workspace_audit_report.md`          |
+| 查看文档同步依赖        | `docs/sync-manifest.yaml`                 |
 | 打开工作空间            | `Workspace_1.code-workspace`              |
 
 ---
@@ -72,6 +73,13 @@
 | `docs/phase3_validation_report.md`  | Phase 3 验证报告                         | P2（历史参考） |
 | `docs/codex_to_vscode_migration.md` | Codex 到 VS Code 迁移记录                | P2（历史参考） |
 
+### 🔄 同步管理
+
+| 文档/脚本                 | 用途                                    | 优先级         |
+| ------------------------- | --------------------------------------- | -------------- |
+| `docs/sync-manifest.yaml` | 文档同步依赖清单 — 声明文件间依赖关系   | P1（治理参考） |
+| `scripts/sync_checker.py` | 文档同步检查器 — 自动检查关联文件一致性 | P1（治理参考） |
+
 ---
 
 ## 配置索引
@@ -100,17 +108,18 @@ Workspace_1/
 ├── constraints/     # 约束规则包
 │   ├── baseline/    #   基线约束（6个）
 │   ├── industries/  #   行业约束（5个）
-│   └── jurisdictions/ # 司法管辖区约束（4个）
+│   ├── jurisdictions/ # 司法管辖区约束（4个）
+│   └── countries/   #   国家约束（3个 + 模板）
 ├── docs/            # 文档（本文档所在目录）
 ├── evaluators/      # 评估规则和评分标准
 │   ├── rules/       #   规则检查
 │   └── rubrics/     #   评分标准
 ├── lattice/         # Lattice 晶格框架
-├── prompts/         # 系统提示词
+├── prompts/         # 系统提示词（含 country/ 领域）
 ├── schemas/         # JSON Schema 和 OpenAPI 定义
-├── scripts/         # 核心执行脚本
-├── tests/           # 测试用例
-├── workflows/       # 工作流定义（14个）
+├── scripts/         # 核心执行脚本（含 MCP 工具脚本）
+├── tests/           # 测试用例（8个阶段）
+├── workflows/       # 工作流定义（15个，含 country/）
 ├── data/            # 数据文件（Git 排除）
 ├── input/           # 输入文件（Git 排除）
 ├── logs/            # 日志文件（Git 排除）
@@ -129,4 +138,4 @@ Workspace_1/
 
 ---
 
-_版本：v1.0 | 日期：2026-05-11 | 维护人：Cline_
+_版本：v1.1 | 日期：2026-05-22 | 维护人：Cline_

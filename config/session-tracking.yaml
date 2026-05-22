@@ -80,10 +80,14 @@ session_tracking:
 
   # 活跃上下文
   active_context:
-    current_focus: ""
-    last_session: "session_20260508_001"
-    pending_items: []
-    notes: ""
+    current_focus: "工作环境体检与改进 — 修复 MCP 配置脱节、门禁规则对齐、代码变更管理"
+    last_session: "session_20260512_001"
+    pending_items:
+      - "安装缺失的 MCP 服务器到 .vscode/mcp.json"
+      - "管理 20 个已修改文件 + 12+ untracked 文件的版本提交"
+      - "注册 country 领域组件到 active-release.yaml"
+      - "更新 INDEX.md 添加新文件索引"
+    notes: "2026-05-22: 完成工作环境全面体检，发现 8 个待修复问题，按 P0→P1→P2 优先级逐步修复中"
 
   # 关键决策记录
   decision_log:

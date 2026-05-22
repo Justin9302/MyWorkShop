@@ -27,7 +27,7 @@ applies_to:
 gate_rules:
   - id: "mandatory_startup_read"
     severity: "critical"
-    rule: "Before any workflow execution, read config/active-release.yaml, config/context-loading.yaml, and constraints/baseline/human_review.yaml."
+    rule: "Before any workflow execution, read the mandatory startup sequence in order: docs/model_context.md → config/active-release.yaml → README.md → docs/current_workspace_creation_plan.md → constraints/baseline/context_intent_gate.yaml → config/workspace_usage_guide.md. This sequence aligns with config/context-loading.yaml required_startup_sequence."
     on_failure: "block_and_report"
   - id: "intent_confirmation_required"
     severity: "critical"

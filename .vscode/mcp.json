@@ -19,6 +19,36 @@
       "command": "npx",
       "args": ["-y", "@anthropic/mcp-github"],
       "description": "GitHub API operations: create PRs, manage issues, review changes"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Structured logical reasoning chain for white-box derivation"
+    },
+    "pdf-parser": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-pdf"],
+      "description": "PDF document parsing: extract text, paginated viewing"
+    },
+    "database-query": {
+      "command": "npx",
+      "args": ["-y", "@turingdance/database-mcp"],
+      "description": "Database query: SQLite/MySQL/PostgreSQL/Oracle/SQL Server"
+    },
+    "financial-calculator": {
+      "command": "python3",
+      "args": ["scripts/mcp_financial_calculator.py"],
+      "description": "Financial model calculations: NPV/IRR/LCOE/payback/sensitivity/offtaker risk"
+    },
+    "market-data": {
+      "command": "python3",
+      "args": ["scripts/mcp_market_data.py"],
+      "description": "Market data queries: NEM electricity market data/PPA/CAPEX/MLF/grid costs/BESS strategy/AI data center demand"
+    },
+    "data-viz": {
+      "command": "python3",
+      "args": ["scripts/mcp_data_viz.py"],
+      "description": "Data visualization: generate chart HTML/financial dashboards/sensitivity charts/project comparison tables (Chart.js)"
     }
   }
 }

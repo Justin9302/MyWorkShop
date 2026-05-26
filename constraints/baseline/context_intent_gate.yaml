@@ -59,7 +59,7 @@ gate_rules:
     on_failure: "record_omission_reason"
   - id: "git_commit_required"
     severity: "high"
-    rule: "After completing any file modification operation (fix, update, create, delete), the workflow must execute a Git commit to record the change locally before proceeding to the next task or concluding. Commit messages must be descriptive and follow the conventional commit format: 'type: description' where type is one of: feat, fix, chore, docs, refactor, test, style, release. This rule applies to all file changes made during the task, including configuration files, documentation, scripts, and any other assets in the workspace."
+    rule: "After completing any file modification operation (fix, update, create, delete), the workflow must execute a Git commit to record the change locally before proceeding to the next task or concluding. Commit rules differ by file category: system layer changes require strict conventional commit format and immediate submission; work content changes allow flexible format and batch submission at task end. See 'Git提交规则分类' in config/workspace_usage_guide.md for the full category definitions and rules."
     on_failure: "block_and_report"
 audit:
   record_gate_status: true

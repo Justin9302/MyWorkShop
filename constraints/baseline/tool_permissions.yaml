@@ -12,3 +12,6 @@ rules:
   - id: "summarize_tool_results"
     severity: "medium"
     rule: "Tool outputs must be recorded as summaries in run snapshots; sensitive raw outputs must not be written into Git."
+  - id: "git_commit_after_fix"
+    severity: "high"
+    rule: 'After completing any file modification (fix, update, create, delete), immediately commit changes to local Git repository with a descriptive message. The commit message must follow the format: ''类型: 简短描述'' where type is one of: feat, fix, chore, docs, refactor, test, style, release. This ensures every change is traceable and reversible. Run ''git add . && git commit -m "<message>"'' after each file fix session before concluding the task or moving to the next step.'

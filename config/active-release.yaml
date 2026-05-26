@@ -380,5 +380,6 @@ active_release:
     - "2026-05-10: 全局进化流程 — 同步所有组件至正式 Release release_2026_05_10_001"
     - "2026-05-22: 工作环境体检修复 — MCP 配置对齐、门禁规则统一、country 领域注册、会话跟踪更新、feature-flags 优先级说明、统一测试入口创建"
     - "2026-05-22: 创建 system_health_check 工作流 — 全维度健康诊断与灰度进化方案，注册 workflow/prompt/schema"
+    - "2026-05-26: 创建 docs/document_governance.md — VPP 综合技术方案文档版本治理全局规则，统一 7 篇文档的 YAML front matter 元数据格式"
     - "Environment: VS Code + GitHub Copilot Agent (migrated from Codex)."
-  updated_at: "2026-05-22T11:12:00+10:00"
+  updated_at: "2026-05-26T13:37:00+10:00"

@@ -15,7 +15,11 @@ outputs/*
 logs/*
 tmp/
 input/
-output/
+
+# OUTPUT/ — 工作内容产出（业务文档、分析报告等），需要Git跟踪
+# 使用 ! 否定模式取消忽略，确保业务产出可追溯
+/output/
+!/OUTPUT/
 
 # Phase 7c-e: 候选变更 & 仪表盘（显式排除，不走 Git）
 runtime/candidate_changes/

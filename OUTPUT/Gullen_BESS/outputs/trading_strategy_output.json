@@ -1,0 +1,18 @@
+{
+  "weighted_avg_price": 0.2190340909090909,
+  "effective_hours": 1027.84,
+  "annual_energy_kwh": 308352000.0,
+  "bess_cycles": 146.0,
+  "curtailment_kwh": 0,
+  "grid_charge_kwh": 175200000.0,
+  "degradation_rate": 0.02,
+  "_bess_details": {
+    "total_charge_kwh": 175200000.0,
+    "total_discharge_kwh": 308352000.0,
+    "total_charge_cost": 3942000.0,
+    "total_discharge_revenue": 63597600.0,
+    "net_revenue": 67539600.0,
+    "num_charge_events": 4,
+    "num_discharge_events": 7
+  }
+}

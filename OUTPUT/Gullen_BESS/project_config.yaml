@@ -1,0 +1,151 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# 项目参数配置文件 — Gullen NSW BESS 纯储能项目
+# ══════════════════════════════════════════════════════════════════════════════
+# 项目：Gullen NSW 风电项目对面的纯BESS项目
+# 装机：300MW / 1200MWh
+# 技术类型：LFP（磷酸铁锂）
+# 接入费用：6000万 AUD
+# 开发费：1000万 AUD
+# ══════════════════════════════════════════════════════════════════════════════
+# 参数来源：data/market_reference_au.yaml (V0.4, 2026-05-06)
+# 数据有效期至：2026-08-06
+# ══════════════════════════════════════════════════════════════════════════════
+# 2026年市场参数对齐（来源：market_reference_au.yaml）：
+#   - BESS CAPEX（4hr）：$800-1,100/kW NSW → 取$950/kW（纯系统）
+#   - 全包CAPEX：$950/kW + 接入费$60M + 开发费$10M = $355M → $1.183/W
+#   - BESS OPEX：$15-25/kW/年 → 取$20/kW/年（bess_opex_aud_kw_year）
+#   - 融资利率：6.0%（2026年澳洲大型BESS项目典型利率）
+#   - 债务比例：70%（澳洲可再生能源项目典型杠杆）
+#   - 折现率：9.0%（WACC估算）
+# ══════════════════════════════════════════════════════════════════════════════
+
+project:
+  name: "Gullen NSW BESS"
+  technology_type: "bess"
+  capacity_mw: 300
+  capacity_kw: 300000
+
+technical:
+  equivalent_hours: 0
+  degradation_rate: 0.02
+  construction_years: 2
+  operation_years: 20
+
+# ── BESS 参数 ──
+bess:
+  bess_capacity_kw: 300000
+  duration_hours: 4
+  round_trip_efficiency: 0.88
+  max_charge_rate: 0.5
+  max_discharge_rate: 0.5
+  charge_price_threshold: 0.05
+  discharge_price_threshold: 0.15
+  grid_charge_premium: 0.01
+  initial_soc: 0.5
+  min_soc: 0.1
+  max_soc: 0.9
+
+# ── 电价曲线（NSW NEM 典型日，AUD/kWh） ──
+price_curve:
+  type: "typical_day"
+  resolution: "hourly"
+  hours:
+    [
+      0.03,
+      0.02,
+      0.02,
+      0.01,
+      0.02,
+      0.03,
+      0.05,
+      0.08,
+      0.10,
+      0.12,
+      0.14,
+      0.16,
+      0.18,
+      0.15,
+      0.12,
+      0.10,
+      0.08,
+      0.06,
+      0.22,
+      0.28,
+      0.25,
+      0.20,
+      0.12,
+      0.06,
+    ]
+
+# ── 成本参数（2026年市场对齐，来源：market_reference_au.yaml） ──
+# CAPEX构成明细（按market_reference_au.yaml bess_capex_detail结构，4hr系统）：
+#   ⚠️ BESS行业$/kW报价绑定4小时时长，$/kWh = $/kW ÷ 4hr
+#   电芯+PACK+BMS：$350/kW ($87.5/kWh) × 300MW = $105,000,000
+#   PCS+变压器+集装箱：$120/kW ($30/kWh) × 300MW = $36,000,000
+#   安装施工+并网调试：$130/kW ($32.5/kWh) × 300MW = $39,000,000
+#   EPC管理+利润：$50/kW ($12.5/kWh) × 300MW = $15,000,000
+#   BESS系统小计：$650/kW ($162.5/kWh) × 300MW = $195,000,000
+#   接入费用（给定）：$60,000,000
+#   开发费（给定）：$10,000,000
+#   ─────────────────────────────────
+#   全包CAPEX合计：$355,000,000 → $1,183/kW ($296/kWh)
+#   参考：market_reference_au.yaml NSW bess_4hr_aud_kw: $800-1,100/kW
+#         bess_capex_detail total_installed: $540-760/kW (typical $650/kW)
+#         per_kwh total_installed: $135-190/kWh (typical $163/kWh)
+costs:
+  capex_per_watt: 1.183
+  capex_total: 355000000
+  capex_schedule: [0.6, 0.4]
+  opex_fixed_per_kw_year: 20
+  opex_escalation_rate: 0.025
+  insurance_rate: 0.007
+  grid_connection_cost: 60000000
+  land_lease_per_kw: 3
+  development_fee: 10000000
+
+# ── 融资参数（2026年市场对齐） ──
+# 债务比例70%：澳洲大型BESS项目典型杠杆水平
+# 利率6.0%：2026年澳洲项目融资利率（RBA现金利率约4.1% + 项目利差约1.9%）
+# 贷款期限15年：匹配BESS 20年运营期
+# 折现率9.0%：WACC估算（70%债务×6.0%×(1-30%) + 30%权益×12%）
+financing:
+  debt_ratio: 0.70
+  equity_ratio: 0.30
+  interest_rate: 0.06
+  loan_tenor_years: 15
+  discount_rate: 0.09
+  tax_rate: 0.30
+  depreciation_years: 15
+
+# ── 收入模式：电力市场套利（NEM现货市场） ──
+offtaker:
+  revenue_model: "market"
+  market_risk:
+    historical_price_volatility: 0.35
+    market_liquidity: "high"
+    hedging_available: true
+  subsidy_risk: "low"
+
+country_risk_level: "medium_low"
+exchange_rate_risk: "low"
+ppa_currency: "AUD"
+
+# ── 多情景分析（2026年市场对齐） ──
+scenarios:
+  乐观情景（电价+10%）:
+    revenue:
+      ppa_price_per_kwh: 0.241
+
+  悲观情景（电价-15%）:
+    revenue:
+      ppa_price_per_kwh: 0.186
+
+  CAPEX超支情景（+10%）:
+    costs:
+      capex_per_watt: 1.301
+      capex_total: 390500000
+
+  低融资成本情景:
+    financing:
+      interest_rate: 0.05
+      discount_rate: 0.08

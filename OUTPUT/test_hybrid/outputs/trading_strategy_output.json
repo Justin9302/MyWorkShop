@@ -1,0 +1,22 @@
+{
+  "weighted_avg_price": 0.13051546391752578,
+  "effective_hours": 3186.45,
+  "annual_energy_kwh": 477967500.0,
+  "bess_cycles": 146.0,
+  "curtailment_kwh": 0.0,
+  "grid_charge_kwh": 21900000.0,
+  "degradation_rate": 0.005,
+  "_hybrid_details": {
+    "total_solar_generation": 440737500.0,
+    "total_solar_to_grid": 440737500.0,
+    "total_solar_to_bess": 0,
+    "total_solar_curtailed": 0.0,
+    "total_grid_charge_kwh": 21900000.0,
+    "total_discharge_kwh": 37230000.0,
+    "total_solar_revenue": 56803125.0,
+    "total_discharge_revenue": 6236025.0,
+    "total_grid_charge_cost": -657000.0,
+    "total_revenue": 62382150.0,
+    "solar_curtailment_rate": 0.0
+  }
+}
